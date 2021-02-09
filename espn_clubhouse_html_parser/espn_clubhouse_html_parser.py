@@ -19,7 +19,7 @@ NHL_TEAM_ABBREVIATIONS_LIST = ["Ana", "Ari", "Bos", "Buf", "Cgy", "Car", "Chi", 
                                "TB", "Tor", "Van", "Vgs", "Wsh", "Wpg"]
 
 # List of injury designations found in the page
-INJURY_DESIGNATION_LIST = ["IR", "O", "D", "DTD", "Q"]
+INJURY_DESIGNATION_LIST = ["IR", "O", "DTD", "D", "Q", "P"]
 
 def _get_file_basename(file_basename):
     """ Helper function to determine what file basename to use as output.
