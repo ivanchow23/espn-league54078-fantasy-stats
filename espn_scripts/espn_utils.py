@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 """ Common utilities file used between various ESPN scripts. """
 
+# List of position designations
+POSITIONS_LIST = ["D, F", "D", "F", "G"]
+
 # List of NHL team abbreviations found in various ESPN HTML pages
 NHL_TEAM_ABBREVIATIONS_LIST = ["Ana", "Ari", "Bos", "Buf", "Cgy", "Car", "Chi", "Col", "Cls", "Dal", "Det", "Edm",
                                "Fla", "LA",  "Min", "Mon", "Nsh", "NJ",  "NYI", "NYR", "Ott", "Phi", "Pit", "SJ",
@@ -19,19 +22,27 @@ def parse_metadata_from_player_str(player_str):
     """
     player_dict = {'Player': "", 'Injury Designation': "", 'Team': "", 'Position': ""}
 
+    # Check if input is string
+    if not isinstance(player_str, str):
+        return player_dict
+
     # Handle special case where the player name is literally empty
     if player_str == "Empty":
         return player_dict
 
     # First, parse last letter that indicates player's position
     # Handle special case where a player is eligible for multiple positions
-    if player_str.endswith("D, F"):
-        player_dict['Position'] = "D/F"
-        player_str = player_str[:len(player_str) - len("D, F")]
-    # Otherwise, simple case where last character is the player position
-    else:
-        player_dict['Position'] = player_str[-1]
-        player_str = player_str[:len(player_str) - 1]
+    for pos in POSITIONS_LIST:
+        if player_str.endswith(pos):
+            # Handle special case where a player is eligible for multiple positions
+            if pos == "D, F":
+                player_dict['Position'] = "D/F"
+            # Otherwise, simple case where position matches
+            else:
+                player_dict['Position'] = pos
+
+            player_str = player_str[:len(player_str) - len(pos)]
+            break
 
     # Parse for team abbreviation
     for team in NHL_TEAM_ABBREVIATIONS_LIST:
