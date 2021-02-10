@@ -6,6 +6,79 @@ class TestEspnUtils(unittest.TestCase):
         """ Set-up required items. """
         pass
 
+    def test_parse_draft_metadata_from_player_str(self):
+        """ Tests metadata parsing from draft player string functionality. """
+        # Test typical cases
+        input_str = "Sidney Crosby Pit, C"
+        expected_output = {'Player': "Sidney Crosby", 'Team': "Pit", 'Position': "C"}
+        actual_output = espn_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEquals(expected_output, actual_output)
+
+        input_str = "Vladimir Tarasenko StL, RW"
+        expected_output = {'Player': "Vladimir Tarasenko", 'Team': "StL", 'Position': "RW"}
+        actual_output = espn_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEquals(expected_output, actual_output)
+
+        input_str = "Marc-Andre Fleury Vgs, G"
+        expected_output = {'Player': "Marc-Andre Fleury", 'Team': "Vgs", 'Position': "G"}
+        actual_output = espn_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEquals(expected_output, actual_output)
+
+        # Test various position designations
+        input_str = "Player One Ana, D"
+        expected_output = {'Player': "Player One", 'Team': "Ana", 'Position': "D"}
+        actual_output = espn_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEquals(expected_output, actual_output)
+
+        input_str = "Player One Vgs, LW"
+        expected_output = {'Player': "Player One", 'Team': "Vgs", 'Position': "LW"}
+        actual_output = espn_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEquals(expected_output, actual_output)
+
+        # Test invalid position designations
+        input_str = "Invalid Player Ana, E"
+        expected_output = {'Player': "Invalid Player Ana, E", 'Team': "", 'Position': ""}
+        actual_output = espn_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEquals(expected_output, actual_output)
+
+        input_str = "Invalid Player Ana, 123"
+        expected_output = {'Player': "Invalid Player Ana, 123", 'Team': "", 'Position': ""}
+        actual_output = espn_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEquals(expected_output, actual_output)
+
+        # Test unknown team abbreviation
+        input_str = "Some Player AAA, C"
+        expected_output = {'Player': "Some Player AAA", 'Team': "", 'Position': "C"}
+        actual_output = espn_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEquals(expected_output, actual_output)
+
+        # Test incorrect input format
+        input_str = "Invalid Format Ana,C"
+        expected_output = {'Player': "", 'Team': "", 'Position': ""}
+        actual_output = espn_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEquals(expected_output, actual_output)
+
+        input_str = "Invalid PlayerAna, LW"
+        expected_output = {'Player': "", 'Team': "", 'Position': ""}
+        actual_output = espn_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEquals(expected_output, actual_output)
+
+        # Test invalid inputs
+        input_str = None
+        expected_output = {'Player': "", 'Team': "", 'Position': ""}
+        actual_output = espn_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEquals(expected_output, actual_output)
+
+        input_str = 12345
+        expected_output = {'Player': "", 'Team': "", 'Position': ""}
+        actual_output = espn_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEquals(expected_output, actual_output)
+
+        input_str = [1, 2, 3]
+        expected_output = {'Player': "", 'Team': "", 'Position': ""}
+        actual_output = espn_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEquals(expected_output, actual_output)
+
     def test_parse_metadata_from_player_str(self):
         """ Tests metadata parsing from player string functionality. """
         # Test typical cases
