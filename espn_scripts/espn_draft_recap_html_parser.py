@@ -9,6 +9,22 @@ import re
 # Expected HTML title page format
 HTML_TITLE_PAGE_RE_FORMAT = r"Draft Recap - [\W\w]+ - ESPN Fantasy Hockey"
 
+def run(in_file_path):
+    """ Run the script. """
+    in_file_path = args.i
+    file_dir = os.path.dirname(in_file_path)
+    file_basename = os.path.splitext(os.path.basename(in_file_path))[0]
+    file_basename = _get_file_basename(file_basename)
+    print("Processing: {}".format(in_file_path))
+
+    html_dfs = pd.read_html(in_file_path)
+    combined_df = _get_combined_df(html_dfs)
+
+    out_file_path = os.path.join(file_dir, file_basename + ".csv")
+    combined_df.to_csv(out_file_path, index=False)
+    print("Output to: {}".format(out_file_path))
+    print("Done.\n")
+
 def _get_file_basename(file_basename):
     """ Helper function to determine what file basename to use as output.
         ESPN draft recap pages use a certain title format, which could
@@ -66,17 +82,4 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-i', required=True, help="Input HTML file.")
     args = arg_parser.parse_args()
-
-    in_file_path = args.i
-    file_dir = os.path.dirname(in_file_path)
-    file_basename = os.path.splitext(os.path.basename(in_file_path))[0]
-    file_basename = _get_file_basename(file_basename)
-    print("Processing: {}".format(in_file_path))
-
-    html_dfs = pd.read_html(in_file_path)
-    combined_df = _get_combined_df(html_dfs)
-
-    out_file_path = os.path.join(file_dir, file_basename + ".csv")
-    combined_df.to_csv(out_file_path, index=False)
-    print("Output to: {}".format(out_file_path))
-    print("Done.\n")
+    run(args.i)

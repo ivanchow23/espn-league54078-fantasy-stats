@@ -13,6 +13,40 @@ import re
 # Expected HTML title page format
 HTML_TITLE_PAGE_RE_FORMAT = r"[\W\w]+ - [\W\w]+ - ESPN Fantasy Hockey"
 
+def run(in_file_path):
+    """ Run the script. """
+    in_file_path = args.i
+    file_dir = os.path.dirname(in_file_path)
+    file_basename = os.path.splitext(os.path.basename(in_file_path))[0]
+    file_basename = _get_file_basename(file_basename)
+    print("Processing: {}".format(in_file_path))
+
+    # Read HTML file for all tables/data
+    html_dfs = pd.read_html(in_file_path)
+
+    # Read HTML file for team names
+    soup = BeautifulSoup(open(in_file_path, 'r'), 'html.parser')
+    span_tags = soup.find_all('span', class_='teamName')
+
+    # Each tag's title should correspond in the same order as the list of dataframes
+    # Check that number of tables match the number of tags
+    if len(span_tags) != len(html_dfs):
+        print("Length of title tags don't match length of HTML dataframes. Exiting...")
+        exit(-1)
+
+    # Combine into a single dataframe that shows each team roster
+    team_rosters_output_path = os.path.join(file_dir, file_basename + ".csv")
+    team_rosters_df = _get_team_rosters_df(span_tags, html_dfs)
+    team_rosters_df.to_csv(team_rosters_output_path, index=False)
+    print("Output to: {}".format(team_rosters_output_path))
+
+    # Combine into a single dataframe which contains a list of all players
+    players_list_output_path = os.path.join(file_dir, file_basename + " - All Players.csv")
+    players_list_df = _get_combined_players_list_df(html_dfs)
+    players_list_df.to_csv(players_list_output_path, index=False)
+    print("Output to: {}".format(players_list_output_path))
+    print("Done.\n")
+
 def _get_file_basename(file_basename):
     """ Helper function to determine what file basename to use as output.
         ESPN league roster pages use a certain title format, which could
@@ -87,35 +121,4 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-i', required=True, help="Input HTML file.")
     args = arg_parser.parse_args()
-
-    in_file_path = args.i
-    file_dir = os.path.dirname(in_file_path)
-    file_basename = os.path.splitext(os.path.basename(in_file_path))[0]
-    file_basename = _get_file_basename(file_basename)
-    print("Processing: {}".format(in_file_path))
-
-    # Read HTML file for all tables/data
-    html_dfs = pd.read_html(in_file_path)
-
-    # Read HTML file for team names
-    soup = BeautifulSoup(open(in_file_path, 'r'), 'html.parser')
-    span_tags = soup.find_all('span', class_='teamName')
-
-    # Each tag's title should correspond in the same order as the list of dataframes
-    # Check that number of tables match the number of tags
-    if len(span_tags) != len(html_dfs):
-        print("Length of title tags don't match length of HTML dataframes. Exiting...")
-        exit(-1)
-
-    # Combine into a single dataframe that shows each team roster
-    team_rosters_output_path = os.path.join(file_dir, file_basename + ".csv")
-    team_rosters_df = _get_team_rosters_df(span_tags, html_dfs)
-    team_rosters_df.to_csv(team_rosters_output_path, index=False)
-    print("Output to: {}".format(team_rosters_output_path))
-
-    # Combine into a single dataframe which contains a list of all players
-    players_list_output_path = os.path.join(file_dir, file_basename + " - All Players.csv")
-    players_list_df = _get_combined_players_list_df(html_dfs)
-    players_list_df.to_csv(players_list_output_path, index=False)
-    print("Output to: {}".format(players_list_output_path))
-    print("Done.\n")
+    run(args.i)

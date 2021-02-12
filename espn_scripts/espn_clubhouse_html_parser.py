@@ -14,6 +14,34 @@ HTML_TITLE_PAGE_RE_FORMAT = r"[\W\w]+ Clubhouse - [\W\w]+ [\W\w]+ - ESPN Fantasy
 # Number of expected tables in the HTML page
 NUM_EXPECTED_HTML_TABLES = 6
 
+def run(in_file_path):
+    """ Runs the script. """
+    file_dir = os.path.dirname(in_file_path)
+    file_basename = os.path.splitext(os.path.basename(in_file_path))[0]
+    file_basename = _get_file_basename(file_basename)
+    print("Processing: {}".format(in_file_path))
+
+    # Read HTML file for all tables/data
+    html_dfs = pd.read_html(in_file_path)
+
+    # Check if HTML page contains at least expected number of tables
+    if len(html_dfs) < NUM_EXPECTED_HTML_TABLES:
+        print("Found {} tables (expected {}). Exiting...".format(len(html_dfs), NUM_EXPECTED_HTML_TABLES))
+        exit(-1)
+
+    # Half the dataframes are used to parse for skater data and the other half for goalie data
+    # Assume first half of dataframes are for skater data, second half for goalie data
+    skaters_out_file_path = os.path.join(file_dir, file_basename + " - Skaters.csv")
+    skaters_df = _get_combined_df(html_dfs[0: int(len(html_dfs) / 2)])
+    skaters_df.to_csv(skaters_out_file_path, index=False)
+    print("Output to: {}".format(skaters_out_file_path))
+
+    goalies_out_file_path = os.path.join(file_dir, file_basename + " - Goalies.csv")
+    goalies_df = _get_combined_df(html_dfs[int(len(html_dfs) / 2):])
+    goalies_df.to_csv(goalies_out_file_path, index=False)
+    print("Output to: {}".format(goalies_out_file_path))
+    print("Done.\n")
+
 def _get_file_basename(file_basename):
     """ Helper function to determine what file basename to use as output.
         ESPN roster clubhouse pages use a certain title format, which could
@@ -80,30 +108,4 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-i', required=True, help="Input HTML file.")
     args = arg_parser.parse_args()
-
-    in_file_path = args.i
-    file_dir = os.path.dirname(in_file_path)
-    file_basename = os.path.splitext(os.path.basename(in_file_path))[0]
-    file_basename = _get_file_basename(file_basename)
-    print("Processing: {}".format(in_file_path))
-
-    # Read HTML file for all tables/data
-    html_dfs = pd.read_html(in_file_path)
-
-    # Check if HTML page contains at least expected number of tables
-    if len(html_dfs) < NUM_EXPECTED_HTML_TABLES:
-        print("Found {} tables (expected {}). Exiting...".format(len(html_dfs), NUM_EXPECTED_HTML_TABLES))
-        exit(-1)
-
-    # Half the dataframes are used to parse for skater data and the other half for goalie data
-    # Assume first half of dataframes are for skater data, second half for goalie data
-    skaters_out_file_path = os.path.join(file_dir, file_basename + " - Skaters.csv")
-    skaters_df = _get_combined_df(html_dfs[0: int(len(html_dfs) / 2)])
-    skaters_df.to_csv(skaters_out_file_path, index=False)
-    print("Output to: {}".format(skaters_out_file_path))
-
-    goalies_out_file_path = os.path.join(file_dir, file_basename + " - Goalies.csv")
-    goalies_df = _get_combined_df(html_dfs[int(len(html_dfs) / 2):])
-    goalies_df.to_csv(goalies_out_file_path, index=False)
-    print("Output to: {}".format(goalies_out_file_path))
-    print("Done.\n")
+    run(args.i)
