@@ -1,17 +1,14 @@
 #!/usr/bin/env python
-""" Parses an ESPN league roster HTML page and saves to CSV files.
+""" Parses an ESPN league rosters HTML page and saves to CSV files.
     Outputs two CSV files: One contains each team's roster information.
     Second contains a combined list of players. """
 
 import argparse
 from bs4 import BeautifulSoup
-from espn_utils import parse_metadata_from_player_str
+import espn_utils
 import os
 import pandas as pd
 import re
-
-# Expected HTML title page format
-HTML_TITLE_PAGE_RE_FORMAT = r"[\W\w]+ - [\W\w]+ - ESPN Fantasy Hockey"
 
 def run(in_file_path):
     """ Run the script. """
@@ -53,7 +50,7 @@ def _get_file_basename(file_basename):
         get saved as the file name when saving as HTML. Otherwise, just use
         the base filename if it does not match expected title format. """
     # Found a match
-    if(re.match(HTML_TITLE_PAGE_RE_FORMAT, file_basename)):
+    if(re.match(espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS, file_basename)):
         # Strip some extra text from name
         file_basename = file_basename.replace(" - ESPN Fantasy Hockey", "")
         return file_basename
@@ -104,7 +101,7 @@ def _get_modified_player_df(df):
     # Parse for additional metadata embedded in the player strings
     player_metadata_dict_list = []
     for player in player_df['PLAYER']:
-        player_metadata_dict_list.append(parse_metadata_from_player_str(player))
+        player_metadata_dict_list.append(espn_utils.parse_metadata_from_player_str(player))
 
     # Convert list of dictionaries to dataframe
     player_metadata_df = pd.DataFrame(player_metadata_dict_list)

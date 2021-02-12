@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 """ Parses an ESPN fantasy roster recap HTML page and outputs to CSV. """
 import argparse
-from espn_utils import parse_draft_metadata_from_player_str
+import espn_utils
 import os
 import pandas as pd
 import re
-
-# Expected HTML title page format
-HTML_TITLE_PAGE_RE_FORMAT = r"Draft Recap - [\W\w]+ - ESPN Fantasy Hockey"
 
 def run(in_file_path):
     """ Run the script. """
@@ -31,7 +28,7 @@ def _get_file_basename(file_basename):
         get saved as the file name when saving as HTML. Otherwise, just use
         the base filename if it does not match expected title format. """
     # Found a match
-    if(re.match(HTML_TITLE_PAGE_RE_FORMAT, file_basename)):
+    if(re.match(espn_utils.FILE_NAME_RE_FORMAT_DRAFT_RECAP, file_basename)):
         # Strip some extra text from name
         file_basename = file_basename.replace(" - ESPN Fantasy Hockey", "")
         return file_basename
@@ -61,7 +58,7 @@ def _modify_player_col(df):
     # Parse for additional metadata embedded in the player strings
     player_metadata_dict_list = []
     for player in df['Player']:
-        player_metadata_dict_list.append(parse_draft_metadata_from_player_str(player))
+        player_metadata_dict_list.append(espn_utils.parse_draft_metadata_from_player_str(player))
 
     # New dataframe to add into original
     # Rename "Team" key to "NHL Team" to differentiate between ESPN fantasy team (uses same column name)
