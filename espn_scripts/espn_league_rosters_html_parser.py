@@ -12,7 +12,6 @@ import re
 
 def run(in_file_path):
     """ Run the script. """
-    in_file_path = args.i
     file_dir = os.path.dirname(in_file_path)
     file_basename = os.path.splitext(os.path.basename(in_file_path))[0]
     file_basename = _get_file_basename(file_basename)
