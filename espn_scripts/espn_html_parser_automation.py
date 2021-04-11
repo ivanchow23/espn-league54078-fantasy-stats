@@ -45,18 +45,18 @@ if __name__ == "__main__":
 
     # Parsing clubhouse files
     if args.ch:
-        print("------------------------------------------- Parsing ESPN clubhouse HTML files -------------------------------------------")
+        print("\n------------------------------------------- Parsing ESPN clubhouse HTML files -------------------------------------------")
         for file_path in _find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_CLUBHOUSE):
-            espn_clubhouse_html_parser.run(file_path)
+            espn_clubhouse_html_parser.to_csvs([file_path])
 
     # Parsing draft recap files
     if args.dr:
-        print("------------------------------------------ Parsing ESPN draft recap HTML files ------------------------------------------")
+        print("\n------------------------------------------ Parsing ESPN draft recap HTML files ------------------------------------------")
         for file_path in _find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_DRAFT_RECAP):
-            espn_draft_recap_html_parser.run(file_path)
+            espn_draft_recap_html_parser.to_csv([file_path])
 
     # Parsing league roster files
     if args.lr:
-        print("------------------------------------------ Parsing ESPN league roster HTML files ----------------------------------------")
+        print("\n------------------------------------------ Parsing ESPN league roster HTML files ----------------------------------------")
         for file_path in _find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS):
-            espn_league_rosters_html_parser.run(file_path)
+            espn_league_rosters_html_parser.to_csv([file_path])

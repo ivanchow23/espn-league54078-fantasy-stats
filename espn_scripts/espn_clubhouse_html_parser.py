@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-""" Parses an ESPN fantasy hockey clubhouse roster HTML page.
-    Saves team and player stats information to CSV. """
-
+""" Parses an ESPN fantasy hockey clubhouse roster HTML page. """
 import argparse
 import espn_utils
 import os
@@ -11,33 +9,52 @@ import re
 # Number of expected tables in the HTML page
 NUM_EXPECTED_HTML_TABLES = 6
 
-def run(in_file_path):
-    """ Runs the script. """
-    file_dir = os.path.dirname(in_file_path)
-    file_basename = os.path.splitext(os.path.basename(in_file_path))[0]
-    file_basename = _get_file_basename(file_basename)
-    print("Processing: {}".format(in_file_path))
+def get_file_dicts(in_file_paths):
+    """ Parses and returns a list of dictionaries corresponding to skater and goalie data for given input HTML files.
+        Return data structure has the form:
+        [ { 'file_dir': "file_dir1", 'file_basename': "file_basename1", 'skaters_df': skaters_df1, 'goalies_df': goalies_df1 },
+          { 'file_dir': "file_dir2", 'file_basename': "file_basename2", 'skaters_df': skaters_df2, 'goalies_df': goalies_df2 },
+          { 'file_dir': "file_dir3", 'file_basename': "file_basename3", 'skaters_df': skaters_df3, 'goalies_df': goalies_df3 },
+          ...
+        ]
+    """
+    file_dicts = []
+    for in_file_path in in_file_paths:
+        # File paths and basenames
+        file_dir = os.path.dirname(in_file_path)
+        file_basename = os.path.splitext(os.path.basename(in_file_path))[0]
+        file_basename = _get_file_basename(file_basename)
+        print("Processing: {}".format(in_file_path))
 
-    # Read HTML file for all tables/data
-    html_dfs = pd.read_html(in_file_path)
+        # Read HTML file for all tables/data
+        html_dfs = pd.read_html(in_file_path)
 
-    # Check if HTML page contains at least expected number of tables
-    if len(html_dfs) < NUM_EXPECTED_HTML_TABLES:
-        print("Found {} tables (expected {}). Exiting...".format(len(html_dfs), NUM_EXPECTED_HTML_TABLES))
-        exit(-1)
+        # Check if HTML page contains at least expected number of tables
+        if len(html_dfs) < NUM_EXPECTED_HTML_TABLES:
+            print("Found {} tables (expected {}). Skipping...".format(len(html_dfs), NUM_EXPECTED_HTML_TABLES))
+            continue
 
-    # Half the dataframes are used to parse for skater data and the other half for goalie data
-    # Assume first half of dataframes are for skater data, second half for goalie data
-    skaters_out_file_path = os.path.join(file_dir, file_basename + " - Skaters.csv")
-    skaters_df = _get_combined_df(html_dfs[0: int(len(html_dfs) / 2)])
-    skaters_df.to_csv(skaters_out_file_path, index=False)
-    print("Output to: {}".format(skaters_out_file_path))
+        # Half the dataframes are used to parse for skater data and the other half for goalie data
+        # Assumes first half of dataframes are for skater data, second half for goalie data
+        skaters_df = _get_combined_df(html_dfs[0: int(len(html_dfs) / 2)])
+        goalies_df = _get_combined_df(html_dfs[int(len(html_dfs) / 2):])
 
-    goalies_out_file_path = os.path.join(file_dir, file_basename + " - Goalies.csv")
-    goalies_df = _get_combined_df(html_dfs[int(len(html_dfs) / 2):])
-    goalies_df.to_csv(goalies_out_file_path, index=False)
-    print("Output to: {}".format(goalies_out_file_path))
-    print("Done.\n")
+        # Fill output data
+        file_dicts.append({'file_dir': file_dir, 'file_basename': file_basename, 'skaters_df': skaters_df, 'goalies_df': goalies_df })
+
+    return file_dicts
+
+def to_csvs(in_file_paths):
+    """ Parses input files and outputs to individual CSV files. """
+    file_dicts = get_file_dicts(in_file_paths)
+    for file_dict in file_dicts:
+        skaters_out_file_path = os.path.join(file_dict['file_dir'], file_dict['file_basename'] + " - Skaters.csv")
+        file_dict['skaters_df'].to_csv(skaters_out_file_path, index=False)
+        print("Output to: {}".format(skaters_out_file_path))
+
+        goalies_out_file_path = os.path.join(file_dict['file_dir'], file_dict['file_basename']  + " - Goalies.csv")
+        file_dict['goalies_df'].to_csv(goalies_out_file_path, index=False)
+        print("Output to: {}".format(goalies_out_file_path))
 
 def _get_file_basename(file_basename):
     """ Helper function to determine what file basename to use as output.
@@ -105,4 +122,5 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-i', required=True, help="Input HTML file.")
     args = arg_parser.parse_args()
-    run(args.i)
+    to_csvs([args.i])
+    print("Done.\n")

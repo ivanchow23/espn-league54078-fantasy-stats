@@ -1,25 +1,44 @@
 #!/usr/bin/env python
-""" Parses an ESPN fantasy roster recap HTML page and outputs to CSV. """
+""" Parses an ESPN fantasy roster recap HTML page. """
 import argparse
 import espn_utils
 import os
 import pandas as pd
 import re
 
-def run(in_file_path):
-    """ Run the script. """
-    file_dir = os.path.dirname(in_file_path)
-    file_basename = os.path.splitext(os.path.basename(in_file_path))[0]
-    file_basename = _get_file_basename(file_basename)
-    print("Processing: {}".format(in_file_path))
+def get_file_dicts(in_file_paths):
+    """ Parses and returns a list of dictionaries corresponding to draft recap information for given input HTML files.
+        Return data structure has the form:
+        [ { 'file_dir': "file_dir1", 'file_basename': "file_basename1", 'df': df1 },
+          { 'file_dir': "file_dir2", 'file_basename': "file_basename2", 'df': df2 },
+          { 'file_dir': "file_dir3", 'file_basename': "file_basename3", 'df': df3 },
+          ...
+        ]
+    """
+    file_dicts = []
+    for in_file_path in in_file_paths:
+        # File paths and basenames
+        file_dir = os.path.dirname(in_file_path)
+        file_basename = os.path.splitext(os.path.basename(in_file_path))[0]
+        file_basename = _get_file_basename(file_basename)
+        print("Processing: {}".format(in_file_path))
 
-    html_dfs = pd.read_html(in_file_path)
-    combined_df = _get_combined_df(html_dfs)
+        # Parse
+        html_dfs = pd.read_html(in_file_path)
+        combined_df = _get_combined_df(html_dfs)
 
-    out_file_path = os.path.join(file_dir, file_basename + ".csv")
-    combined_df.to_csv(out_file_path, index=False)
-    print("Output to: {}".format(out_file_path))
-    print("Done.\n")
+        # Fill output data
+        file_dicts.append({'file_dir': file_dir, 'file_basename': file_basename, 'df': combined_df })
+
+    return file_dicts
+
+def to_csv(in_file_paths):
+    """ Parses input files and outputs to CSV file. """
+    file_dicts = get_file_dicts(in_file_paths)
+    for file_dict in file_dicts:
+        out_file_path = os.path.join(file_dict['file_dir'], file_dict['file_basename'] + ".csv")
+        file_dict['df'].to_csv(out_file_path, index=False)
+        print("Output to: {}".format(out_file_path))
 
 def _get_file_basename(file_basename):
     """ Helper function to determine what file basename to use as output.
@@ -78,4 +97,5 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-i', required=True, help="Input HTML file.")
     args = arg_parser.parse_args()
-    run(args.i)
+    to_csv([args.i])
+    print("Done.\n")
