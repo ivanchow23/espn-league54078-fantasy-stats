@@ -129,7 +129,7 @@ def _get_modified_player_df(df):
 if __name__ == "__main__":
     """ Main function. """
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('-i', required=True, help="Input HTML file.")
+    arg_parser.add_argument('-i', nargs='+', required=True, help="Input HTML file(s).")
     args = arg_parser.parse_args()
-    to_csv([args.i])
+    to_csv(args.i)
     print("Done.\n")
