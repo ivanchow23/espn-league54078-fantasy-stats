@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """ Parses an ESPN fantasy roster recap HTML page. """
 import argparse
+from bs4 import BeautifulSoup
 import espn_utils
 import os
 import pandas as pd
@@ -9,26 +10,36 @@ import re
 def get_file_dicts(in_file_paths):
     """ Parses and returns a list of dictionaries corresponding to draft recap information for given input HTML files.
         Return data structure has the form:
-        [ { 'file_dir': "file_dir1", 'file_basename': "file_basename1", 'df': df1 },
-          { 'file_dir': "file_dir2", 'file_basename': "file_basename2", 'df': df2 },
-          { 'file_dir': "file_dir3", 'file_basename': "file_basename3", 'df': df3 },
+        [ { 'file_dir': "file_dir1", 'league_name': "league_nameA", ..., 'df': df1 },
+          { 'file_dir': "file_dir2", 'league_name': "league_nameB", ..., 'df': df2 },
+          { 'file_dir': "file_dir3", 'league_name': "league_nameC", ..., 'df': df3 },
           ...
         ]
     """
     file_dicts = []
     for in_file_path in in_file_paths:
-        # File paths and basenames
         file_dir = os.path.dirname(in_file_path)
-        file_basename = os.path.splitext(os.path.basename(in_file_path))[0]
-        file_basename = _get_file_basename(file_basename)
         print("Processing: {}".format(in_file_path))
 
         # Parse
         html_dfs = pd.read_html(in_file_path)
         combined_df = _get_combined_df(html_dfs)
 
+        # Read and parse HTML for various tags
+        soup = BeautifulSoup(open(in_file_path, 'r'), 'html.parser')
+
+        # Apparently can get league info from this obscure header and its common across the HTML pages I've inspected
+        # Note: Won't be surprised if this might not work elsewhere
+        league_name = ""
+        league_name_tags = soup.find_all('h3', class_="jsx-1532665337 subHeader")
+        try:
+            league_name = league_name_tags[0].text
+        except:
+            # Intentional catch-all and pass since this method seems kind of hacky to begin with
+            pass
+
         # Fill output data
-        file_dicts.append({'file_dir': file_dir, 'file_basename': file_basename, 'df': combined_df })
+        file_dicts.append({'file_dir': file_dir, 'league_name': league_name, 'df': combined_df })
 
     return file_dicts
 
@@ -36,23 +47,13 @@ def to_csv(in_file_paths):
     """ Parses input files and outputs to CSV file. """
     file_dicts = get_file_dicts(in_file_paths)
     for file_dict in file_dicts:
-        out_file_path = os.path.join(file_dict['file_dir'], file_dict['file_basename'] + ".csv")
+        # File basename with special characters strip (add special character regex as needed)
+        file_basename = f"Draft Recap - {file_dict['league_name']}"
+        file_basename = re.sub(r"[^A-Za-z0-9 \-()]+", "_", file_basename)
+
+        out_file_path = os.path.join(file_dict['file_dir'], file_basename + ".csv")
         file_dict['df'].to_csv(out_file_path, index=False)
         print("Output to: {}".format(out_file_path))
-
-def _get_file_basename(file_basename):
-    """ Helper function to determine what file basename to use as output.
-        ESPN draft recap pages use a certain title format, which could
-        get saved as the file name when saving as HTML. Otherwise, just use
-        the base filename if it does not match expected title format. """
-    # Found a match
-    if(re.match(espn_utils.FILE_NAME_RE_FORMAT_DRAFT_RECAP, file_basename)):
-        # Strip some extra text from name
-        file_basename = file_basename.replace(" - ESPN Fantasy Hockey", "")
-        return file_basename
-    # Just use original basename
-    else:
-        return file_basename
 
 def _get_combined_df(df_list):
     """ Combines list of dataframes into one big list. """
