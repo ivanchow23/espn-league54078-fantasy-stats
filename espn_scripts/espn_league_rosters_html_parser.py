@@ -47,10 +47,14 @@ def get_file_dicts(in_file_paths):
 
         # Get team roster information
         # Assumes indicies/order of the tag list matches the indicies/order of the dataframes
-        # TODO: Known issue where this will overwrite an existing team key if same team names exist as duplicates
         team_rosters_dict = {}
         for span_tag, df in zip(team_name_span_tags, html_dfs):
-            team_rosters_dict[span_tag['title']] = df
+            # Handle duplicate team names by appending some identifier
+            team_name_key = span_tag['title']
+            if team_name_key in team_rosters_dict:
+                team_name_key += " (2)"
+
+            team_rosters_dict[team_name_key] = df
 
         # Fill output data
         file_dicts.append({'file_dir': file_dir, 'file_basename': file_basename, 'team_rosters': team_rosters_dict})
