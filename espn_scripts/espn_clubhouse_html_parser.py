@@ -73,9 +73,8 @@ def to_csvs(in_file_paths):
     """ Parses input files and outputs to individual CSV files. """
     file_dicts = get_file_dicts(in_file_paths)
     for file_dict in file_dicts:
-        # File basename with special characters strip (add special character regex as needed)
-        file_basename = f"{file_dict['team_name']} ({file_dict['owner_name']}) - {file_dict['league_name']}"
-        file_basename = re.sub(r"[^A-Za-z0-9 \-()]+", "_", file_basename)
+        # Output to CSVs
+        file_basename = _strip_special_chars(f"{file_dict['team_name']} ({file_dict['owner_name']}) - {file_dict['league_name']}")
 
         skaters_out_file_path = os.path.join(file_dict['file_dir'], file_basename + " - Skaters.csv")
         file_dict['skaters_df'].to_csv(skaters_out_file_path, index=False)
@@ -84,6 +83,28 @@ def to_csvs(in_file_paths):
         goalies_out_file_path = os.path.join(file_dict['file_dir'], file_basename  + " - Goalies.csv")
         file_dict['goalies_df'].to_csv(goalies_out_file_path, index=False)
         print("Output to: {}".format(goalies_out_file_path))
+
+def to_excel(in_file_paths):
+    """ Parses input files and outputs to Excel file, where each input file is organized into a sheet. """
+    file_dicts = get_file_dicts(in_file_paths)
+    for file_dict in file_dicts:
+        # Use league name as the output file
+        # Output dataframes into individual sheets of specified file
+        file_name = _strip_special_chars(f"Clubhouses - {file_dict['league_name']}")
+        file_path = os.path.join(file_dict['file_dir'], file_name + ".xlsx")
+
+        # Excel writer can't make new file using just 'a' mode
+        # First check if file already exists to append to, otherwise write to new file
+        if os.path.exists(file_path):
+            with pd.ExcelWriter(file_path, engine='openpyxl', mode='a') as excel_writer:
+                file_dict['skaters_df'].to_excel(excel_writer, sheet_name=_strip_special_chars(f"{file_dict['team_name']} ({file_dict['owner_name']}) - Skaters"))
+                file_dict['goalies_df'].to_excel(excel_writer, sheet_name=_strip_special_chars(f"{file_dict['team_name']} ({file_dict['owner_name']}) - Goalies"))
+        else:
+            with pd.ExcelWriter(file_path, engine='openpyxl') as excel_writer:
+                file_dict['skaters_df'].to_excel(excel_writer, sheet_name=_strip_special_chars(f"{file_dict['team_name']} ({file_dict['owner_name']}) - Skaters"))
+                file_dict['goalies_df'].to_excel(excel_writer, sheet_name=_strip_special_chars(f"{file_dict['team_name']} ({file_dict['owner_name']}) - Goalies"))
+
+        print(f"Output to: {file_path}")
 
 def _get_combined_df(df_list):
     """ Returns a combined dataframe of player, season stats, and fantasy points.
@@ -131,10 +152,16 @@ def _get_modified_player_df(df):
 
     return player_df
 
+def _strip_special_chars(input_str):
+    """ Helper function to strip special characters and replace them with an underscore. """
+    # Add special character regex as needed
+    return re.sub(r"[^A-Za-z0-9 \-!@#$%^&(),']+", "_", input_str)
+
 if __name__ == "__main__":
     """ Main function. """
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-i', nargs='+', required=True, help="Input HTML file(s).")
     args = arg_parser.parse_args()
     to_csvs(args.i)
+    to_excel(args.i)
     print("Done.\n")

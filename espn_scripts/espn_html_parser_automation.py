@@ -46,14 +46,20 @@ if __name__ == "__main__":
     # Parsing clubhouse files
     if args.ch:
         print("\n------------------------------------------- Parsing ESPN clubhouse HTML files -------------------------------------------")
-        espn_clubhouse_html_parser.to_csvs(_find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_CLUBHOUSE))
+        file_paths = _find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_CLUBHOUSE)
+        espn_clubhouse_html_parser.to_csvs(file_paths)
+        espn_clubhouse_html_parser.to_excel(file_paths)
 
     # Parsing draft recap files
     if args.dr:
         print("\n------------------------------------------ Parsing ESPN draft recap HTML files ------------------------------------------")
-        espn_draft_recap_html_parser.to_csv(_find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_DRAFT_RECAP))
+        file_paths = _find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_DRAFT_RECAP)
+        espn_draft_recap_html_parser.to_csv(file_paths)
+        espn_draft_recap_html_parser.to_excel(file_paths)
 
     # Parsing league roster files
     if args.lr:
         print("\n------------------------------------------ Parsing ESPN league roster HTML files ----------------------------------------")
-        espn_league_rosters_html_parser.to_csv(_find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS))
+        file_paths = _find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS)
+        espn_league_rosters_html_parser.to_csv(file_paths)
+        espn_league_rosters_html_parser.to_excel(file_paths)

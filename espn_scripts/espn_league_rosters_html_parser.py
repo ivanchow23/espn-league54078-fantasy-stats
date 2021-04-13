@@ -29,7 +29,7 @@ def get_file_dicts(in_file_paths):
         file_dir = os.path.dirname(in_file_path)
         print("Processing: {}".format(in_file_path))
 
-        # Read HTML file for all tables/data
+        # Read HTML file for all tables/data and update dataframes to get proper parsing
         html_dfs = pd.read_html(in_file_path)
 
         # Read HTML file for various information
@@ -67,7 +67,7 @@ def get_file_dicts(in_file_paths):
             if team_name_key in team_rosters_dict:
                 team_name_key += " (2)"
 
-            team_rosters_dict[team_name_key] = {'roster_df': df, 'total_season_points': pts}
+            team_rosters_dict[team_name_key] = {'roster_df': _get_modified_player_df(df), 'total_season_points': pts}
 
         # Fill output data
         file_dicts.append({'file_dir': file_dir, 'league_name': league_name, 'team_rosters': team_rosters_dict})
@@ -79,13 +79,35 @@ def to_csv(in_file_paths):
     file_dicts = get_file_dicts(in_file_paths)
     for file_dict in file_dicts:
         # File basename with special characters strip (add special character regex as needed)
-        file_basename = f"League Rosters - {file_dict['league_name']}"
-        file_basename = re.sub(r"[^A-Za-z0-9 \-()]+", "_", file_basename)
+        file_basename = _strip_special_chars(f"League Rosters - {file_dict['league_name']}")
 
+        # TODO: Think about if this should output league rosters into individual CSVs
         team_rosters_output_path = os.path.join(file_dict['file_dir'], file_basename + ".csv")
         team_rosters_df = _get_team_rosters_df(file_dict['team_rosters'])
         team_rosters_df.to_csv(team_rosters_output_path, index=False)
         print("Output to: {}".format(team_rosters_output_path))
+
+def to_excel(in_file_paths):
+    """ Parses input files and outputs to Excel file. """
+    file_dicts = get_file_dicts(in_file_paths)
+    for file_dict in file_dicts:
+        # Use league name as the output file
+        # Output dataframes into individual sheets of specified file
+        file_basename = _strip_special_chars(f"League Rosters - {file_dict['league_name']}")
+        out_file_path = os.path.join(file_dict['file_dir'], file_basename + ".xlsx")
+
+        # Add each team roster into its own sheet in the file
+        for team_name_key, team_dict in file_dict['team_rosters'].items():
+            # Excel writer can't make new file using just 'a' mode
+            # First check if file already exists to append to, otherwise write to new file
+            if os.path.exists(out_file_path):
+                with pd.ExcelWriter(out_file_path, engine='openpyxl', mode='a') as excel_writer:
+                    team_dict['roster_df'].to_excel(excel_writer, sheet_name=_strip_special_chars(team_name_key))
+            else:
+                with pd.ExcelWriter(out_file_path, engine='openpyxl') as excel_writer:
+                    team_dict['roster_df'].to_excel(excel_writer, sheet_name=_strip_special_chars(team_name_key))
+
+        print("Output to: {}".format(out_file_path))
 
 def _get_team_rosters_df(team_roster_dict):
     """ Combines dictionary of team roster dataframes into a single dataframe of all team rosters.
@@ -93,11 +115,9 @@ def _get_team_rosters_df(team_roster_dict):
     team_rosters_df = pd.DataFrame()
 
     for team_name, team_dict in team_roster_dict.items():
-        # First, modify the player columns to extract metadata information out of the strings
         mod_df = team_dict['roster_df'].copy(deep=True)
-        mod_df = _get_modified_player_df(mod_df)
 
-        # Next, create a multi-indexed dataframe to combine team name and roster info together
+        # Create a multi-indexed dataframe to combine team name and roster info together
         multi_idx_tuple_arr = [(team_name, col) for col in mod_df.columns]
         mod_df.columns = pd.MultiIndex.from_tuples(multi_idx_tuple_arr)
 
@@ -126,10 +146,16 @@ def _get_modified_player_df(df):
 
     return player_df
 
+def _strip_special_chars(input_str):
+    """ Helper function to strip special characters and replace them with an underscore. """
+    # Add special character regex as needed
+    return re.sub(r"[^A-Za-z0-9 \-!@#$%^&(),']+", "_", input_str)
+
 if __name__ == "__main__":
     """ Main function. """
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-i', nargs='+', required=True, help="Input HTML file(s).")
     args = arg_parser.parse_args()
     to_csv(args.i)
+    to_excel(args.i)
     print("Done.\n")

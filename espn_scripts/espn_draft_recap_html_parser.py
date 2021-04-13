@@ -48,11 +48,23 @@ def to_csv(in_file_paths):
     file_dicts = get_file_dicts(in_file_paths)
     for file_dict in file_dicts:
         # File basename with special characters strip (add special character regex as needed)
-        file_basename = f"Draft Recap - {file_dict['league_name']}"
-        file_basename = re.sub(r"[^A-Za-z0-9 \-()]+", "_", file_basename)
-
+        file_basename = _strip_special_chars(f"Draft Recap - {file_dict['league_name']}")
         out_file_path = os.path.join(file_dict['file_dir'], file_basename + ".csv")
+
         file_dict['df'].to_csv(out_file_path, index=False)
+        print("Output to: {}".format(out_file_path))
+
+def to_excel(in_file_paths):
+    """ Parses input files and outputs to Excel file. """
+    file_dicts = get_file_dicts(in_file_paths)
+    for file_dict in file_dicts:
+        # Use league name as the output file
+        # Output dataframes into individual sheets of specified file
+        file_basename = _strip_special_chars(f"Draft Recap - {file_dict['league_name']}")
+        out_file_path = os.path.join(file_dict['file_dir'], file_basename + ".xlsx")
+
+        # Output to Excel file
+        file_dict['df'].to_excel(out_file_path, index=False)
         print("Output to: {}".format(out_file_path))
 
 def _get_combined_df(df_list):
@@ -93,10 +105,16 @@ def _modify_player_col(df):
 
     return df
 
+def _strip_special_chars(input_str):
+    """ Helper function to strip special characters and replace them with an underscore. """
+    # Add special character regex as needed
+    return re.sub(r"[^A-Za-z0-9 \-!@#$%^&(),']+", "_", input_str)
+
 if __name__ == "__main__":
     """ Main function. """
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-i', nargs='+', required=True, help="Input HTML file(s).")
     args = arg_parser.parse_args()
     to_csv(args.i)
+    to_excel(args.i)
     print("Done.\n")
