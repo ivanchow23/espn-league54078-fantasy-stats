@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import espn_utils
 import os
 import pandas as pd
+import pickle
 import re
 
 def get_file_dicts(in_file_paths):
@@ -41,7 +42,7 @@ def get_file_dicts(in_file_paths):
 
         team_points_list = []
         for span_tag in soup.find_all('span', class_='pl2'):
-            team_points_list.append(int(re.findall("\d+", span_tag.text)[0]))
+            team_points_list.append(int(re.findall(r"\d+", span_tag.text)[0]))
 
         # Apparently can get league info from this obscure header and its common across the HTML pages I've inspected
         league_name = ""
@@ -109,6 +110,33 @@ def to_excel(in_file_paths):
 
         print("Output to: {}".format(out_file_path))
 
+def to_pickle(in_file_paths):
+    """ Parses input files and outputs to pickle. """
+    file_dicts = get_file_dicts(in_file_paths)
+
+    # First, get the directory from where input file is from
+    output_pickles_dict = {}
+    for file_dict in file_dicts:
+        # Use the file directory and league name as the pickle output path and store as a key
+        file_name = _strip_special_chars(f"League Rosters - {file_dict['league_name']}")
+        file_path = os.path.join(file_dict['file_dir'], file_name + ".pickle")
+
+        # First remove unnecessary keys from current dictionary
+        del file_dict['file_dir']
+        del file_dict['league_name']
+
+        # Add dictionary into list if key exists
+        if file_path in output_pickles_dict:
+            output_pickles_dict[file_path].append(file_dict)
+        # Otherwise create new list
+        else:
+            output_pickles_dict[file_path] = [file_dict]
+
+    # Next, dump all pickles
+    for out_file_path, data in output_pickles_dict.items():
+        pickle.dump(data, open(out_file_path, 'wb'))
+        print(f"Output to: {out_file_path}")
+
 def _get_team_rosters_df(team_roster_dict):
     """ Combines dictionary of team roster dataframes into a single dataframe of all team rosters.
         Assumes input list structure in the form: { 'team_name1': { ... }, 'team_name2': { ... }, ... } """
@@ -158,4 +186,5 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
     to_csv(args.i)
     to_excel(args.i)
+    to_pickle(args.i)
     print("Done.\n")

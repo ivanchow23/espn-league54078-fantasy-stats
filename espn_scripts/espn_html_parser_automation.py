@@ -78,6 +78,7 @@ if __name__ == "__main__":
         file_paths = _find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_CLUBHOUSE)
         espn_clubhouse_html_parser.to_csvs(file_paths)
         espn_clubhouse_html_parser.to_excel(file_paths)
+        espn_clubhouse_html_parser.to_pickle(file_paths)
 
     # Parsing draft recap files
     if args.dr:
@@ -85,6 +86,7 @@ if __name__ == "__main__":
         file_paths = _find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_DRAFT_RECAP)
         espn_draft_recap_html_parser.to_csv(file_paths)
         espn_draft_recap_html_parser.to_excel(file_paths)
+        espn_draft_recap_html_parser.to_pickle(file_paths)
 
     # Parsing league roster files
     if args.lr:
@@ -92,6 +94,7 @@ if __name__ == "__main__":
         file_paths = _find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS)
         espn_league_rosters_html_parser.to_csv(file_paths)
         espn_league_rosters_html_parser.to_excel(file_paths)
+        espn_league_rosters_html_parser.to_pickle(file_paths)
 
     # Move files into folders
     # Find folder paths that contain HTML files because that is likely where all the output files are to move
@@ -100,6 +103,7 @@ if __name__ == "__main__":
     for folder_path in folder_paths_with_html:
         _move_files(folder_path, os.path.join(folder_path, "csv"), ".csv")
         _move_files(folder_path, os.path.join(folder_path, "excel"), ".xlsx")
+        _move_files(folder_path, os.path.join(folder_path, "pickles"), ".pickle")
 
     # Done!
     print("Done.")

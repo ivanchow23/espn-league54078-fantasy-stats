@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import espn_utils
 import os
 import pandas as pd
+import pickle
 import re
 
 def get_file_dicts(in_file_paths):
@@ -67,6 +68,33 @@ def to_excel(in_file_paths):
         file_dict['df'].to_excel(out_file_path, index=False)
         print("Output to: {}".format(out_file_path))
 
+def to_pickle(in_file_paths):
+    """ Parses input files and outputs to pickle. """
+    file_dicts = get_file_dicts(in_file_paths)
+
+    # First, get the directory from where input file is from
+    output_pickles_dict = {}
+    for file_dict in file_dicts:
+        # Use the file directory and league name as the pickle output path and store as a key
+        file_name = _strip_special_chars(f"Draft Recap - {file_dict['league_name']}")
+        file_path = os.path.join(file_dict['file_dir'], file_name + ".pickle")
+
+        # First remove unnecessary keys from current dictionary
+        del file_dict['file_dir']
+        del file_dict['league_name']
+
+        # Add dictionary into list if key exists
+        if file_path in output_pickles_dict:
+            output_pickles_dict[file_path].append(file_dict)
+        # Otherwise create new list
+        else:
+            output_pickles_dict[file_path] = [file_dict]
+
+    # Next, dump all pickles
+    for out_file_path, data in output_pickles_dict.items():
+        pickle.dump(data, open(out_file_path, 'wb'))
+        print(f"Output to: {out_file_path}")
+
 def _get_combined_df(df_list):
     """ Combines list of dataframes into one big list. """
     combined_df = pd.DataFrame()
@@ -117,4 +145,5 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
     to_csv(args.i)
     to_excel(args.i)
+    to_pickle(args.i)
     print("Done.\n")
