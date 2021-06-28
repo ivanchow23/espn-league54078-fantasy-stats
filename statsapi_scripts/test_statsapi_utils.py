@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import json
 import os
 import statsapi_utils
@@ -6,7 +7,7 @@ import unittest
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 class TestStatsApiUtils(unittest.TestCase):
-    def SetUp(self):
+    def setUp(self):
         """ Set-up required items. """
         pass
 
@@ -139,6 +140,6 @@ class TestStatsApiUtils(unittest.TestCase):
         except:
             pass
 
-    def TearDown(self):
+    def tearDown(self):
         """ Remove any items. """
         pass
