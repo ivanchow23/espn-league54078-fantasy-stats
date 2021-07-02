@@ -3,16 +3,18 @@
 import os
 import sqlite3
 import statsapi_utils
+import statsapi_logger
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_DATABASE_PATH = os.path.join(SCRIPT_DIR, "statsapi.db")
+logger = statsapi_logger.logger()
 
 def create_db(db_path=None):
     """ Creates a database file. """
     # Connect to database
     conn = _connect_db(db_path, create_new=True)
     if not conn:
-        print(f"Could not connect to database: {db_path}")
+        logger.warning(f"Could not connect to database: {db_path}")
         return False
 
     # Get cursor for database
@@ -94,7 +96,7 @@ def _create_table_if_not_exist(cur, table_name, col_dict):
         # Remove trailing comma from string after columns are built
         execute_str = execute_str[:-1]
         execute_str += ")"
-        print(f"create_db cmd: {execute_str}")
+        logger.info(f"Executing: {execute_str}")
         cur.execute(execute_str)
 
     # If table exists, update column names by:
@@ -109,14 +111,14 @@ def _create_table_if_not_exist(cur, table_name, col_dict):
         cols_to_add = {col: dtype for col, dtype in col_dict.items() if col not in table_cols}
         cols_to_drop = [col for col in table_cols if col not in col_dict]
 
-        print(f"create_db: Adding new columns to table {table_name}: {cols_to_add}")
-        print(f"create_db: Dropping columns from table {table_name}: {cols_to_drop}")
+        logger.debug(f"Adding new columns to table {table_name}: {cols_to_add}")
+        logger.debug(f"Dropping columns from table {table_name}: {cols_to_drop}")
 
         # Add columns to table if needed
         if len(cols_to_add) != 0:
             for col_name, data_type in cols_to_add.items():
                 execute_string = f"ALTER TABLE {table_name} ADD COLUMN '{col_name}' '{data_type}'"
-                print(f"create_db cmd: {execute_string}")
+                logger.info(f"Executing: {execute_string}")
                 cur.execute(execute_string)
 
         # Remove columns from table if needed

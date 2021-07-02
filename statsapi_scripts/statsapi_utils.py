@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 """ Common utilities file used for retrieving data from statsapi. """
+import os
 import json
 import requests
+import statsapi_logger
 
-URL_STRING =  "https://statsapi.web.nhl.com"
+URL_STRING = "https://statsapi.web.nhl.com"
 URL_STRING_API_PREFIX = "https://statsapi.web.nhl.com/api/v1"
+logger = statsapi_logger.logger()
 
 def load_json_from_url(url):
     """ Loads JSON data from the given URL into a dictionary. """
@@ -15,7 +18,7 @@ def save_json_from_url(url, out_file_path):
         Returns True if request and data saving is successful. """
     # Check JSON output
     if not _is_json(out_file_path):
-        print(f"Output {out_file_path} is not a .json file.")
+        logger.warning(f"Output {out_file_path} is not a .json file.")
         return False
 
     # Load data
@@ -58,13 +61,13 @@ def _load_json(url):
         Assumes data to be in JSON format. """
     # Check input URL before sending request
     if not _check_url(url):
-        print(f"{url} is invalid for Stats API access.")
+        logger.warning(f"{url} is invalid for Stats API access.")
         return None
 
     # Send request to URL
     response = requests.get(url)
     if response.status_code != 200:
-        print(f"Request to {url} failed.")
+        logger.warning(f"Request to {url} failed.")
         return None
 
     return response.json()
