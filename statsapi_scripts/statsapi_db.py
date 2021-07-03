@@ -6,10 +6,9 @@ import statsapi_utils
 import statsapi_logger
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-DEFAULT_DATABASE_PATH = os.path.join(SCRIPT_DIR, "statsapi.db")
 logger = statsapi_logger.logger()
 
-def create_db(db_path=None):
+def create_db(db_path):
     """ Creates a database file. """
     # Connect to database
     conn = _connect_db(db_path, create_new=True)
@@ -36,10 +35,6 @@ def _connect_db(db_path, create_new=False):
         Use create_new=True to create a new database if it doesn't exist. Otherwise,
         set default False to ensure database must already exist before connecting.
         Returns connection handle if successful. None otherwise. """
-    # Default database object path if not supplied
-    if db_path is None:
-        db_path = DEFAULT_DATABASE_PATH
-
     # Path check
     if not _check_db_path(db_path, create_new):
         return None
@@ -136,4 +131,4 @@ def _create_table_if_not_exist(cur, table_name, col_dict):
         #         cur.execute(f"ALTER TABLE {table_name} DROP COLUMN '{col_name}'")
 
 if __name__ == "__main__":
-    create_db()
+    create_db(os.path.join(SCRIPT_DIR, "statsapi.db"))
