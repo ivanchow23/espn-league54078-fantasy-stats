@@ -6,6 +6,7 @@ import statsapi_utils
 import statsapi_logger
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+DEFAULT_DATABASE_PATH = os.path.join(SCRIPT_DIR, "statsapi.db")
 logger = statsapi_logger.logger()
 
 def create_db(db_path):
@@ -15,6 +16,7 @@ def create_db(db_path):
     if not conn:
         logger.warning(f"Could not connect to database: {db_path}")
         return False
+    logger.info(f"Connected to: {db_path}")
 
     # Get cursor for database
     cur = conn.cursor()
@@ -27,6 +29,42 @@ def create_db(db_path):
     _create_table_if_not_exist(cur, "players", { 'name': "text",
                                                  'link': "text" })
     # Close connection
+    conn.close()
+    return True
+
+def update_teams_table(db_path=None):
+    """ Updates a table within a database of team information from statsapi.
+        Directly fetches teams data from statsapi website. Overwrites data if
+        team information already exists in table. """
+    # Connect to database
+    conn = _connect_db(db_path)
+    if not conn:
+        logger.warning(f"Could not connect to database: {db_path}")
+        return False
+    logger.info(f"Connected to: {db_path}")
+
+    # Get cursor for database
+    cur = conn.cursor()
+
+    # Load teams data from server
+    teams_dict = statsapi_utils.load_json_from_url(statsapi_utils.URL_STRING_API_PREFIX + "/teams")
+    if not teams_dict:
+        logger.warning(f"Could not load data to update teams table.")
+        return False
+
+    # Get list of dictionaries of teams
+    teams_dicts_list = teams_dict['teams']
+    for team_dict in teams_dicts_list:
+        id = team_dict['id']
+        name = team_dict['name']
+        abbrev = team_dict['abbreviation']
+        link = team_dict['link']
+
+        logger.info(f"Adding/updating entry for: {name} (ID: {id})")
+        execute_str = "INSERT or REPLACE INTO teams VALUES (:id, :name, :abbreviation, :link)"
+        conn.execute(execute_str, {'id': id, 'name': name, 'abbreviation': abbrev, 'link': link})
+        conn.commit()
+
     conn.close()
     return True
 
@@ -91,8 +129,9 @@ def _create_table_if_not_exist(cur, table_name, col_dict):
         # Remove trailing comma from string after columns are built
         execute_str = execute_str[:-1]
         execute_str += ")"
-        logger.info(f"Executing: {execute_str}")
+        logger.debug(f"Executing: {execute_str}")
         cur.execute(execute_str)
+        logger.info(f"Created table {table_name}")
 
     # If table exists, update column names by:
     # - Dropping columns from the table that don't exist in col_dict
@@ -112,9 +151,10 @@ def _create_table_if_not_exist(cur, table_name, col_dict):
         # Add columns to table if needed
         if len(cols_to_add) != 0:
             for col_name, data_type in cols_to_add.items():
-                execute_string = f"ALTER TABLE {table_name} ADD COLUMN '{col_name}' '{data_type}'"
-                logger.info(f"Executing: {execute_string}")
-                cur.execute(execute_string)
+                execute_str = f"ALTER TABLE {table_name} ADD COLUMN '{col_name}' '{data_type}'"
+                logger.debug(f"Executing: {execute_str}")
+                cur.execute(execute_str)
+                logger.info(f"Added column {col_name} to table {table_name}")
 
         # Remove columns from table if needed
         # TODO: Intentionally not supported right now -
@@ -131,4 +171,5 @@ def _create_table_if_not_exist(cur, table_name, col_dict):
         #         cur.execute(f"ALTER TABLE {table_name} DROP COLUMN '{col_name}'")
 
 if __name__ == "__main__":
-    create_db(os.path.join(SCRIPT_DIR, "statsapi.db"))
+    create_db(DEFAULT_DATABASE_PATH)
+    update_teams_table(DEFAULT_DATABASE_PATH)

@@ -56,6 +56,32 @@ class TestStatsApiDb(unittest.TestCase):
         db_path = "this/is/not/a/path/test.db"
         self.assertFalse(statsapi_db.create_db(db_path))
 
+    def test_update_teams_table(self):
+        """ Test functionality of updating teams table in the database. """
+        # Test typical use-case
+        db_path = os.path.join(TEST_DIR, "test.db")
+        statsapi_db.create_db(db_path)
+        self.assertTrue(statsapi_db.update_teams_table(db_path))
+
+        # Connect to the database
+        cur = self._connect_db(db_path)
+
+        # Test certain entries exist
+        cur.execute("SELECT * FROM teams WHERE name='New Jersey Devils'")
+        actual_ret = cur.fetchone()
+        expected_ret = (1, 'New Jersey Devils', 'NJD', '/api/v1/teams/1')
+        self.assertEqual(expected_ret, actual_ret)
+
+        cur.execute("SELECT * FROM teams WHERE abbreviation='MTL'")
+        actual_ret = cur.fetchone()
+        expected_ret = (8, 'Montréal Canadiens', 'MTL', '/api/v1/teams/8')
+        self.assertEqual(expected_ret, actual_ret)
+
+        cur.execute("SELECT * FROM teams WHERE link='/api/v1/teams/55'")
+        actual_ret = cur.fetchone()
+        expected_ret = (55, 'Seattle Kraken', 'SEA', '/api/v1/teams/55')
+        self.assertEqual(expected_ret, actual_ret)
+
     def _create_db(self, db_path):
         """ Very simple helper function to generate a database file for testing.
             Test database requires dual maintenance with implementation to be
