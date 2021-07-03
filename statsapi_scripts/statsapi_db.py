@@ -89,7 +89,7 @@ def _create_table_if_not_exist(cur, table_name, col_dict):
 
     # If table doesn't exist, simply create it with the supplied columns
     if cur_ret is None:
-        execute_str = f"CREATE TABLE {table_name} ("
+        execute_str = f"CREATE TABLE {table_name} (id integer PRIMARY KEY,"
         for col_name, data_type in col_dict.items():
             execute_str += f"{col_name} {data_type},"
 

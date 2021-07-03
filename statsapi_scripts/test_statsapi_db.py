@@ -62,9 +62,9 @@ class TestStatsApiDb(unittest.TestCase):
             most updated with tests. """
         conn = sqlite3.connect(db_path)
         cur = conn.cursor()
-        cur.execute("CREATE TABLE teams (name text, abbreviation text, link text)")
+        cur.execute("CREATE TABLE teams (id integer PRIMARY KEY, name text, abbreviation text, link text)")
         conn.commit()
-        cur.execute("CREATE TABLE players (name text, link text)")
+        cur.execute("CREATE TABLE players (id integer PRIMARY KEY, name text, link text)")
         conn.commit()
         conn.close()
 
