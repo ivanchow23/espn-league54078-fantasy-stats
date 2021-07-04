@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """ Module for building database used for easier access of data from statsapi. """
+import argparse
+import csv
 import os
 import sqlite3
 import statsapi_utils
@@ -16,6 +18,7 @@ def create_db(db_path):
     if not conn:
         logger.warning(f"Could not connect to database: {db_path}")
         return False
+    logger.info(f"Creating database file...")
     logger.info(f"Connected to: {db_path}")
 
     # Get cursor for database
@@ -32,7 +35,7 @@ def create_db(db_path):
     conn.close()
     return True
 
-def update_teams_table(db_path=None):
+def update_teams_table(db_path):
     """ Updates a table within a database of team information from statsapi.
         Directly fetches teams data from statsapi website. Overwrites data if
         team information already exists in table. """
@@ -41,6 +44,7 @@ def update_teams_table(db_path=None):
     if not conn:
         logger.warning(f"Could not connect to database: {db_path}")
         return False
+    logger.info("Updating teams table...")
     logger.info(f"Connected to: {db_path}")
 
     # Get cursor for database
@@ -60,13 +64,115 @@ def update_teams_table(db_path=None):
         abbrev = team_dict['abbreviation']
         link = team_dict['link']
 
-        logger.info(f"Adding/updating entry for: {name} (ID: {id})")
+        logger.info(f"Updating team entry: {name} (ID: {id})")
         execute_str = "INSERT or REPLACE INTO teams VALUES (:id, :name, :abbreviation, :link)"
         conn.execute(execute_str, {'id': id, 'name': name, 'abbreviation': abbrev, 'link': link})
         conn.commit()
 
     conn.close()
     return True
+
+def update_players_table(db_path, input_file):
+    """ Updates a table within a database of player information from statsapi.
+        Requires the teams table to be populated in the database so it can
+        access roster data, which is then used to retrieve player links.
+        Overwrites data if player information already exists in table.
+
+        This function performs the general steps to retrieve player links:
+            1. Get team the player played for in a given season.
+            2. Get team roster for the given season.
+            3. Find player on that roster, which should contain a player link.
+            4. Use player link to access player info. In our case, we want to
+               store the link and other information if needed in our database.
+
+        Input file is a CSV formatted file with the following info:
+
+        Player Name,        Team,     Year
+        Sidney Crosby,      PIT,      20182019
+        Connor McDavid,     EDM,      20202021
+        Auston Matthews,    TOR,      20160217
+    """
+    # Input file check
+    if not _check_csv_path(input_file):
+        logger.warning(f"Cannot open {input_file}")
+        return False
+
+    # Read input file as CSV
+    with open(input_file, 'r') as csv_file:
+        reader = csv.DictReader(csv_file)
+        if not reader:
+            logger.warning(f"Input CSV {input_file} is empty.")
+            return False
+
+        # Check required headers exist
+        headers = reader.fieldnames
+        required_headers = ['Player Name', 'Team', 'Year']
+        if not headers or not set(required_headers).issubset(set(headers)):
+            logger.warning(f"Input CSV require headers: {required_headers}")
+            return False
+
+        # Connect to database
+        conn = _connect_db(db_path)
+        if not conn:
+            logger.warning(f"Could not connect to database: {db_path}")
+            return False
+        logger.info("Updating players table...")
+        logger.info(f"Connected to: {db_path}")
+
+        # Get cursor for database
+        cur = conn.cursor()
+
+        # Iterate through each row in file
+        for row in reader:
+            player_name = row['Player Name']
+            team_abbrev = row['Team']
+            year_string = row['Year']
+
+            # Look up link from teams table
+            execute_str = f"SELECT link from teams WHERE abbreviation='{team_abbrev}'"
+            logger.debug(f"Executing: {execute_str}")
+            cur.execute(execute_str)
+
+            # Attempt to find team link from database
+            link_ret = cur.fetchone()
+            if not link_ret:
+                logger.warning(f"Could not find team link for: {player_name} {team_abbrev} {year_string}")
+                continue
+
+            # Load team roster data given the link and year
+            # This link should have the form: https://statsapi.web.nhl.com/api/v1/teams/20?expand=team.roster&season=20122013
+            # TODO: Optimization - Look for players on the same team and season to load team roster season information just once
+            # TODO: Logic currently requires access to server every time. Ideally, figure out if an entry already exists in the
+            #       database to skip this step. But would also need to handle if two players share the same name.
+            team_link = link_ret[0]
+            team_roster_season_link = f"{statsapi_utils.URL_STRING}{team_link}?expand=team.roster&season={year_string}"
+            team_roster_season_json = statsapi_utils.load_json_from_url(team_roster_season_link)
+            if not team_roster_season_json:
+                logger.warning(f"Could not access team roster season data for: {player_name} {team_abbrev} {year_string}")
+                continue
+
+            # Attempt to find player in list of roster dictionaries
+            try:
+                roster_dicts = team_roster_season_json['teams'][0]['roster']['roster']
+                player_dict = next((p_dict['person'] for p_dict in roster_dicts if p_dict['person']['fullName'] == player_name), None)
+                if not player_dict:
+                    logger.warning(f"Could not find player data for: {player_name} {team_abbrev} {year_string}")
+                    continue
+            except KeyError:
+                logger.warning(f"Could not access team roster or player data for: {player_name} {team_abbrev} {year_string}")
+                continue
+
+            # Insert into table
+            id = player_dict['id']
+            name = player_dict['fullName']
+            link = player_dict['link']
+
+            logger.info(f"Updating player entry: {player_dict['fullName']} (ID: {player_dict['id']})")
+            execute_str = "INSERT or REPLACE INTO players VALUES (:id, :name, :link)"
+            conn.execute(execute_str, {'id': id, 'name': name, 'link': link})
+            conn.commit()
+
+        return True
 
 def _connect_db(db_path, create_new=False):
     """ Helper function for connecting to the given database. Handles exceptions.
@@ -102,6 +208,22 @@ def _check_db_path(db_path, create_new=False):
     if not create_new:
         if not os.path.exists(db_path):
             return False
+
+    return True
+
+def _check_csv_path(file_path):
+    """ Helper function to check validity of supplied CSV file path. """
+    # Check string input
+    if not isinstance(file_path, str):
+        return False
+
+    # Input file check
+    if not os.path.exists(file_path):
+        return False
+
+    # File extension check
+    if not file_path.endswith(".csv"):
+        return False
 
     return True
 
@@ -157,7 +279,7 @@ def _create_table_if_not_exist(cur, table_name, col_dict):
                 logger.info(f"Added column {col_name} to table {table_name}")
 
         # Remove columns from table if needed
-        # TODO: Intentionally not supported right now -
+        # TODO: Intentionally not supported right now
         # ALTER TABLE DROP COLUMN command is only available for sqlite3 versions >= 3.35
         # See: https://stackoverflow.com/a/5987838
         #
@@ -171,5 +293,13 @@ def _create_table_if_not_exist(cur, table_name, col_dict):
         #         cur.execute(f"ALTER TABLE {table_name} DROP COLUMN '{col_name}'")
 
 if __name__ == "__main__":
-    create_db(DEFAULT_DATABASE_PATH)
-    update_teams_table(DEFAULT_DATABASE_PATH)
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('-i', required=False, help="Input players CSV file to update statsapi players table in database.")
+    args = arg_parser.parse_args()
+    input_players_csv = args.i
+
+    if not os.path.exists(DEFAULT_DATABASE_PATH):
+        create_db(DEFAULT_DATABASE_PATH)
+        update_teams_table(DEFAULT_DATABASE_PATH)
+
+    update_players_table(DEFAULT_DATABASE_PATH, input_players_csv)
