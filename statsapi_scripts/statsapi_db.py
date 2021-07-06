@@ -16,7 +16,7 @@ def create_db(db_path):
     # Connect to database
     conn = _connect_db(db_path, create_new=True)
     if not conn:
-        logger.warning(f"Could not connect to database: {db_path}")
+        logger.error(f"Could not connect to database: {db_path}")
         return False
     logger.info(f"Creating database file...")
     logger.info(f"Connected to: {db_path}")
@@ -53,7 +53,7 @@ def update_teams_table(db_path):
     # Load teams data from server
     teams_dict = statsapi_utils.load_json_from_url(statsapi_utils.URL_STRING_API_PREFIX + "/teams")
     if not teams_dict:
-        logger.warning(f"Could not load data to update teams table.")
+        logger.error(f"Could not load data to update teams table.")
         return False
 
     # Get list of dictionaries of teams
@@ -94,27 +94,27 @@ def update_players_table(db_path, input_file):
     """
     # Input file check
     if not _check_csv_path(input_file):
-        logger.warning(f"Cannot open {input_file}")
+        logger.error(f"Cannot open {input_file}")
         return False
 
     # Read input file as CSV
     with open(input_file, 'r') as csv_file:
         reader = csv.DictReader(csv_file)
         if not reader:
-            logger.warning(f"Input CSV {input_file} is empty.")
+            logger.error(f"Input CSV {input_file} is empty.")
             return False
 
         # Check required headers exist
         headers = reader.fieldnames
         required_headers = ['Player Name', 'Team', 'Year']
         if not headers or not set(required_headers).issubset(set(headers)):
-            logger.warning(f"Input CSV require headers: {required_headers}")
+            logger.error(f"Input CSV require headers: {required_headers}")
             return False
 
         # Connect to database
         conn = _connect_db(db_path)
         if not conn:
-            logger.warning(f"Could not connect to database: {db_path}")
+            logger.error(f"Could not connect to database: {db_path}")
             return False
         logger.info("Updating players table...")
         logger.info(f"Connected to: {db_path}")

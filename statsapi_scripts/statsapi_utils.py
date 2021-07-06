@@ -18,7 +18,7 @@ def save_json_from_url(url, out_file_path):
         Returns True if request and data saving is successful. """
     # Check JSON output
     if not _is_json(out_file_path):
-        logger.warning(f"Output {out_file_path} is not a .json file.")
+        logger.error(f"Output {out_file_path} is not a .json file.")
         return False
 
     # Load data
@@ -61,13 +61,13 @@ def _load_json(url):
         Assumes data to be in JSON format. """
     # Check input URL before sending request
     if not _check_url(url):
-        logger.warning(f"{url} is invalid for Stats API access.")
+        logger.error(f"{url} is invalid for Stats API access.")
         return None
 
     # Send request to URL
     response = requests.get(url)
     if response.status_code != 200:
-        logger.warning(f"Request to {url} failed.")
+        logger.error(f"Request to {url} failed.")
         return None
 
     return response.json()
