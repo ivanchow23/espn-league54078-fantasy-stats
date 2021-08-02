@@ -12,6 +12,9 @@
         -> player<id2>.json
         -> ...
     - 20192020
+      - team_rosters
+        -> 20192020_team<id1>_roster.json
+        -> 20192020_team<id2>_roster.json
       - player_gamelogs
         -> 20192020_player<id1>_gamelog.json
         -> 20192020_player<id2>_gamelog.json
@@ -23,6 +26,9 @@
       - etc.
 
     - 20202021
+      - team_rosters
+        -> 20202021_team<id1>_roster.json
+        -> 20202021_team<id2>_roster.json    
       - player_gamelogs
         -> 20202021_player<id1>_gamelog.json
         -> 20202021_player<id2>_gamelog.json
@@ -38,9 +44,16 @@ import statsapi_logger
 import statsapi_utils
 logger = statsapi_logger.logger()
 
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+DEFAULT_ROOT_DATA_FOLDER = os.path.join(SCRIPT_DIR, "statsapi_data")
+
+# Limit to prevent trying to access season data before this year
+# Based on founding year: https://en.wikipedia.org/wiki/History_of_the_National_Hockey_League_(1917%E2%80%931942) 
+SEASON_START_YEAR_LIMIT = 1917
+
 def download_teams_data(root_path, overwrite=False):
-    """ Download teams data into its own folder within the specified output path. 
-        Downloaded file names have the form: "team<id>.json" 
+    """ Download all teams data into its own folder within the specified 
+        output path. Downloaded file names have the form: "team<id>.json" 
         Returns True on success. False otherwise. """
     # Output folder
     output_folder_path = _create_dir_if_not_exist(root_path, "teams") 
@@ -53,13 +66,71 @@ def download_teams_data(root_path, overwrite=False):
     teams_dict = statsapi_utils.load_json_from_url(teams_url)
     total_team_dicts = len(teams_dict['teams'])
 
-    # Iterate through each team and download files
+    # Iterate through each team and download
     for index, team_dict in enumerate(teams_dict['teams']):
         output_file_path = os.path.join(output_folder_path, f"team{team_dict['id']}.json")
         url = statsapi_utils.get_full_url(team_dict['link'])
-        info_str = _save_file(url, output_file_path, overwrite, curr_file_idx=index, total_files=total_team_dicts)
+        info_str = _save_file(url, output_file_path, overwrite, file_counter=index + 1, total_files=total_team_dicts)
         logger.info(info_str)
     
+    return True
+
+def download_team_rosters_data(root_path, start_year, end_year, overwrite=False):
+    """ Download all team rosters data into each year's folder within the specified 
+        output path for all seasons between the specified years. Downloaded files have 
+        the form: "XXXXYYYY_team<id>_roster.json" where XXXXYYYY is the season. Returns 
+        True on success. False otherwise.
+
+        Example: start_year = 2018 end_year = 2020 will try and download data for the 
+        seasons: 20182019, 20192020, 20202021. 
+        
+        Note: Depends on teams data to be present locally within the root path! Call 
+        download_teams_data() first. """
+    # Error check
+    if not _check_year_range(start_year, end_year):
+        logger.warning(f"Invalid start/end year: start={repr(start_year)} end={repr(end_year)}. Skipping download.")
+        return False
+
+    # This function depends on teams data to be present locally
+    # Check for prescence of teams folder and data
+    teams_data_folder_path = os.path.join(root_path, "teams")
+    if not os.path.exists(teams_data_folder_path):
+        logger.warning(f"Cannot find teams data in {root_path}")
+        logger.warning("Run the 'download_teams_data()' function first.")
+        logger.warning("Skipping download.")
+        return False
+
+    # Look for files within teams folder and get list of all team IDs
+    # File names are in a known format, so simply parse out ID from names rather than opening the file
+    # Example: ["team1.json", "team10.json", "team23.json"] -> [1, 10, 23]
+    file_list = os.listdir(teams_data_folder_path)
+    team_id_list = [int("".join(filter(str.isdigit, f))) for f in file_list]
+
+    # Download progress counters
+    file_counter = 0
+    num_files = len(team_id_list) * (end_year + 1 - start_year)
+
+    # Process each year
+    for year in range(start_year, end_year + 1):
+        # Current season is the current year + the next year
+        # Example: The season for year 2018 is 2018-2019
+        curr_season_string = f"{year}{year + 1}"
+
+        # Output folder
+        output_folder_path = _create_dir_if_not_exist(root_path, curr_season_string, "team_rosters") 
+        if not output_folder_path:
+            logger.warning(f"Invalid path: {output_folder_path}. Skipping download.")
+            return False        
+
+        # Iterate through each team and download
+        # Example link: https://statsapi.web.nhl.com/api/v1/teams/20?expand=team.roster&season=20122013
+        for id in team_id_list:
+            file_counter += 1
+            url = statsapi_utils.get_full_url(f"/api/v1/teams/{id}?expand=team.roster&season={curr_season_string}")
+            output_file_path = os.path.join(output_folder_path, f"{curr_season_string}_team{id}_roster.json")
+            info_str = _save_file(url, output_file_path, overwrite, file_counter=file_counter, total_files=num_files)
+            logger.info(info_str)
+
     return True
 
 def _create_dir_if_not_exist(root_path, *dirs):
@@ -81,7 +152,22 @@ def _create_dir_if_not_exist(root_path, *dirs):
     except(OSError, TypeError):
         return None
 
-def _save_file(url, output_file_path, overwrite, curr_file_idx=0, total_files=0):
+def _check_year_range(start_year, end_year):
+    """ Helper function to check the start and end year ranges for seasons. 
+        Returns True if inputs and range are valid. False otherwise. """
+    # Error check
+    if not isinstance(start_year, int) or not isinstance(end_year, int) or start_year >= end_year:
+        logger.debug(f"Invalid start/end year: start={repr(start_year)} end={repr(end_year)}.")
+        return False
+
+    # Limit access attempt before a certain year
+    if start_year < SEASON_START_YEAR_LIMIT:
+        logger.warning(f"Start year ({start_year}) must be >= {SEASON_START_YEAR_LIMIT}")
+        return False
+
+    return True        
+
+def _save_file(url, output_file_path, overwrite, file_counter=0, total_files=0):
     """ Helper function that saves data from the given URL to the output file path.
         Does not access and save data if overwrite flag is false. 
         
@@ -91,7 +177,7 @@ def _save_file(url, output_file_path, overwrite, curr_file_idx=0, total_files=0)
     # Build string for logger
     info_string = ""
     if total_files != 0:
-        info_string += f"[{curr_file_idx + 1}/{total_files}] "
+        info_string += f"[{file_counter}/{total_files}] "
 
     # If file already exists locally, skip
     if not overwrite:
@@ -110,4 +196,5 @@ def _save_file(url, output_file_path, overwrite, curr_file_idx=0, total_files=0)
 
 if __name__ == "__main__":
     """ Main function. """
-    download_teams_data("statsapi_data")
+    download_teams_data(DEFAULT_ROOT_DATA_FOLDER)
+    download_team_rosters_data(DEFAULT_ROOT_DATA_FOLDER, start_year=2015, end_year=2016)
