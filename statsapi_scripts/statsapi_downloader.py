@@ -39,13 +39,13 @@
         -> ...
       - etc.
 """
+import argparse
 import os
 import statsapi_logger
 import statsapi_utils
 logger = statsapi_logger.logger()
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-DEFAULT_ROOT_DATA_FOLDER = os.path.join(SCRIPT_DIR, "statsapi_data")
 
 # Limit to prevent trying to access season data before this year
 # Based on founding year: https://en.wikipedia.org/wiki/History_of_the_National_Hockey_League_(1917%E2%80%931942) 
@@ -191,10 +191,22 @@ def _save_file(url, output_file_path, overwrite, file_counter=0, total_files=0):
         return info_string
     else:
         # Generic error message - relying on utility logger messages
-        info_string = f"Error downloading data."
+        info_string += "Cannot download data."
         return info_string
 
 if __name__ == "__main__":
     """ Main function. """
-    download_teams_data(DEFAULT_ROOT_DATA_FOLDER)
-    download_team_rosters_data(DEFAULT_ROOT_DATA_FOLDER, start_year=2015, end_year=2016)
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("-o", required=True, help="Root directory for all downloaded data.")
+    arg_parser.add_argument("--start_year", required=False, type=int, help="Starting year used for downloading season data.")
+    arg_parser.add_argument("--end_year", required=False, type=int, help="Ending year used for downloading season data.")
+    arg_parser.add_argument("--overwrite", required=False, action='store_true', help="Flag to overwrite all existing files when downloading.")
+    args = arg_parser.parse_args()
+
+    root_data_folder = args.o
+    start_year = args.start_year
+    end_year = args.end_year
+    ow = args.overwrite
+
+    download_teams_data(root_data_folder, overwrite=ow)
+    download_team_rosters_data(root_data_folder, start_year=start_year, end_year=end_year, overwrite=ow)
