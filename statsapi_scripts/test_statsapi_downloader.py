@@ -104,7 +104,7 @@ class TestStatsApiDownloader(unittest.TestCase):
 
         # Test same starting and end year
         # - Check return is valid
-        self.assertFalse(statsapi_downloader.download_team_rosters_data(test_folder_path, 2020, 2020))
+        self.assertTrue(statsapi_downloader.download_team_rosters_data(test_folder_path, 2020, 2020))
 
         # Test invalid start/end years
         # - Check false return

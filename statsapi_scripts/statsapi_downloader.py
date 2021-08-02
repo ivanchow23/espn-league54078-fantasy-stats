@@ -156,7 +156,7 @@ def _check_year_range(start_year, end_year):
     """ Helper function to check the start and end year ranges for seasons. 
         Returns True if inputs and range are valid. False otherwise. """
     # Error check
-    if not isinstance(start_year, int) or not isinstance(end_year, int) or start_year >= end_year:
+    if not isinstance(start_year, int) or not isinstance(end_year, int) or start_year > end_year:
         logger.debug(f"Invalid start/end year: start={repr(start_year)} end={repr(end_year)}.")
         return False
 
