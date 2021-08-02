@@ -32,6 +32,10 @@ def save_json_from_url(url, out_file_path):
 
     return True
 
+def get_full_url(url_suffix):
+    """ Helper function that retrieves the full statsapi URL given the suffix """
+    return f"{URL_STRING}{url_suffix}"
+
 def _check_url(url):
     """ Basic checks for URL input string. """
     # Check string input

@@ -133,6 +133,14 @@ class TestStatsApiUtils(unittest.TestCase):
         statsapi_utils.save_json_from_url(url, out_path)
         self.assertFalse(os.path.exists(os.path.join(SCRIPT_DIR, "out.json")))
 
+    def test_get_full_url(self):
+        """ Test functionality of getting the full statsapi URL link. """
+        # Test typical case
+        suffix = "/api/v1/teams"
+        expected_result = statsapi_utils.URL_STRING + suffix
+        actual_result = statsapi_utils.get_full_url(suffix)
+        self.assertEqual(expected_result, actual_result)
+
     def _rm_file(self, file):
         """ Helper function to remove a file. Does nothing if it doesn't exist. """
         try:

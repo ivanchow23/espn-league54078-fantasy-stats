@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 """ Wrapper module for declaring a logger in other statsapi modules. Assumes script directory
     contains logging configuration file. Also assumes script directory is in the same directory
