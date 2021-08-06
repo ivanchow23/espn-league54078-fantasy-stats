@@ -28,6 +28,7 @@ class TestStatsApiDownloader(unittest.TestCase):
 
         data_folder_path = os.path.join(test_folder_path, "teams")
         self.assertTrue(os.path.exists(data_folder_path))
+        self.assertTrue(os.path.exists(os.path.join(test_folder_path, "teams_id_map.csv")))
         self.assertTrue(os.path.exists(os.path.join(data_folder_path, "team1.json")))
         self.assertTrue(os.path.exists(os.path.join(data_folder_path, "team6.json")))
         self.assertTrue(os.path.exists(os.path.join(data_folder_path, "team20.json")))
@@ -43,6 +44,7 @@ class TestStatsApiDownloader(unittest.TestCase):
         statsapi_downloader.download_teams_data(test_folder_path)
 
         self.assertTrue(os.path.exists(data_folder_path))
+        self.assertTrue(os.path.exists(os.path.join(test_folder_path, "teams_id_map.csv")))
         self.assertTrue(os.path.exists(os.path.join(data_folder_path, "team1.json")))
         self.assertTrue(os.path.exists(os.path.join(data_folder_path, "team6.json")))
         self.assertTrue(os.path.exists(os.path.join(data_folder_path, "team20.json")))

@@ -40,6 +40,7 @@
       - etc.
 """
 import argparse
+import pandas as pd
 import os
 import statsapi_logger
 import statsapi_utils
@@ -53,8 +54,9 @@ SEASON_START_YEAR_LIMIT = 1917
 
 def download_teams_data(root_path, overwrite=False):
     """ Download all teams data into its own folder within the specified 
-        output path. Downloaded file names have the form: "team<id>.json" 
-        Returns True on success. False otherwise. """
+        output path. Downloaded file names have the form: "team<id>.json".
+        Also generates a map file in the root directory to map teams to 
+        their unique ID. Returns True on success. False otherwise. """
     # Output folder
     output_folder_path = _create_dir_if_not_exist(root_path, "teams") 
     if not output_folder_path:
@@ -67,12 +69,20 @@ def download_teams_data(root_path, overwrite=False):
     total_team_dicts = len(teams_dict['teams'])
 
     # Iterate through each team and download
+    teams_id_map = []
     for index, team_dict in enumerate(teams_dict['teams']):
+        # Keep track of team IDs to generate map file
+        teams_id_map.append({'id': team_dict['id'], 'name': team_dict['name'], 'abbreviation': team_dict['abbreviation']})
+
+        # Download file
         output_file_path = os.path.join(output_folder_path, f"team{team_dict['id']}.json")
         url = statsapi_utils.get_full_url(team_dict['link'])
         info_str = _save_file(url, output_file_path, overwrite, file_counter=index + 1, total_files=total_team_dicts)
         logger.info(info_str)
-    
+
+    # Generate map file in root folder
+    teams_id_map_df = pd.DataFrame(teams_id_map)
+    teams_id_map_df.to_csv(os.path.join(root_path, "teams_id_map.csv"), index=False)
     return True
 
 def download_team_rosters_data(root_path, start_year, end_year, overwrite=False):
