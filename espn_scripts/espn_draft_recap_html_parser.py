@@ -101,6 +101,10 @@ def _get_combined_df(df_list):
     for df in df_list:
         combined_df = pd.concat([combined_df, df], axis=0, ignore_index=True)
 
+    # Rename "Team" column to differentiate between player's actual NHL team, 
+    # and name of a team in the fantasy league.
+    combined_df = combined_df.rename(columns={'Team': "ESPN Fantasy Team"})
+
     # Player column strings contain data nested in them, clean that up
     combined_df = _modify_player_col(combined_df)
 
@@ -120,9 +124,7 @@ def _modify_player_col(df):
         player_metadata_dict_list.append(espn_utils.parse_draft_metadata_from_player_str(player))
 
     # New dataframe to add into original
-    # Rename "Team" key to "NHL Team" to differentiate between ESPN fantasy team (uses same column name)
     new_player_df = pd.DataFrame(player_metadata_dict_list)
-    new_player_df = new_player_df.rename(columns={'Team': 'NHL Team'})
 
     # Drop player column from original dataframe and insert new dataframe in its place
     col_index = df.columns.get_loc('Player')
