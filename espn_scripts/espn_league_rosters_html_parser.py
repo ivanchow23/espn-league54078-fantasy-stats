@@ -7,6 +7,10 @@ import os
 import pandas as pd
 import pickle
 import re
+import sys
+
+sys.path.insert(1, os.path.join(sys.path[0], "..", "espn_statsapi_scripts"))
+import espn_statsapi_utils
 
 def get_file_dicts(in_file_paths):
     """ Parses and returns a list of dictionaries corresponding to league roster information for given input HTML files.
@@ -171,6 +175,9 @@ def _get_modified_player_df(df):
     player_df = player_df.drop(columns='PLAYER')
     for col in player_metadata_df.columns:
         player_df[col] = player_metadata_df[col]
+
+    # Map team abbreviations
+    player_df['Team'] = player_df['Team'].apply(lambda str: espn_statsapi_utils.statsapi_team_abbrev(str))        
 
     return player_df
 

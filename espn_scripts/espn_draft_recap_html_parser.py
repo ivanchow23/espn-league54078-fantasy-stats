@@ -7,6 +7,10 @@ import os
 import pandas as pd
 import pickle
 import re
+import sys
+
+sys.path.insert(1, os.path.join(sys.path[0], "..", "espn_statsapi_scripts"))
+import espn_statsapi_utils
 
 def get_file_dicts(in_file_paths):
     """ Parses and returns a list of dictionaries corresponding to draft recap information for given input HTML files.
@@ -132,6 +136,9 @@ def _modify_player_col(df):
     for new_col in new_player_df.columns:
         df.insert(col_index, new_col, new_player_df[new_col])
         col_index += 1
+
+    # Map team abbreviations
+    df['Team'] = df['Team'].apply(lambda str: espn_statsapi_utils.statsapi_team_abbrev(str))           
 
     return df
 

@@ -7,6 +7,10 @@ import os
 import pandas as pd
 import pickle
 import re
+import sys
+
+sys.path.insert(1, os.path.join(sys.path[0], "..", "espn_statsapi_scripts"))
+import espn_statsapi_utils
 
 # Number of expected tables in the HTML page
 NUM_EXPECTED_HTML_TABLES = 6
@@ -177,6 +181,9 @@ def _get_modified_player_df(df):
     player_df = player_df.drop((index_key, 'Player'), axis = 1)
     for col in player_metadata_df.columns:
         player_df[index_key, col] = player_metadata_df[col]
+
+    # Map team abbreviations
+    player_df[index_key, 'Team'] = player_df[index_key, 'Team'].apply(lambda str: espn_statsapi_utils.statsapi_team_abbrev(str))
 
     return player_df
 
