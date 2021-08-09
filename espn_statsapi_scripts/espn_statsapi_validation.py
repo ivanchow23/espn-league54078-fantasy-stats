@@ -123,7 +123,16 @@ def main(espn_path, statsapi_path, out_path):
 
       # Player doesn't exist in team roster for given inputs
       if entry['statsapi_endpoint'] == "":
-         err.log(f"Cannot find statsapi entry: {player} {team} {season}")
+         err_string = f"Cannot find statsapi entry: {player:<20} {team:<5} {season:<10} "
+
+         # Attempt to search in other teams and provide a suggestion in the error output
+         candidates = _search_for_player_in_teams(statsapi_path, player, season)
+         if len(candidates) > 0:
+            err_string += "Suggestion(s): "
+            for c in candidates:
+               err_string += f"[{c['player']} {c['team']} {c['season']}] "
+
+         err.log(err_string)
 
    # Finish
    master_players_df = pd.DataFrame(master_players_list)
@@ -270,6 +279,48 @@ def _get_statsapi_player_endpoint(statsapi_path, player_name, team, season_strin
             return player_dict['person']['link']
 
    return ""
+
+def _search_for_player_in_teams(statsapi_path, player_name, season_string):
+   """ Function that tries to search for a player on a team in a given season. 
+       This function is meant to be crude but hopefully helps automate this 
+       search process without having to manually look it up as a user. Searches
+       through statsapi team roster data for a given season. Returns a list of 
+       candiadtes found (typically will just be one team, but this helps handle
+       the edge case of a player with the same name or if they were part of 
+       multiple teams in a season). Returns empty list otherwise. 
+
+       Note: This function is not meant to help automatically fix any incorrect 
+       players/teams. Use this to help suggest corrections instead. """
+   candidate_teams = []
+
+   # Iterate through each team roster file for the given season
+   team_rosters_season_path = os.path.join(statsapi_path, season_string, "team_rosters")
+   for file in os.listdir(team_rosters_season_path):
+
+      # Not a file in format we expect
+      if not re.match(f"{season_string}_team[0-9]+_roster.json", file):
+         continue
+
+      # Read file and look for the player in the roster
+      team_roster_path = os.path.join(team_rosters_season_path, file)
+      with open(team_roster_path, 'r') as f:
+         data_dict = json.load(f)
+
+         # If found, save this team as a potential candidate to be correct
+         for player_dict in data_dict['teams'][0]['roster']['roster']:
+            # No modifications to player name
+            if player_dict['person']['fullName'] == player_name:
+               candidate_teams.append({'player': player_name,
+                                       'team': data_dict['teams'][0]['abbreviation'],
+                                       'season': season_string})
+
+            # Check the edge-case where player's name is abbreviated
+            # Strip out all periods in the name if any (example: P.K. -> PK)
+            elif player_dict['person']['fullName'] == player_name.replace(".", ""):
+               candidate_teams.append({'player': player_name.replace(".", ""),
+                                       'team': data_dict['teams'][0]['abbreviation'],
+                                       'season': season_string})
+   return candidate_teams
 
 if __name__ == "__main__":
     """ Main function. """
