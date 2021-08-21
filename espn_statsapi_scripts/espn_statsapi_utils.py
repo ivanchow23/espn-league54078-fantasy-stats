@@ -71,9 +71,10 @@ class CorrectionUtil():
     def get_corrected_dict(self, player_name, team, season_string):
         """ Returns a dictionary of corrected names and information given the input.
             Returns None if no correction entries are found. """
-        for data_dict in self._data_dict:
-            if data_dict['Player'] == player_name and data_dict['Team'] == team and data_dict['Season'] == season_string:
-                return {k: data_dict[k] for k in ['Corrected Player', 'Corrected Team', 'Corrected Season'] if k in data_dict}
+        if self.valid:
+            for data_dict in self._data_dict:
+                if data_dict['Player'] == player_name and data_dict['Team'] == team and data_dict['Season'] == season_string:
+                    return {k: data_dict[k] for k in ['Corrected Player', 'Corrected Team', 'Corrected Season'] if k in data_dict}
         return None
 
     def _read_file(self, file_path):

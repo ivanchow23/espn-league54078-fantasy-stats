@@ -104,6 +104,11 @@ class TestEspnUtils(unittest.TestCase):
         actual_ret = corr.get_corrected_dict("Sidney Crosby", "PIT", "20182019")
         self.assertIsNone(actual_ret)
 
+        # Test invalid object
+        corr = espn_statsapi_utils.CorrectionUtil(None)
+        actual_ret = corr.get_corrected_dict("Sidney Crosby", "PIT", "20182019")
+        self.assertIsNone(actual_ret)
+
     def _create_csv(self, file_path, data_dicts):
         """ Simple helper function to generate a CSV file from list of dictionaries. """
         with open(file_path, 'w', newline="") as csv_file:
