@@ -16,12 +16,9 @@ class TestEspnUtils(unittest.TestCase):
 
         # Generate test file
         self._test_correction_file_path = os.path.join(TEST_DIR, "test.csv")
-        self._create_csv(self._test_correction_file_path, [{'Player': "T.J. Brodie", 'Team': "CGY", 'Season': "20162017",
-                                                            'Corrected Player': "TJ Brodie", 'Corrected Team': "CGY", 'Corrected Season': "20162017"},
-                                                           {'Player': "Joe Pavelski", 'Team': "DAL", 'Season': "20182019",
-                                                            'Corrected Player': "Joe Pavelski", 'Corrected Team': "DAL", 'Corrected Season': "20182019"},
-                                                           {'Player': "Alexis Lafreniere", 'Team': "NYR", 'Season': "20202021",
-                                                            'Corrected Player': "Alexis Lafrenière", 'Corrected Team': "NYR", 'Corrected Season': "20202021"}])
+        self._create_csv(self._test_correction_file_path, [{'Player': "T.J. Brodie", 'Team': "CGY", 'Corrected Player': "TJ Brodie", 'Corrected Team': "CGY"},
+                                                           {'Player': "Joe Pavelski", 'Team': "DAL", 'Corrected Player': "Joe Pavelski", 'Corrected Team': "DAL"},
+                                                           {'Player': "Alexis Lafreniere", 'Team': "NYR", 'Corrected Player': "Alexis Lafrenière", 'Corrected Team': "NYR"}])
 
     def test_statsapi_team_abbrev(self):
         """ Test statsapi team abbreviation function. """
@@ -69,9 +66,7 @@ class TestEspnUtils(unittest.TestCase):
 
         # Test file with extra columns
         file_path = os.path.join(TEST_DIR, "test_correction_file_path_extra_cols.csv")
-        self._create_csv(file_path, [{'Player': "T.J. Brodie", 'Team': "CGY", 'Season': "20162017",
-                                      'Corrected Player': "TJ Brodie", 'Corrected Team': "CGY", 'Corrected Season': "20162017",
-                                      'Extra Column': "123"}])
+        self._create_csv(file_path, [{'Player': "T.J. Brodie", 'Team': "CGY", 'Corrected Player': "TJ Brodie", 'Corrected Team': "CGY", 'Extra': "123"}])
         corr = espn_statsapi_utils.CorrectionUtil(file_path)
         self.assertTrue(corr.valid)
 
@@ -95,18 +90,18 @@ class TestEspnUtils(unittest.TestCase):
         """ Test getting corrected dict from correction object. """
         # Test typical case
         corr = espn_statsapi_utils.CorrectionUtil(self._test_correction_file_path)
-        expected_ret = {'Corrected Player': "Alexis Lafrenière", 'Corrected Team': "NYR", 'Corrected Season': "20202021"}
-        actual_ret = corr.get_corrected_dict("Alexis Lafreniere", "NYR", "20202021")
+        expected_ret = {'Corrected Player': "Alexis Lafrenière", 'Corrected Team': "NYR"}
+        actual_ret = corr.get_corrected_dict("Alexis Lafreniere", "NYR")
         self.assertEqual(expected_ret, actual_ret)
 
         # Test no correcion entry
         corr = espn_statsapi_utils.CorrectionUtil(self._test_correction_file_path)
-        actual_ret = corr.get_corrected_dict("Sidney Crosby", "PIT", "20182019")
+        actual_ret = corr.get_corrected_dict("Sidney Crosby", "PIT")
         self.assertIsNone(actual_ret)
 
         # Test invalid object
         corr = espn_statsapi_utils.CorrectionUtil(None)
-        actual_ret = corr.get_corrected_dict("Sidney Crosby", "PIT", "20182019")
+        actual_ret = corr.get_corrected_dict("Sidney Crosby", "PIT")
         self.assertIsNone(actual_ret)
 
     def _create_csv(self, file_path, data_dicts):
