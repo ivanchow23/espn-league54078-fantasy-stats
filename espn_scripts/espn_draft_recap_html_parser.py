@@ -12,6 +12,9 @@ import sys
 sys.path.insert(1, os.path.join(sys.path[0], "..", "espn_statsapi_scripts"))
 import espn_statsapi_utils
 
+# Declare correction object global for simplicity of access in functions
+espn_statsapi_corr = None
+
 def get_file_dicts(in_file_paths):
     """ Parses and returns a list of dictionaries corresponding to draft recap information for given input HTML files.
         Return data structure has the form:
@@ -28,7 +31,6 @@ def get_file_dicts(in_file_paths):
 
         # Parse
         html_dfs = pd.read_html(in_file_path)
-        combined_df = _get_combined_df(html_dfs)
 
         # Read and parse HTML for various tags
         soup = BeautifulSoup(open(in_file_path, 'r'), 'html.parser')
@@ -42,6 +44,18 @@ def get_file_dicts(in_file_paths):
         except:
             # Intentional catch-all and pass since this method seems kind of hacky to begin with
             pass
+
+        # Load correction file (designed to have only up to one per folder)
+        # Create correction object regardless if file exists or not
+        corr_file_path = ""
+        corr_file_paths = [f for f in os.listdir(file_dir) if "corrections" in f]
+        if len(corr_file_paths) > 0:
+            corr_file_path = os.path.join(file_dir, corr_file_paths[0])
+        global espn_statsapi_corr
+        espn_statsapi_corr = espn_statsapi_utils.CorrectionUtil(corr_file_path)
+
+        # Combine dataframes
+        combined_df = _get_combined_df(html_dfs)
 
         # Fill output data
         file_dicts.append({'file_dir': file_dir, 'league_name': league_name, 'df': combined_df })
@@ -105,7 +119,7 @@ def _get_combined_df(df_list):
     for df in df_list:
         combined_df = pd.concat([combined_df, df], axis=0, ignore_index=True)
 
-    # Rename "Team" column to differentiate between player's actual NHL team, 
+    # Rename "Team" column to differentiate between player's actual NHL team,
     # and name of a team in the fantasy league.
     combined_df = combined_df.rename(columns={'Team': "ESPN Fantasy Team"})
 
@@ -138,8 +152,18 @@ def _modify_player_col(df):
         col_index += 1
 
     # Map team abbreviations
-    df['Team'] = df['Team'].apply(lambda str: espn_statsapi_utils.statsapi_team_abbrev(str))           
+    df['Team'] = df['Team'].apply(lambda str: espn_statsapi_utils.statsapi_team_abbrev(str))
 
+    # Map player corrections
+    if espn_statsapi_corr.valid:
+        # Iterating through dataframes is not intended, but it's currently the simplist way
+        for index, row in df.iterrows():
+            # Apply correction if needed
+            corrected_dict = espn_statsapi_corr.get_corrected_dict(row['Player'], row['Team'])
+            if corrected_dict:
+                print(f"Correction applied: {row['Player']} {row['Team']} -> {corrected_dict['Corrected Player']} {corrected_dict['Corrected Team']}")
+                df.at[index, 'Player'] = corrected_dict['Corrected Player']
+                df.at[index, 'Team'] = corrected_dict['Corrected Team']
     return df
 
 def _strip_special_chars(input_str):

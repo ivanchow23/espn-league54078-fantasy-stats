@@ -12,6 +12,9 @@ import sys
 sys.path.insert(1, os.path.join(sys.path[0], "..", "espn_statsapi_scripts"))
 import espn_statsapi_utils
 
+# Declare correction object global for simplicity of access in functions
+espn_statsapi_corr = None
+
 # Number of expected tables in the HTML page
 NUM_EXPECTED_HTML_TABLES = 6
 
@@ -62,6 +65,15 @@ def get_file_dicts(in_file_paths):
             owner_name_search = tag.find('span', class_='owner-name')
             if owner_name_search:
                 owner_name = owner_name_search.text
+
+        # Load correction file (designed to have only up to one per folder)
+        # Create correction object regardless if file exists or not
+        corr_file_path = ""
+        corr_file_paths = [f for f in os.listdir(file_dir) if "corrections" in f]
+        if len(corr_file_paths) > 0:
+            corr_file_path = os.path.join(file_dir, corr_file_paths[0])
+        global espn_statsapi_corr
+        espn_statsapi_corr = espn_statsapi_utils.CorrectionUtil(corr_file_path)
 
         # Half the dataframes are used to parse for skater data and the other half for goalie data
         # Assumes first half of dataframes are for skater data, second half for goalie data
@@ -184,6 +196,19 @@ def _get_modified_player_df(df):
 
     # Map team abbreviations
     player_df[index_key, 'Team'] = player_df[index_key, 'Team'].apply(lambda str: espn_statsapi_utils.statsapi_team_abbrev(str))
+
+    # Map player corrections
+    if espn_statsapi_corr.valid:
+        # Iterating through dataframes is not intended, but it's currently the simplist way
+        for index, row in player_df[index_key].iterrows():
+            # Apply correction if needed
+            corrected_dict = espn_statsapi_corr.get_corrected_dict(row['Player'], row['Team'])
+            if corrected_dict:
+                # Note: Use "at" to change df values: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.at.html
+                # Note: Access an element in multi-index df as follows: https://stackoverflow.com/a/50002318
+                print(f"Correction applied: {row['Player']} {row['Team']} -> {corrected_dict['Corrected Player']} {corrected_dict['Corrected Team']}")
+                player_df.at[index, (index_key, 'Player')] = corrected_dict['Corrected Player']
+                player_df.at[index, (index_key, 'Team')] = corrected_dict['Corrected Team']
 
     return player_df
 

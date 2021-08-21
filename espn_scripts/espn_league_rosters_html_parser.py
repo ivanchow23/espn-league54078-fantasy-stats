@@ -12,6 +12,9 @@ import sys
 sys.path.insert(1, os.path.join(sys.path[0], "..", "espn_statsapi_scripts"))
 import espn_statsapi_utils
 
+# Declare correction object global for simplicity of access in functions
+espn_statsapi_corr = None
+
 def get_file_dicts(in_file_paths):
     """ Parses and returns a list of dictionaries corresponding to league roster information for given input HTML files.
         Return data structure has the form:
@@ -62,6 +65,15 @@ def get_file_dicts(in_file_paths):
         if len(team_names_list) != len(html_dfs) or len(team_points_list) != len(html_dfs):
             print("Length of title tags don't match length of HTML dataframes. Skipping...")
             continue
+
+        # Load correction file (designed to have only up to one per folder)
+        # Create correction object regardless if file exists or not
+        corr_file_path = ""
+        corr_file_paths = [f for f in os.listdir(file_dir) if "corrections" in f]
+        if len(corr_file_paths) > 0:
+            corr_file_path = os.path.join(file_dir, corr_file_paths[0])
+        global espn_statsapi_corr
+        espn_statsapi_corr = espn_statsapi_utils.CorrectionUtil(corr_file_path)
 
         # Get team roster information
         # Assumes indicies/order of the tag list matches the indicies/order of the dataframes
@@ -177,7 +189,18 @@ def _get_modified_player_df(df):
         player_df[col] = player_metadata_df[col]
 
     # Map team abbreviations
-    player_df['Team'] = player_df['Team'].apply(lambda str: espn_statsapi_utils.statsapi_team_abbrev(str))        
+    player_df['Team'] = player_df['Team'].apply(lambda str: espn_statsapi_utils.statsapi_team_abbrev(str))
+
+    # Map player corrections
+    if espn_statsapi_corr.valid:
+        # Iterating through dataframes is not intended, but it's currently the simplist way
+        for index, row in player_df.iterrows():
+            # Apply correction if needed
+            corrected_dict = espn_statsapi_corr.get_corrected_dict(row['Player'], row['Team'])
+            if corrected_dict:
+                print(f"Correction applied: {row['Player']} {row['Team']} -> {corrected_dict['Corrected Player']} {corrected_dict['Corrected Team']}")
+                player_df.at[index, 'Player'] = corrected_dict['Corrected Player']
+                player_df.at[index, 'Team'] = corrected_dict['Corrected Team']
 
     return player_df
 
