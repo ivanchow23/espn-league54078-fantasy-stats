@@ -82,12 +82,12 @@ class CorrectionUtil():
             if successful. None otherwise. """
         # Error check
         if (not _is_string(file_path) or
-            not file_path.endswith(".csv") or
+            not file_path.lower().endswith(".csv") or
             not os.path.exists(file_path)):
             return None
 
         # Read file
-        with open(file_path, 'r') as csv_file:
+        with open(file_path, 'r', encoding='utf-8') as csv_file:
             # File headers must contain the required headers
             dict_reader = csv.DictReader(csv_file)
             headers = dict_reader.fieldnames

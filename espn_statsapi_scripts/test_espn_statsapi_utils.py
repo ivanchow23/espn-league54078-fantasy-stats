@@ -70,6 +70,12 @@ class TestEspnUtils(unittest.TestCase):
         corr = espn_statsapi_utils.CorrectionUtil(file_path)
         self.assertTrue(corr.valid)
 
+        # Test mixed-case CSV suffix
+        file_path = os.path.join(TEST_DIR, "test_correction_file_mixed_case_suffix.CsV")
+        self._create_csv(file_path, [{'Player': "T.J. Brodie", 'Team': "CGY", 'Corrected Player': "TJ Brodie", 'Corrected Team': "CGY"}])
+        corr = espn_statsapi_utils.CorrectionUtil(file_path)
+        self.assertTrue(corr.valid)
+
         # Test invalid file path
         corr = espn_statsapi_utils.CorrectionUtil(r"not\a\valid\path.csv")
         self.assertFalse(corr.valid)
@@ -106,7 +112,7 @@ class TestEspnUtils(unittest.TestCase):
 
     def _create_csv(self, file_path, data_dicts):
         """ Simple helper function to generate a CSV file from list of dictionaries. """
-        with open(file_path, 'w', newline="") as csv_file:
+        with open(file_path, 'w', newline="", encoding='utf-8') as csv_file:
             dict_writer = csv.DictWriter(csv_file, fieldnames=data_dicts[0].keys())
             dict_writer.writeheader()
             dict_writer.writerows(data_dicts)
