@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-""" Script used to validate player names from ESPN outputs to be used as 
-    reference for statsapi. The purpose of this script is to ensure all 
+""" Script used to validate player names from ESPN outputs to be used as
+    reference for statsapi. The purpose of this script is to ensure all
     data is unified to conform to statsapi naming conventions between
     ESPN and statsapi files. This validation step ensures all inputs are
     corrected "early" in the toolchain so data going into later stages
@@ -9,12 +9,12 @@
     General workflow when using this script:
       1. Script takes all relevant outputs from ESPN parsed data to create
          a "master list" of players for all years.
-      2. Check each player against the team and year they played for with 
-         statsapi team roster data. Note: This depends on all required team 
+      2. Check each player against the team and year they played for with
+         statsapi team roster data. Note: This depends on all required team
          roster data to be downloaded from statsapi locally.
       3. If player entry exists - ok.
       4. If player entry does not exist, flag a warning/error.
-      5. All warnings and errors must be addressed or manually corrected in 
+      5. All warnings and errors must be addressed or manually corrected in
          the ESPN parsing layer.
 """
 import argparse
@@ -31,7 +31,7 @@ SCRIPT_NAME = os.path.basename(__file__)
 #   - ^ used to denote start of string searching
 #   - $ used to denote end of string searching
 #   - + used to denote any repeating numbers between [0-9]
-# Examples: 
+# Examples:
 #  - "20192020" (ok)
 #  - "aaa20192020" (no)
 #  - "20192020aaa" (no)
@@ -49,7 +49,7 @@ class ErrorLogger():
       self._msg_buffer.append(msg)
 
    def write_file(self):
-      """ Writes message in buffer to file. Writes a custom message if no messages 
+      """ Writes message in buffer to file. Writes a custom message if no messages
           are present in buffer (implies no problems). Call this when script is about
           to finish running. """
       num_errors = len(self._msg_buffer)
@@ -62,17 +62,17 @@ class ErrorLogger():
                f.write(f"{msg}\n")
 
 def main(espn_path, statsapi_path, out_path):
-   """ Runs the main validation function. Outputs a "master list" of players and 
+   """ Runs the main validation function. Outputs a "master list" of players and
        any warnings/errors that need to be corrected.
-         - espn_path: Root path of parsed ESPN data from ESPN scripts. 
-         - statsapi_path: Root path of statsapi data cache from statsapi downloader. 
+         - espn_path: Root path of parsed ESPN data from ESPN scripts.
+         - statsapi_path: Root path of statsapi data cache from statsapi downloader.
          - out_path: Path to folder where outputs of this script will go.
 
       Expected folder structures for ESPN and statsapi data are the same, where each
       folder represents the season:
         - 20142015
         - 20152016
-        - etc. 
+        - etc.
    """
    print(f"Running {SCRIPT_NAME}...")
 
@@ -86,7 +86,7 @@ def main(espn_path, statsapi_path, out_path):
 
    # Validating ESPN data is compatible with statsapi data
    # So look for season folders from ESPN data
-   season_folders = [d for d in os.listdir(espn_path) 
+   season_folders = [d for d in os.listdir(espn_path)
                      if os.path.isdir(os.path.join(espn_path, d)) and re.match(SEASON_STRING_RE_PATTERN, d)]
 
    # Process each season data into a master list
@@ -120,6 +120,10 @@ def main(espn_path, statsapi_path, out_path):
       team = entry['Team']
       season = entry['Season']
       entry['statsapi_endpoint'] = _get_statsapi_player_endpoint(statsapi_path, player, team, season)
+
+      # Skip empty entries
+      if player == "" and team == "":
+         continue
 
       # Player doesn't exist in team roster for given inputs
       if entry['statsapi_endpoint'] == "":
@@ -230,7 +234,7 @@ def _load_espn_league_rosters(espn_path, season_string):
    return pickle_data_df
 
 def _combine_dfs_to_dicts(espn_draft_recap_df, espn_league_rosters_df, season_string):
-   """ Helper function to combine dataframes together. Handles duplicate 
+   """ Helper function to combine dataframes together. Handles duplicate
        player entries. Returns a list of dictionaries."""
    # Handle empty cases
    if espn_draft_recap_df is None and espn_league_rosters_df is None:
@@ -249,7 +253,7 @@ def _combine_dfs_to_dicts(espn_draft_recap_df, espn_league_rosters_df, season_st
 
 def _get_statsapi_player_endpoint(statsapi_path, player_name, team, season_string):
    """ Retrieves the statsapi player endpoint link given the input information.
-       Looks at the team roster data to find the player. Returns a statsapi 
+       Looks at the team roster data to find the player. Returns a statsapi
        endpoint link if player is found. Returns an empty string otherwise. """
    # TODO: This could be ported to a loader utility to abstract teams to ID mapping
    # TODO: Is this also inefficient since we're re-reading the entire file everytime?
@@ -272,7 +276,7 @@ def _get_statsapi_player_endpoint(statsapi_path, player_name, team, season_strin
    # Read file and look for the player in the roster
    with open(team_roster_path, 'r') as f:
       data_dict = json.load(f)
-      for player_dict in data_dict['teams'][0]['roster']['roster']:    
+      for player_dict in data_dict['teams'][0]['roster']['roster']:
          # At this point, we found a match for the player name and team for a given season
          # Note: There is an edge case where same player name could exist on the same team in the same season
          if player_dict['person']['fullName'] == player_name:
@@ -281,15 +285,15 @@ def _get_statsapi_player_endpoint(statsapi_path, player_name, team, season_strin
    return ""
 
 def _search_for_player_in_teams(statsapi_path, player_name, season_string):
-   """ Function that tries to search for a player on a team in a given season. 
-       This function is meant to be crude but hopefully helps automate this 
+   """ Function that tries to search for a player on a team in a given season.
+       This function is meant to be crude but hopefully helps automate this
        search process without having to manually look it up as a user. Searches
-       through statsapi team roster data for a given season. Returns a list of 
+       through statsapi team roster data for a given season. Returns a list of
        candiadtes found (typically will just be one team, but this helps handle
-       the edge case of a player with the same name or if they were part of 
-       multiple teams in a season). Returns empty list otherwise. 
+       the edge case of a player with the same name or if they were part of
+       multiple teams in a season). Returns empty list otherwise.
 
-       Note: This function is not meant to help automatically fix any incorrect 
+       Note: This function is not meant to help automatically fix any incorrect
        players/teams. Use this to help suggest corrections instead. """
    candidate_teams = []
 
