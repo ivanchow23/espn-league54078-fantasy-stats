@@ -112,6 +112,9 @@ def main(espn_path, statsapi_path, out_path):
       # Combine into master list of dictionaries
       master_players_list += _combine_dfs_to_dicts(espn_draft_recap_df, espn_league_rosters_df, season_string)
 
+      # Remove empty entries
+      master_players_list = [d for d in master_players_list if d['Player'] != "" and d['Team'] != ""]
+
    # Process and validate each entry in master list
    for entry in master_players_list:
       # Each entry should now have enough information to find the player in statsapi team roster
@@ -120,10 +123,6 @@ def main(espn_path, statsapi_path, out_path):
       team = entry['Team']
       season = entry['Season']
       entry['statsapi_endpoint'] = _get_statsapi_player_endpoint(statsapi_path, player, team, season)
-
-      # Skip empty entries
-      if player == "" and team == "":
-         continue
 
       # Player doesn't exist in team roster for given inputs
       if entry['statsapi_endpoint'] == "":
