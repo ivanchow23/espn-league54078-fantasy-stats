@@ -39,6 +39,9 @@ def _move_files(src_folder, dest_folder, file_ext):
     print(f"Moving {file_ext} files from {src_folder} to {dest_folder}")
     files_to_move = []
     for f in os.listdir(src_folder):
+        # Exception: Leave correction files as is
+        if f.endswith("corrections.csv".lower()):
+            continue
         if f.endswith(file_ext):
             files_to_move.append(f)
 
