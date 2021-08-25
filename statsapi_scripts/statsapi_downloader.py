@@ -28,7 +28,7 @@
     - 20202021
       - team_rosters
         -> 20202021_team<id1>_roster.json
-        -> 20202021_team<id2>_roster.json    
+        -> 20202021_team<id2>_roster.json
       - player_gamelogs
         -> 20202021_player<id1>_gamelog.json
         -> 20202021_player<id2>_gamelog.json
@@ -40,8 +40,10 @@
       - etc.
 """
 import argparse
+import csv
 import pandas as pd
 import os
+import re
 import statsapi_logger
 import statsapi_utils
 logger = statsapi_logger.logger()
@@ -49,16 +51,16 @@ logger = statsapi_logger.logger()
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # Limit to prevent trying to access season data before this year
-# Based on founding year: https://en.wikipedia.org/wiki/History_of_the_National_Hockey_League_(1917%E2%80%931942) 
+# Based on founding year: https://en.wikipedia.org/wiki/History_of_the_National_Hockey_League_(1917%E2%80%931942)
 SEASON_START_YEAR_LIMIT = 1917
 
 def download_teams_data(root_path, overwrite=False):
-    """ Download all teams data into its own folder within the specified 
+    """ Download all teams data into its own folder within the specified
         output path. Downloaded file names have the form: "team<id>.json".
-        Also generates a map file in the root directory to map teams to 
+        Also generates a map file in the root directory to map teams to
         their unique ID. Returns True on success. False otherwise. """
     # Output folder
-    output_folder_path = _create_dir_if_not_exist(root_path, "teams") 
+    output_folder_path = _create_dir_if_not_exist(root_path, "teams")
     if not output_folder_path:
         logger.warning(f"Invalid path: {output_folder_path}. Skipping download.")
         return False
@@ -85,16 +87,74 @@ def download_teams_data(root_path, overwrite=False):
     teams_id_map_df.to_csv(os.path.join(root_path, "teams_id_map.csv"), index=False)
     return True
 
+def download_players_data(root_path, in_file_path, overwrite=False):
+    """ Download all players data into its own folder within the specified
+        output path. Accepts an input CSV file with player information and
+        statsapi endpoints used to access data from the server. Downloaded
+        file names have the form: "player<id>.json". Also generates a map
+        file in the root directory to map players to their unique ID. Returns
+        True on success. False otherwise. """
+    # Required headers to be present in the input file
+    required_headers = ['Player', 'statsapi_endpoint']
+
+    # Output folder
+    output_folder_path = _create_dir_if_not_exist(root_path, "players")
+    if not output_folder_path:
+        logger.warning(f"Invalid path: {output_folder_path}. Skipping download.")
+        return False
+
+    # Check input file
+    if not isinstance(in_file_path, str) or not os.path.exists(in_file_path) or not in_file_path.lower().endswith(".csv"):
+        logger.warning(f"Invalid input file: {in_file_path}. Skipping download.")
+        return False
+
+    # Read file
+    players_data_dict_list = []
+    with open(in_file_path, 'r', encoding='utf-8') as csv_file:
+        dict_reader = csv.DictReader(csv_file)
+        file_headers = dict_reader.fieldnames
+        if not set(required_headers).issubset(set(file_headers)):
+            logger.warning(f"Input file does not contain required headers. Requires: {required_headers}. Skipping download.")
+            return False
+        players_data_dict_list = list(dict_reader)
+
+    # Iterate through each endpoint and download
+    total_players = len(players_data_dict_list)
+    for index, player_dict in enumerate(players_data_dict_list):
+        # Add new key for ID mapping
+        player_dict['id'] = ""
+
+        # Check endpoint pattern matches
+        endpoint = player_dict['statsapi_endpoint']
+        if not isinstance(endpoint, str) or not re.match(f"{statsapi_utils.API_ENDPOINT_PREFIX}/people/[0-9]+", endpoint):
+            logger.warning(f"Invalid endpoint ({endpoint}). Skipping download.")
+            continue
+
+        # Parse ID from endpoint string
+        id = re.findall(f"[0-9]+", endpoint)[-1]
+        player_dict['id'] = id
+
+        # Download file
+        output_file_path = os.path.join(output_folder_path, f"player{id}.json")
+        url = statsapi_utils.get_full_url(endpoint)
+        info_str = _save_file(url, output_file_path, overwrite, file_counter=index + 1, total_files=total_players)
+        logger.info(info_str)
+
+    # Generate map file in root folder
+    players_id_map_df = pd.DataFrame(players_data_dict_list)
+    players_id_map_df.to_csv(os.path.join(root_path, "players_id_map.csv"), index=False)
+    return True
+
 def download_team_rosters_data(root_path, start_year, end_year, overwrite=False):
-    """ Download all team rosters data into each year's folder within the specified 
-        output path for all seasons between the specified years. Downloaded files have 
-        the form: "XXXXYYYY_team<id>_roster.json" where XXXXYYYY is the season. Returns 
+    """ Download all team rosters data into each year's folder within the specified
+        output path for all seasons between the specified years. Downloaded files have
+        the form: "XXXXYYYY_team<id>_roster.json" where XXXXYYYY is the season. Returns
         True on success. False otherwise.
 
-        Example: start_year = 2018 end_year = 2020 will try and download data for the 
-        seasons: 20182019, 20192020, 20202021. 
-        
-        Note: Depends on teams data to be present locally within the root path! Call 
+        Example: start_year = 2018 end_year = 2020 will try and download data for the
+        seasons: 20182019, 20192020, 20202021.
+
+        Note: Depends on teams data to be present locally within the root path! Call
         download_teams_data() first. """
     # Error check
     if not _check_year_range(start_year, end_year):
@@ -113,6 +173,7 @@ def download_team_rosters_data(root_path, start_year, end_year, overwrite=False)
     # Look for files within teams folder and get list of all team IDs
     # File names are in a known format, so simply parse out ID from names rather than opening the file
     # Example: ["team1.json", "team10.json", "team23.json"] -> [1, 10, 23]
+    # Reference: https://stackoverflow.com/a/4289557
     file_list = os.listdir(teams_data_folder_path)
     team_id_list = [int("".join(filter(str.isdigit, f))) for f in file_list]
 
@@ -127,10 +188,10 @@ def download_team_rosters_data(root_path, start_year, end_year, overwrite=False)
         curr_season_string = f"{year}{year + 1}"
 
         # Output folder
-        output_folder_path = _create_dir_if_not_exist(root_path, curr_season_string, "team_rosters") 
+        output_folder_path = _create_dir_if_not_exist(root_path, curr_season_string, "team_rosters")
         if not output_folder_path:
             logger.warning(f"Invalid path: {output_folder_path}. Skipping download.")
-            return False        
+            return False
 
         # Iterate through each team and download
         # Example link: https://statsapi.web.nhl.com/api/v1/teams/20?expand=team.roster&season=20122013
@@ -144,8 +205,8 @@ def download_team_rosters_data(root_path, start_year, end_year, overwrite=False)
     return True
 
 def _create_dir_if_not_exist(root_path, *dirs):
-    """ Helper function that creates "nested" directories within the root. Handles if 
-        directory already exists and other basic errors. Returns a path if directory 
+    """ Helper function that creates "nested" directories within the root. Handles if
+        directory already exists and other basic errors. Returns a path if directory
         already exists or if it is successfully created. Returns None otherwise.
 
         Examples:
@@ -163,7 +224,7 @@ def _create_dir_if_not_exist(root_path, *dirs):
         return None
 
 def _check_year_range(start_year, end_year):
-    """ Helper function to check the start and end year ranges for seasons. 
+    """ Helper function to check the start and end year ranges for seasons.
         Returns True if inputs and range are valid. False otherwise. """
     # Error check
     if not isinstance(start_year, int) or not isinstance(end_year, int) or start_year > end_year:
@@ -175,12 +236,12 @@ def _check_year_range(start_year, end_year):
         logger.warning(f"Start year ({start_year}) must be >= {SEASON_START_YEAR_LIMIT}")
         return False
 
-    return True        
+    return True
 
 def _save_file(url, output_file_path, overwrite, file_counter=0, total_files=0):
     """ Helper function that saves data from the given URL to the output file path.
-        Does not access and save data if overwrite flag is false. 
-        
+        Does not access and save data if overwrite flag is false.
+
         Also returns a string for download progress. This is returned so the original
         caller can make logger output "more correctly" show which function is actually
         downloading the data (rather than this one). """
@@ -210,13 +271,18 @@ if __name__ == "__main__":
     arg_parser.add_argument("-o", required=True, help="Root directory for all downloaded data.")
     arg_parser.add_argument("--start_year", required=False, type=int, help="Starting year used for downloading season data.")
     arg_parser.add_argument("--end_year", required=False, type=int, help="Ending year used for downloading season data.")
+    arg_parser.add_argument("--players_file", required=False, help="CSV file path to list of players with statsapi endpoints for downloading player data.")
     arg_parser.add_argument("--overwrite", required=False, action='store_true', help="Flag to overwrite all existing files when downloading.")
     args = arg_parser.parse_args()
 
+    # Store arguments
     root_data_folder = args.o
     start_year = args.start_year
     end_year = args.end_year
+    players_file_path = args.players_file
     ow = args.overwrite
 
+    # Download data
     download_teams_data(root_data_folder, overwrite=ow)
+    download_players_data(root_data_folder, players_file_path, overwrite=ow)
     download_team_rosters_data(root_data_folder, start_year=start_year, end_year=end_year, overwrite=ow)

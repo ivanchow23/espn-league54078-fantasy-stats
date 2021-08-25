@@ -6,7 +6,9 @@ import requests
 import statsapi_logger
 
 URL_STRING = "https://statsapi.web.nhl.com"
-URL_STRING_API_PREFIX = "https://statsapi.web.nhl.com/api/v1"
+API_ENDPOINT_PREFIX = "/api/v1"
+URL_STRING_API_PREFIX = f"https://statsapi.web.nhl.com{API_ENDPOINT_PREFIX}"
+
 logger = statsapi_logger.logger()
 
 def load_json_from_url(url):
