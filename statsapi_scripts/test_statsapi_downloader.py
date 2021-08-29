@@ -85,6 +85,42 @@ class TestStatsApiDownloader(unittest.TestCase):
         actual_mapfile_data = pd.read_csv(os.path.join(test_folder_path, "players_id_map.csv")).to_dict('records')
         self.assertEqual(expected_mapfile_data, actual_mapfile_data)
 
+        # Test typical case again, with no overwrite
+        # - First, keep track of modification date from the first test
+        mod_time_mapfile = os.path.getmtime(os.path.join(test_folder_path, "players_id_map.csv"))
+        mod_time_player8470612 = os.path.getmtime(os.path.join(test_folder_path, "players", "player8470612.json"))
+        mod_time_player8471675 = os.path.getmtime(os.path.join(test_folder_path, "players", "player8471675.json"))
+        mod_time_player8478402 = os.path.getmtime(os.path.join(test_folder_path, "players", "player8478402.json"))
+        self.assertTrue(statsapi_downloader.download_players_data(test_folder_path, test_input_file_path))
+
+        # - Check expected files exist
+        # - Check mapfile exists
+        # - Check mapfile contents (same as previous test)
+        # - Check files did not get modified
+        self.assertTrue(os.path.exists(os.path.join(test_folder_path, "players", "player8470612.json")))
+        self.assertTrue(os.path.exists(os.path.join(test_folder_path, "players", "player8471675.json")))
+        self.assertTrue(os.path.exists(os.path.join(test_folder_path, "players", "player8478402.json")))
+        self.assertTrue(os.path.exists(os.path.join(test_folder_path, "players_id_map.csv")))
+        self.assertEqual(expected_mapfile_data, actual_mapfile_data)
+        self.assertEqual(os.path.getmtime(os.path.join(test_folder_path, "players", "player8470612.json")), mod_time_player8470612)
+        self.assertEqual(os.path.getmtime(os.path.join(test_folder_path, "players", "player8471675.json")), mod_time_player8471675)
+        self.assertEqual(os.path.getmtime(os.path.join(test_folder_path, "players", "player8478402.json")), mod_time_player8478402)
+
+        # Test typical case again, with overwrite
+        # - Check expected files exist
+        # - Check mapfile exists
+        # - Check mapfile contents (same as previous test)
+        # - Check files did not get modified
+        self.assertTrue(statsapi_downloader.download_players_data(test_folder_path, test_input_file_path, overwrite=True))
+        self.assertTrue(os.path.exists(os.path.join(test_folder_path, "players", "player8470612.json")))
+        self.assertTrue(os.path.exists(os.path.join(test_folder_path, "players", "player8471675.json")))
+        self.assertTrue(os.path.exists(os.path.join(test_folder_path, "players", "player8478402.json")))
+        self.assertTrue(os.path.exists(os.path.join(test_folder_path, "players_id_map.csv")))
+        self.assertEqual(expected_mapfile_data, actual_mapfile_data)
+        self.assertGreater(os.path.getmtime(os.path.join(test_folder_path, "players", "player8470612.json")), mod_time_player8470612)
+        self.assertGreater(os.path.getmtime(os.path.join(test_folder_path, "players", "player8471675.json")), mod_time_player8471675)
+        self.assertGreater(os.path.getmtime(os.path.join(test_folder_path, "players", "player8478402.json")), mod_time_player8478402)
+
         # Test extra input columns
         self._clean_folder(test_folder_path)
         test_input_file_path = os.path.join(test_folder_path, "test_input_file.csv")
@@ -107,13 +143,20 @@ class TestStatsApiDownloader(unittest.TestCase):
         actual_mapfile_data = pd.read_csv(os.path.join(test_folder_path, "players_id_map.csv")).to_dict('records')
         self.assertEqual(expected_mapfile_data, actual_mapfile_data)
 
+        # Test empty input file
+        # - Check false return
+        self._clean_folder(test_folder_path)
+        test_input_file_path = os.path.join(test_folder_path, "test_input_file.csv")
+        self._create_empty_file(test_input_file_path)
+        self.assertFalse(statsapi_downloader.download_players_data(test_folder_path, test_input_file_path))
+
         # Test invalid root folder paths
         # - Check false return
         # - Check mapfile does not exist
         self._clean_folder(test_folder_path)
         self.assertFalse(statsapi_downloader.download_players_data(None, test_input_file_path))
         self.assertFalse(statsapi_downloader.download_players_data([1, 2, 3], test_input_file_path))
-        self.assertFalse(statsapi_downloader.download_players_data(r"not\a\path?", test_input_file_path))
+        self.assertFalse(statsapi_downloader.download_players_data(r"?\not\a\valid\path", test_input_file_path))
         self.assertFalse(os.path.exists(os.path.join(test_folder_path, "players_id_map.csv")))
 
         # Test invalid input file paths

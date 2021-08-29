@@ -113,7 +113,7 @@ def download_players_data(root_path, in_file_path, overwrite=False):
     with open(in_file_path, 'r', encoding='utf-8') as csv_file:
         dict_reader = csv.DictReader(csv_file)
         file_headers = dict_reader.fieldnames
-        if not set(required_headers).issubset(set(file_headers)):
+        if not file_headers or not set(required_headers).issubset(set(file_headers)):
             logger.warning(f"Input file does not contain required headers. Requires: {required_headers}. Skipping download.")
             return False
         players_data_dict_list = list(dict_reader)
