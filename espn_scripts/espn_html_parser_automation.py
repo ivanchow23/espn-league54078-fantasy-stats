@@ -33,28 +33,6 @@ def _find_folders_with_html(root_folder):
                 break
     return folder_paths_list
 
-def _move_files(src_folder, dest_folder, file_ext):
-    """ Helper function that moves all files with given file extension from source to destination folder. """
-    # Find files with given file extension in source folder
-    print(f"Moving {file_ext} files from {src_folder} to {dest_folder}")
-    files_to_move = []
-    for f in os.listdir(src_folder):
-        # Exception: Leave correction files as is
-        if f.endswith("corrections.csv".lower()):
-            continue
-        if f.endswith(file_ext):
-            files_to_move.append(f)
-
-    # Create destination folder if it doesn't exist
-    if not os.path.exists(dest_folder):
-        os.mkdir(dest_folder)
-
-    # Move all files to destination folder - overwrite if it already exists
-    for f in files_to_move:
-        src_file_path = os.path.join(src_folder, f)
-        dest_file_path = os.path.join(dest_folder, f)
-        os.replace(src_file_path, dest_file_path)
-
 if __name__ == "__main__":
     """ Main function. """
     # Read arguments
@@ -74,39 +52,34 @@ if __name__ == "__main__":
 
     # Set-up common variables
     root_dir = args.d
+    folder_paths = _find_folders_with_html(root_dir)
 
     # Parsing clubhouse files
     if args.ch:
         print("\n------------------------------------------- Parsing ESPN clubhouse HTML files -------------------------------------------")
-        file_paths = _find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_CLUBHOUSE)
-        espn_clubhouse_html_parser.to_csvs(file_paths)
-        espn_clubhouse_html_parser.to_excel(file_paths)
-        espn_clubhouse_html_parser.to_pickle(file_paths)
+        for folder_path in folder_paths:
+            file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_CLUBHOUSE)
+            espn_clubhouse_html_parser.to_csvs(file_paths, folder_path)
+            espn_clubhouse_html_parser.to_excel(file_paths, folder_path)
+            espn_clubhouse_html_parser.to_pickle(file_paths, folder_path)
 
     # Parsing draft recap files
     if args.dr:
         print("\n------------------------------------------ Parsing ESPN draft recap HTML files ------------------------------------------")
-        file_paths = _find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_DRAFT_RECAP)
-        espn_draft_recap_html_parser.to_csv(file_paths)
-        espn_draft_recap_html_parser.to_excel(file_paths)
-        espn_draft_recap_html_parser.to_pickle(file_paths)
+        for folder_path in folder_paths:
+            file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_DRAFT_RECAP)
+            espn_draft_recap_html_parser.to_csv(file_paths, folder_path)
+            espn_draft_recap_html_parser.to_excel(file_paths, folder_path)
+            espn_draft_recap_html_parser.to_pickle(file_paths, folder_path)
 
     # Parsing league roster files
     if args.lr:
         print("\n------------------------------------------ Parsing ESPN league roster HTML files ----------------------------------------")
-        file_paths = _find_files_recursive(root_dir, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS)
-        espn_league_rosters_html_parser.to_csv(file_paths)
-        espn_league_rosters_html_parser.to_excel(file_paths)
-        espn_league_rosters_html_parser.to_pickle(file_paths)
-
-    # Move files into folders
-    # Find folder paths that contain HTML files because that is likely where all the output files are to move
-    print("\n--------------------------------------------------- Moving output files -------------------------------------------------")
-    folder_paths_with_html = _find_folders_with_html(root_dir)
-    for folder_path in folder_paths_with_html:
-        _move_files(folder_path, os.path.join(folder_path, "csv"), ".csv")
-        _move_files(folder_path, os.path.join(folder_path, "excel"), ".xlsx")
-        _move_files(folder_path, os.path.join(folder_path, "pickles"), ".pickle")
+        for folder_path in folder_paths:
+            file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS)
+            espn_league_rosters_html_parser.to_csv(file_paths, folder_path)
+            espn_league_rosters_html_parser.to_excel(file_paths, folder_path)
+            espn_league_rosters_html_parser.to_pickle(file_paths, folder_path)
 
     # Done!
     print("Done.")

@@ -21,9 +21,9 @@ NUM_EXPECTED_HTML_TABLES = 6
 def get_file_dicts(in_file_paths):
     """ Parses and returns a list of dictionaries corresponding to skater and goalie data for given input HTML files.
         Return data structure has the form:
-        [ { 'file_dir': "file_dir1", ..., 'skaters_df': skaters_df1, 'goalies_df': goalies_df1 },
-          { 'file_dir': "file_dir2", ..., 'skaters_df': skaters_df2, 'goalies_df': goalies_df2 },
-          { 'file_dir': "file_dir3", ..., 'skaters_df': skaters_df3, 'goalies_df': goalies_df3 },
+        [ { 'skaters_df': skaters_df1, 'goalies_df': goalies_df1 ... },
+          { 'skaters_df': skaters_df2, 'goalies_df': goalies_df2 ... },
+          { 'skaters_df': skaters_df3, 'goalies_df': goalies_df3 ... },
           ...
         ]
     """
@@ -81,34 +81,40 @@ def get_file_dicts(in_file_paths):
         goalies_df = _get_combined_df(html_dfs[int(len(html_dfs) / 2):])
 
         # Fill output data
-        file_dicts.append({'file_dir': file_dir, 'team_name': team_name, 'owner_name': owner_name,
-                           'league_name': league_name, 'skaters_df': skaters_df, 'goalies_df': goalies_df })
+        file_dicts.append({'team_name': team_name, 'owner_name': owner_name, 'league_name': league_name,
+                           'skaters_df': skaters_df, 'goalies_df': goalies_df })
 
     return file_dicts
 
-def to_csvs(in_file_paths):
+def to_csvs(in_file_paths, root_output_path):
     """ Parses input files and outputs to individual CSV files. """
+    output_folder_path = os.path.join(root_output_path, "csv")
+    os.makedirs(output_folder_path, exist_ok=True)
+
     file_dicts = get_file_dicts(in_file_paths)
     for file_dict in file_dicts:
         # Output to CSVs
         file_basename = _strip_special_chars(f"{file_dict['team_name']} ({file_dict['owner_name']}) - {file_dict['league_name']}")
 
-        skaters_out_file_path = os.path.join(file_dict['file_dir'], file_basename + " - Skaters.csv")
+        skaters_out_file_path = os.path.join(output_folder_path, file_basename + " - Skaters.csv")
         file_dict['skaters_df'].to_csv(skaters_out_file_path, index=False)
         print("Output to: {}".format(skaters_out_file_path))
 
-        goalies_out_file_path = os.path.join(file_dict['file_dir'], file_basename  + " - Goalies.csv")
+        goalies_out_file_path = os.path.join(output_folder_path, file_basename  + " - Goalies.csv")
         file_dict['goalies_df'].to_csv(goalies_out_file_path, index=False)
         print("Output to: {}".format(goalies_out_file_path))
 
-def to_excel(in_file_paths):
+def to_excel(in_file_paths, root_output_path):
     """ Parses input files and outputs to Excel file, where each input file is organized into a sheet. """
+    output_folder_path = os.path.join(root_output_path, "excel")
+    os.makedirs(output_folder_path, exist_ok=True)
+
     file_dicts = get_file_dicts(in_file_paths)
     for file_dict in file_dicts:
         # Use league name as the output file
         # Output dataframes into individual sheets of specified file
         file_name = _strip_special_chars(f"Clubhouses - {file_dict['league_name']}")
-        file_path = os.path.join(file_dict['file_dir'], file_name + ".xlsx")
+        file_path = os.path.join(output_folder_path, file_name + ".xlsx")
 
         # Excel writer can't make new file using just 'a' mode
         # First check if file already exists to append to, otherwise write to new file
@@ -123,19 +129,20 @@ def to_excel(in_file_paths):
 
         print(f"Output to: {file_path}")
 
-def to_pickle(in_file_paths):
+def to_pickle(in_file_paths, root_output_path):
     """ Parses input files and outputs to pickle. """
-    file_dicts = get_file_dicts(in_file_paths)
+    output_folder_path = os.path.join(root_output_path, "pickles")
+    os.makedirs(output_folder_path, exist_ok=True)
 
     # First, get the directory from where input file is from
     output_pickles_dict = {}
+    file_dicts = get_file_dicts(in_file_paths)
     for file_dict in file_dicts:
         # Use the file directory and league name as the pickle output path and store as a key
         file_name = _strip_special_chars(f"Clubhouses - {file_dict['league_name']}")
-        file_path = os.path.join(file_dict['file_dir'], file_name + ".pickle")
+        file_path = os.path.join(output_folder_path, file_name + ".pickle")
 
         # First remove unnecessary keys from current dictionary
-        del file_dict['file_dir']
         del file_dict['league_name']
 
         # Add dictionary into list if key exists
@@ -222,7 +229,10 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-i', nargs='+', required=True, help="Input HTML file(s).")
     args = arg_parser.parse_args()
-    to_csvs(args.i)
-    to_excel(args.i)
-    to_pickle(args.i)
+
+    # Assumes all input files are from same directory
+    output_folder_path = os.path.dirname(args.i[0])
+    to_csvs(args.i, output_folder_path)
+    to_excel(args.i, output_folder_path)
+    to_pickle(args.i, output_folder_path)
     print("Done.\n")

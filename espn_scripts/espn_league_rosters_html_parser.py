@@ -18,13 +18,13 @@ espn_statsapi_corr = None
 def get_file_dicts(in_file_paths):
     """ Parses and returns a list of dictionaries corresponding to league roster information for given input HTML files.
         Return data structure has the form:
-        [ { 'file_dir': "file_dir1", 'league_name': "league_name1", 'team_rosters': { 'team_name1': { ... },
+        [ { 'league_name': "league_name1", 'team_rosters': { 'team_name1': { ... },
                                                                                       'team_name2': { ... },
                                                                                       'team_name3': { ... },
                                                                                        ...
                                                                                     } },
 
-          { 'file_dir': "file_dir2", 'league_name': "league_name2", 'team_rosters': { 'team_nameA': { ... },
+          { 'league_name': "league_name2", 'team_rosters': { 'team_nameA': { ... },
                                                                                       'team_nameB': { ... },
                                                                                       'team_nameC': { ... },
                                                                                        ...
@@ -87,31 +87,37 @@ def get_file_dicts(in_file_paths):
             team_rosters_dict[team_name_key] = {'roster_df': _get_modified_player_df(df), 'total_season_points': pts}
 
         # Fill output data
-        file_dicts.append({'file_dir': file_dir, 'league_name': league_name, 'team_rosters': team_rosters_dict})
+        file_dicts.append({'league_name': league_name, 'team_rosters': team_rosters_dict})
 
     return file_dicts
 
-def to_csv(in_file_paths):
+def to_csv(in_file_paths, root_output_path):
     """ Parses input files and outputs to CSV file. """
+    output_folder_path = os.path.join(root_output_path, "csv")
+    os.makedirs(output_folder_path, exist_ok=True)
+
     file_dicts = get_file_dicts(in_file_paths)
     for file_dict in file_dicts:
         # File basename with special characters strip (add special character regex as needed)
         file_basename = _strip_special_chars(f"League Rosters - {file_dict['league_name']}")
 
         # TODO: Think about if this should output league rosters into individual CSVs
-        team_rosters_output_path = os.path.join(file_dict['file_dir'], file_basename + ".csv")
+        team_rosters_output_path = os.path.join(output_folder_path, file_basename + ".csv")
         team_rosters_df = _get_team_rosters_df(file_dict['team_rosters'])
         team_rosters_df.to_csv(team_rosters_output_path, index=False)
         print("Output to: {}".format(team_rosters_output_path))
 
-def to_excel(in_file_paths):
+def to_excel(in_file_paths, root_output_path):
     """ Parses input files and outputs to Excel file. """
+    output_folder_path = os.path.join(root_output_path, "excel")
+    os.makedirs(output_folder_path, exist_ok=True)
+
     file_dicts = get_file_dicts(in_file_paths)
     for file_dict in file_dicts:
         # Use league name as the output file
         # Output dataframes into individual sheets of specified file
         file_basename = _strip_special_chars(f"League Rosters - {file_dict['league_name']}")
-        out_file_path = os.path.join(file_dict['file_dir'], file_basename + ".xlsx")
+        out_file_path = os.path.join(output_folder_path, file_basename + ".xlsx")
 
         # Add each team roster into its own sheet in the file
         for team_name_key, team_dict in file_dict['team_rosters'].items():
@@ -126,19 +132,20 @@ def to_excel(in_file_paths):
 
         print("Output to: {}".format(out_file_path))
 
-def to_pickle(in_file_paths):
+def to_pickle(in_file_paths, root_output_path):
     """ Parses input files and outputs to pickle. """
-    file_dicts = get_file_dicts(in_file_paths)
+    output_folder_path = os.path.join(root_output_path, "pickles")
+    os.makedirs(output_folder_path, exist_ok=True)
 
     # First, get the directory from where input file is from
     output_pickles_dict = {}
+    file_dicts = get_file_dicts(in_file_paths)
     for file_dict in file_dicts:
         # Use the file directory and league name as the pickle output path and store as a key
         file_name = _strip_special_chars(f"League Rosters - {file_dict['league_name']}")
-        file_path = os.path.join(file_dict['file_dir'], file_name + ".pickle")
+        file_path = os.path.join(output_folder_path, file_name + ".pickle")
 
         # First remove unnecessary keys from current dictionary
-        del file_dict['file_dir']
         del file_dict['league_name']
 
         # Add dictionary into list if key exists
@@ -214,7 +221,10 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-i', nargs='+', required=True, help="Input HTML file(s).")
     args = arg_parser.parse_args()
-    to_csv(args.i)
-    to_excel(args.i)
-    to_pickle(args.i)
+
+    # Assumes all input files are from same directory
+    output_folder_path = os.path.dirname(args.i[0])
+    to_csv(args.i, output_folder_path)
+    to_excel(args.i, output_folder_path)
+    to_pickle(args.i, output_folder_path)
     print("Done.\n")
