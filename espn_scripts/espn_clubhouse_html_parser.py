@@ -86,7 +86,7 @@ def get_file_dicts(in_file_paths):
 
     return file_dicts
 
-def to_csvs(in_file_paths, root_output_path):
+def to_csv(in_file_paths, root_output_path):
     """ Parses input files and outputs to individual CSV files. """
     output_folder_path = os.path.join(root_output_path, "csv")
     os.makedirs(output_folder_path, exist_ok=True)
@@ -232,7 +232,7 @@ if __name__ == "__main__":
 
     # Assumes all input files are from same directory
     output_folder_path = os.path.dirname(args.i[0])
-    to_csvs(args.i, output_folder_path)
+    to_csv(args.i, output_folder_path)
     to_excel(args.i, output_folder_path)
     to_pickle(args.i, output_folder_path)
     print("Done.\n")
