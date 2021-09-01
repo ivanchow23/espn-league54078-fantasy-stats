@@ -10,6 +10,7 @@ import argparse
 import espn_clubhouse_html_parser
 import espn_draft_recap_html_parser
 import espn_league_rosters_html_parser
+import espn_league_rosters_standings_html_parser
 import espn_utils
 import os
 import re
@@ -41,6 +42,7 @@ if __name__ == "__main__":
     arg_parser.add_argument('-ch', required=False, action='store_true', help="Option to parse clubhouse files.")
     arg_parser.add_argument('-dr', required=False, action='store_true', help="Option to parse draft recap files.")
     arg_parser.add_argument('-lr', required=False, action='store_true', help="Option to parse league roster files.")
+    arg_parser.add_argument('-ls', required=False, action='store_true', help="Option to parse league roster standings files.")
     arg_parser.add_argument('-all', required=False, action='store_true', help="Option to parse all files. Overrides all other options.")
     args = arg_parser.parse_args()
 
@@ -49,6 +51,7 @@ if __name__ == "__main__":
         args.ch = True
         args.dr = True
         args.lr = True
+        args.ls = True
 
     # Set-up common variables
     root_dir = args.d
@@ -80,6 +83,16 @@ if __name__ == "__main__":
             espn_league_rosters_html_parser.to_csv(file_paths, folder_path)
             espn_league_rosters_html_parser.to_excel(file_paths, folder_path)
             espn_league_rosters_html_parser.to_pickle(file_paths, folder_path)
+
+    # Parsing league roster files for standing information
+    if args.ls:
+        print("\n------------------------------------- Parsing ESPN league roster standings HTML files -----------------------------------")
+        for folder_path in folder_paths:
+            file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS)
+            for file_path in file_paths:
+                espn_league_rosters_standings_html_parser.to_csv(file_path, folder_path)
+                espn_league_rosters_standings_html_parser.to_excel(file_path, folder_path)
+                espn_league_rosters_standings_html_parser.to_pickle(file_path, folder_path)
 
     # Done!
     print("Done.")
