@@ -9,7 +9,6 @@
 import argparse
 import espn_clubhouse_html_parser
 import espn_draft_recap_html_parser
-import espn_league_rosters_html_parser
 import espn_league_rosters_standings_html_parser
 import espn_utils
 import os
@@ -58,13 +57,6 @@ if __name__ == "__main__":
         espn_draft_recap_html_parser.to_csv(file_paths, folder_path)
         espn_draft_recap_html_parser.to_excel(file_paths, folder_path)
         espn_draft_recap_html_parser.to_pickle(file_paths, folder_path)
-
-    print("\n------------------------------------------ Parsing ESPN league roster HTML files ----------------------------------------")
-    for folder_path in folder_paths:
-        file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS)
-        espn_league_rosters_html_parser.to_csv(file_paths, folder_path)
-        espn_league_rosters_html_parser.to_excel(file_paths, folder_path)
-        espn_league_rosters_html_parser.to_pickle(file_paths, folder_path)
 
     print("\n------------------------------------- Parsing ESPN league roster standings HTML files -----------------------------------")
     for folder_path in folder_paths:
