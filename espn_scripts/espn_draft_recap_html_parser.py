@@ -15,110 +15,72 @@ import espn_statsapi_utils
 # Declare correction object global for simplicity of access in functions
 espn_statsapi_corr = None
 
-def get_file_dicts(in_file_paths):
-    """ Parses and returns a list of dictionaries corresponding to draft recap information for given input HTML files.
-        Return data structure has the form:
-        [ { 'league_name': "league_nameA", ..., 'df': df1 },
-          { 'league_name': "league_nameB", ..., 'df': df2 },
-          { 'league_name': "league_nameC", ..., 'df': df3 },
-          ...
-        ]
-    """
-    file_dicts = []
-    for in_file_path in in_file_paths:
-        file_dir = os.path.dirname(in_file_path)
-        print("Processing: {}".format(in_file_path))
+def get_file_dict(html_path):
+    """ Parses the HTML file and returns dictionary of various information. """
+    print("Processing: {}".format(html_path))
 
-        # Parse
-        html_dfs = pd.read_html(in_file_path)
+    # Parse
+    html_dfs = pd.read_html(html_path)
 
-        # Read and parse HTML for various tags
-        soup = BeautifulSoup(open(in_file_path, 'r'), 'html.parser')
+    # Read and parse HTML for various tags
+    soup = BeautifulSoup(open(html_path, 'r'), 'html.parser')
 
-        # Apparently can get league info from this obscure header and its common across the HTML pages I've inspected
-        # Note: Won't be surprised if this might not work elsewhere
-        league_name = ""
-        league_name_tags = soup.find_all('h3', class_="jsx-1532665337 subHeader")
-        try:
-            league_name = league_name_tags[0].text
-        except:
-            # Intentional catch-all and pass since this method seems kind of hacky to begin with
-            pass
+    # Apparently can get league info from this obscure header and its common across the HTML pages I've inspected
+    # Note: Won't be surprised if this might not work elsewhere
+    league_name = ""
+    league_name_tags = soup.find_all('h3', class_="jsx-1532665337 subHeader")
+    try:
+        league_name = league_name_tags[0].text
+    except:
+        # Intentional catch-all and pass since this method seems kind of hacky to begin with
+        pass
 
-        # Load correction file (designed to have only up to one per folder)
-        # Create correction object regardless if file exists or not
-        corr_file_path = ""
-        corr_file_paths = [f for f in os.listdir(file_dir) if "corrections" in f]
-        if len(corr_file_paths) > 0:
-            corr_file_path = os.path.join(file_dir, corr_file_paths[0])
-        global espn_statsapi_corr
-        espn_statsapi_corr = espn_statsapi_utils.CorrectionUtil(corr_file_path)
+    # Load correction file (designed to have only up to one per folder)
+    # Create correction object regardless if file exists or not
+    file_dir = os.path.dirname(html_path)
+    corr_file_path = ""
+    corr_file_paths = [f for f in os.listdir(file_dir) if "corrections" in f]
+    if len(corr_file_paths) > 0:
+        corr_file_path = os.path.join(file_dir, corr_file_paths[0])
+    global espn_statsapi_corr
+    espn_statsapi_corr = espn_statsapi_utils.CorrectionUtil(corr_file_path)
 
-        # Combine dataframes
-        combined_df = _get_combined_df(html_dfs)
-
-        # Fill output data
-        file_dicts.append({'league_name': league_name, 'df': combined_df })
-
-    return file_dicts
+    # Combine dataframes
+    combined_df = _get_combined_df(html_dfs)
+    return {'league_name': league_name, 'df': combined_df }
 
 def to_csv(in_file_paths, root_output_path):
     """ Parses input files and outputs to CSV file. """
     output_folder_path = os.path.join(root_output_path, "csv")
     os.makedirs(output_folder_path, exist_ok=True)
 
-    file_dicts = get_file_dicts(in_file_paths)
-    for file_dict in file_dicts:
-        # File basename with special characters strip (add special character regex as needed)
-        file_basename = _strip_special_chars(f"Draft Recap - {file_dict['league_name']}")
-        out_file_path = os.path.join(output_folder_path, file_basename + ".csv")
-
-        file_dict['df'].to_csv(out_file_path, index=False)
-        print("Output to: {}".format(out_file_path))
+    file_dict = get_file_dict(in_file_paths)
+    file_basename = _strip_special_chars(f"Draft Recap - {file_dict['league_name']}")
+    out_file_path = os.path.join(output_folder_path, file_basename + ".csv")
+    file_dict['df'].to_csv(out_file_path, index=False)
+    print("Output to: {}".format(out_file_path))
 
 def to_excel(in_file_paths, root_output_path):
     """ Parses input files and outputs to Excel file. """
     output_folder_path = os.path.join(root_output_path, "excel")
     os.makedirs(output_folder_path, exist_ok=True)
 
-    file_dicts = get_file_dicts(in_file_paths)
-    for file_dict in file_dicts:
-        # Use league name as the output file
-        # Output dataframes into individual sheets of specified file
-        file_basename = _strip_special_chars(f"Draft Recap - {file_dict['league_name']}")
-        out_file_path = os.path.join(output_folder_path, file_basename + ".xlsx")
-
-        # Output to Excel file
-        file_dict['df'].to_excel(out_file_path, index=False)
-        print("Output to: {}".format(out_file_path))
+    file_dict = get_file_dict(in_file_paths)
+    file_basename = _strip_special_chars(f"Draft Recap - {file_dict['league_name']}")
+    out_file_path = os.path.join(output_folder_path, file_basename + ".xlsx")
+    file_dict['df'].to_excel(out_file_path, index=False)
+    print("Output to: {}".format(out_file_path))
 
 def to_pickle(in_file_paths, root_output_path):
     """ Parses input files and outputs to pickle. """
     output_folder_path = os.path.join(root_output_path, "pickles")
     os.makedirs(output_folder_path, exist_ok=True)
 
-    # First, get the directory from where input file is from
-    output_pickles_dict = {}
-    file_dicts = get_file_dicts(in_file_paths)
-    for file_dict in file_dicts:
-        # Use the file directory and league name as the pickle output path and store as a key
-        file_name = _strip_special_chars(f"Draft Recap - {file_dict['league_name']}")
-        file_path = os.path.join(output_folder_path, file_name + ".pickle")
-
-        # First remove unnecessary keys from current dictionary
-        del file_dict['league_name']
-
-        # Add dictionary into list if key exists
-        if file_path in output_pickles_dict:
-            output_pickles_dict[file_path].append(file_dict)
-        # Otherwise create new list
-        else:
-            output_pickles_dict[file_path] = [file_dict]
-
-    # Next, dump all pickles
-    for out_file_path, data in output_pickles_dict.items():
-        pickle.dump(data, open(out_file_path, 'wb'))
-        print(f"Output to: {out_file_path}")
+    file_dict = get_file_dict(in_file_paths)
+    file_basename = _strip_special_chars(f"Draft Recap - {file_dict['league_name']}")
+    out_file_path = os.path.join(output_folder_path, file_basename + ".pickle")
+    pickle.dump(file_dict['df'], open(out_file_path, 'wb'))
+    print(f"Output to: {out_file_path}")
 
 def _get_combined_df(df_list):
     """ Combines list of dataframes into one big list. """
@@ -181,7 +143,7 @@ def _strip_special_chars(input_str):
 if __name__ == "__main__":
     """ Main function. """
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('-i', nargs='+', required=True, help="Input HTML file(s).")
+    arg_parser.add_argument('-i', required=True, help="Input HTML file(s).")
     args = arg_parser.parse_args()
 
     # Assumes all input files are from same directory
