@@ -39,60 +39,39 @@ if __name__ == "__main__":
     # Read arguments
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-d', required=True, help="Input directory containing folder or folders of HTML pages to parse.")
-    arg_parser.add_argument('-ch', required=False, action='store_true', help="Option to parse clubhouse files.")
-    arg_parser.add_argument('-dr', required=False, action='store_true', help="Option to parse draft recap files.")
-    arg_parser.add_argument('-lr', required=False, action='store_true', help="Option to parse league roster files.")
-    arg_parser.add_argument('-ls', required=False, action='store_true', help="Option to parse league roster standings files.")
-    arg_parser.add_argument('-all', required=False, action='store_true', help="Option to parse all files. Overrides all other options.")
     args = arg_parser.parse_args()
-
-    # If parsing all, override all arguments
-    if args.all:
-        args.ch = True
-        args.dr = True
-        args.lr = True
-        args.ls = True
 
     # Set-up common variables
     root_dir = args.d
     folder_paths = _find_folders_with_html(root_dir)
 
-    # Parsing clubhouse files
-    if args.ch:
-        print("\n------------------------------------------- Parsing ESPN clubhouse HTML files -------------------------------------------")
-        for folder_path in folder_paths:
-            file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_CLUBHOUSE)
-            espn_clubhouse_html_parser.to_csv(file_paths, folder_path)
-            espn_clubhouse_html_parser.to_excel(file_paths, folder_path)
-            espn_clubhouse_html_parser.to_pickle(file_paths, folder_path)
+    print("\n------------------------------------------- Parsing ESPN clubhouse HTML files -------------------------------------------")
+    for folder_path in folder_paths:
+        file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_CLUBHOUSE)
+        espn_clubhouse_html_parser.to_csv(file_paths, folder_path)
+        espn_clubhouse_html_parser.to_excel(file_paths, folder_path)
+        espn_clubhouse_html_parser.to_pickle(file_paths, folder_path)
 
-    # Parsing draft recap files
-    if args.dr:
-        print("\n------------------------------------------ Parsing ESPN draft recap HTML files ------------------------------------------")
-        for folder_path in folder_paths:
-            file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_DRAFT_RECAP)
-            espn_draft_recap_html_parser.to_csv(file_paths, folder_path)
-            espn_draft_recap_html_parser.to_excel(file_paths, folder_path)
-            espn_draft_recap_html_parser.to_pickle(file_paths, folder_path)
+    print("\n------------------------------------------ Parsing ESPN draft recap HTML files ------------------------------------------")
+    for folder_path in folder_paths:
+        file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_DRAFT_RECAP)
+        espn_draft_recap_html_parser.to_csv(file_paths, folder_path)
+        espn_draft_recap_html_parser.to_excel(file_paths, folder_path)
+        espn_draft_recap_html_parser.to_pickle(file_paths, folder_path)
 
-    # Parsing league roster files
-    if args.lr:
-        print("\n------------------------------------------ Parsing ESPN league roster HTML files ----------------------------------------")
-        for folder_path in folder_paths:
-            file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS)
-            espn_league_rosters_html_parser.to_csv(file_paths, folder_path)
-            espn_league_rosters_html_parser.to_excel(file_paths, folder_path)
-            espn_league_rosters_html_parser.to_pickle(file_paths, folder_path)
+    print("\n------------------------------------------ Parsing ESPN league roster HTML files ----------------------------------------")
+    for folder_path in folder_paths:
+        file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS)
+        espn_league_rosters_html_parser.to_csv(file_paths, folder_path)
+        espn_league_rosters_html_parser.to_excel(file_paths, folder_path)
+        espn_league_rosters_html_parser.to_pickle(file_paths, folder_path)
 
-    # Parsing league roster files for standing information
-    if args.ls:
-        print("\n------------------------------------- Parsing ESPN league roster standings HTML files -----------------------------------")
-        for folder_path in folder_paths:
-            file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS)
-            for file_path in file_paths:
-                espn_league_rosters_standings_html_parser.to_csv(file_path, folder_path)
-                espn_league_rosters_standings_html_parser.to_excel(file_path, folder_path)
-                espn_league_rosters_standings_html_parser.to_pickle(file_path, folder_path)
+    print("\n------------------------------------- Parsing ESPN league roster standings HTML files -----------------------------------")
+    for folder_path in folder_paths:
+        file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS)
+        for file_path in file_paths:
+            espn_league_rosters_standings_html_parser.to_csv(file_path, folder_path)
+            espn_league_rosters_standings_html_parser.to_excel(file_path, folder_path)
+            espn_league_rosters_standings_html_parser.to_pickle(file_path, folder_path)
 
-    # Done!
     print("Done.")
