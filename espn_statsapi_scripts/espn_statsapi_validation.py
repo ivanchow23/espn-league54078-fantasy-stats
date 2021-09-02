@@ -107,10 +107,10 @@ def main(espn_path, statsapi_path, out_path):
 
       # Load ESPN data
       espn_draft_recap_df = _load_espn_draft_recap(espn_path, season_string)
-      espn_league_rosters_df = _load_espn_league_rosters(espn_path, season_string)
+      espn_clubhouses_df = _load_espn_clubhouses(espn_path, season_string)
 
       # Combine into master list of dictionaries
-      master_players_list += _combine_dfs_to_dicts(espn_draft_recap_df, espn_league_rosters_df, season_string)
+      master_players_list += _combine_dfs_to_dicts(espn_draft_recap_df, espn_clubhouses_df, season_string)
 
       # Remove empty entries
       master_players_list = [d for d in master_players_list if d['Player'] != "" and d['Team'] != ""]
@@ -198,52 +198,52 @@ def _load_espn_draft_recap(espn_path, season_string):
    if draft_recap_pickle_path:
       with open(draft_recap_pickle_path, 'rb') as pickle_path:
          # Read pickle data and convert dataframe to list of dicts
-         pickle_data = pickle.load(pickle_path)
-         pickle_data_df = pickle_data[0]['df']
+         pickle_data_df = pickle.load(pickle_path)
 
    return pickle_data_df
 
-def _load_espn_league_rosters(espn_path, season_string):
-   """ Finds and loads the ESPN league rosters file. Contents is a list
-       of dataframes, so concat them into a big list before returning.
-       Returns None if file doesn't exist or on error.
+def _load_espn_clubhouses(espn_path, season_string):
+   """ Finds and loads the ESPN clubhouses file. Concat team rosters into a
+       list before returning. Returns None if file doesn't exist or on error.
        TODO: This could be ported to an ESPN loading utility. """
    pickle_data_df = None
 
    # Look for draft recap files
    season_path = os.path.join(espn_path, season_string)
-   league_rosters_pickle_path = None
+   clubhouses_pickle_path = None
    for root, _, files in os.walk(season_path):
       for f in files:
-         if "League Rosters" in f and f.endswith(".pickle"):
-            league_rosters_pickle_path = os.path.join(root, f)
+         if "Clubhouses" in f and f.endswith(".pickle"):
+            clubhouses_pickle_path = os.path.join(root, f)
 
    # Read data if available
-   if league_rosters_pickle_path:
-      with open(league_rosters_pickle_path, 'rb') as pickle_path:
+   if clubhouses_pickle_path:
+      with open(clubhouses_pickle_path, 'rb') as pickle_path:
          # Read pickle data
          pickle_data = pickle.load(pickle_path)
          pickle_data_df = pd.DataFrame()
-         team_rosters_dict = pickle_data[0]
 
-         # For each team roster, concat into larger dataframe
-         for team, team_dict in team_rosters_dict['team_rosters'].items():
-            pickle_data_df = pd.concat([pickle_data_df, team_dict['roster_df']], axis=0, ignore_index=True)
+         # Pickle data contains list of dictionaries
+         for team_dict in pickle_data:
+            # Multi-index dataframes
+            skaters_df = team_dict['skaters_df']['Skaters']
+            goalies_df = team_dict['goalies_df']['Goalies']
+            pickle_data_df = pd.concat([pickle_data_df, skaters_df, goalies_df], axis=0, ignore_index=True)
 
    return pickle_data_df
 
-def _combine_dfs_to_dicts(espn_draft_recap_df, espn_league_rosters_df, season_string):
+def _combine_dfs_to_dicts(espn_draft_recap_df, espn_clubhouses_df, season_string):
    """ Helper function to combine dataframes together. Handles duplicate
        player entries. Returns a list of dictionaries."""
    # Handle empty cases
-   if espn_draft_recap_df is None and espn_league_rosters_df is None:
+   if espn_draft_recap_df is None and espn_clubhouses_df is None:
       return []
 
    # Combine dataframes together, then:
    # - Only keep columns relevant to what we need
    # - Drop duplicate entries
    # - Add season column to dataframe
-   combined_df = pd.concat([espn_draft_recap_df, espn_league_rosters_df], axis=0, ignore_index=True)
+   combined_df = pd.concat([espn_draft_recap_df, espn_clubhouses_df], axis=0, ignore_index=True)
    combined_df = combined_df[['Player', 'Team']]
    combined_df = combined_df.drop_duplicates()
    combined_df['Season'] = season_string
