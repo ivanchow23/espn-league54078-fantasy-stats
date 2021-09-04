@@ -81,8 +81,7 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
 
     # Assumes all input files are from same directory
-    output_folder_path = os.path.dirname(args.i[0])
-
+    output_folder_path = os.path.dirname(args.i)
     to_csv(args.i, output_folder_path)
     to_excel(args.i, output_folder_path)
     to_pickle(args.i, output_folder_path)
