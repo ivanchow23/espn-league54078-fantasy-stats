@@ -9,6 +9,9 @@ import pickle
 import re
 import sys
 
+import espn_logger
+logger = espn_logger.logger()
+
 sys.path.insert(1, os.path.join(sys.path[0], "..", "espn_statsapi_scripts"))
 import espn_statsapi_utils
 
@@ -30,14 +33,14 @@ def get_file_dicts(in_file_paths):
     file_dicts = []
     for in_file_path in in_file_paths:
         file_dir = os.path.dirname(in_file_path)
-        print("Processing: {}".format(in_file_path))
+        logger.info("Processing: {}".format(in_file_path))
 
         # Read HTML file for all tables/data
         html_dfs = pd.read_html(in_file_path)
 
         # Check if HTML page contains at least expected number of tables
         if len(html_dfs) < NUM_EXPECTED_HTML_TABLES:
-            print("Found {} tables (expected {}). Skipping...".format(len(html_dfs), NUM_EXPECTED_HTML_TABLES))
+            logger.warning("Found {} tables (expected {}). Skipping...".format(len(html_dfs), NUM_EXPECTED_HTML_TABLES))
             continue
 
         # Read and parse HTML for various tags
@@ -98,11 +101,11 @@ def to_csv(in_file_paths, root_output_path):
 
         skaters_out_file_path = os.path.join(output_folder_path, file_basename + " - Skaters.csv")
         file_dict['skaters_df'].to_csv(skaters_out_file_path, index=False)
-        print("Output to: {}".format(skaters_out_file_path))
+        logger.info("Output: {}".format(skaters_out_file_path))
 
         goalies_out_file_path = os.path.join(output_folder_path, file_basename  + " - Goalies.csv")
         file_dict['goalies_df'].to_csv(goalies_out_file_path, index=False)
-        print("Output to: {}".format(goalies_out_file_path))
+        logger.info("Output: {}".format(goalies_out_file_path))
 
 def to_excel(in_file_paths, root_output_path):
     """ Parses input files and outputs to Excel file, where each input file is organized into a sheet. """
@@ -127,7 +130,7 @@ def to_excel(in_file_paths, root_output_path):
                 file_dict['skaters_df'].to_excel(excel_writer, sheet_name=_strip_special_chars(f"{file_dict['team_name']} ({file_dict['owner_name']}) - Skaters"))
                 file_dict['goalies_df'].to_excel(excel_writer, sheet_name=_strip_special_chars(f"{file_dict['team_name']} ({file_dict['owner_name']}) - Goalies"))
 
-        print(f"Output to: {file_path}")
+        logger.info(f"Output: {file_path}")
 
 def to_pickle(in_file_paths, root_output_path):
     """ Parses input files and outputs to pickle. """
@@ -152,10 +155,10 @@ def to_pickle(in_file_paths, root_output_path):
         else:
             output_pickles_dict[file_path] = [file_dict]
 
-    # Next, dump all pickles
+    # Next, dump to pickle
     for out_file_path, data in output_pickles_dict.items():
         pickle.dump(data, open(out_file_path, 'wb'))
-        print(f"Output to: {out_file_path}")
+        logger.info(f"Output: {out_file_path}")
 
 def _get_combined_df(df_list):
     """ Returns a combined dataframe of player, season stats, and fantasy points.
@@ -185,7 +188,7 @@ def _get_modified_player_df(df):
     elif 'Goalies' in player_df.columns:
         index_key = 'Goalies'
     else:
-        print("Unknown key to access player information dataframe. Exiting...")
+        logger.error("Unknown key to access player information dataframe. Exiting...")
         exit(-1)
 
     # Parse for additional metadata embedded in the player strings
@@ -213,7 +216,7 @@ def _get_modified_player_df(df):
             if corrected_dict:
                 # Note: Use "at" to change df values: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.at.html
                 # Note: Access an element in multi-index df as follows: https://stackoverflow.com/a/50002318
-                print(f"Correction applied: {row['Player']} {row['Team']} -> {corrected_dict['Corrected Player']} {corrected_dict['Corrected Team']}")
+                logger.info(f"Correction: {row['Player']} {row['Team']} -> {corrected_dict['Corrected Player']} {corrected_dict['Corrected Team']}")
                 player_df.at[index, (index_key, 'Player')] = corrected_dict['Corrected Player']
                 player_df.at[index, (index_key, 'Team')] = corrected_dict['Corrected Team']
 
@@ -235,4 +238,3 @@ if __name__ == "__main__":
     to_csv(args.i, output_folder_path)
     to_excel(args.i, output_folder_path)
     to_pickle(args.i, output_folder_path)
-    print("Done.\n")

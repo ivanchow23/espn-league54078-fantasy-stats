@@ -7,9 +7,12 @@ import pandas as pd
 import pickle
 import re
 
+import espn_logger
+logger = espn_logger.logger()
+
 def get_dict(html_path):
     """ Parses the HTML file and returns dictionary of various information. """
-    print(f"Processing: {html_path}")
+    logger.info(f"Processing: {html_path}")
 
     # Read HTML file for all tables/data and update dataframes to get proper parsing
     html_dfs = pd.read_html(html_path)
@@ -44,7 +47,7 @@ def to_csv(html_path, root_output_path):
     file_basename = _strip_special_chars(f"League Standings - {file_dict['league_name']}")
     out_file_path = os.path.join(output_folder_path, file_basename + ".csv")
     file_dict['df'].to_csv(out_file_path, index=False)
-    print(f"Output to: {out_file_path}")
+    logger.info(f"Output: {out_file_path}")
 
 def to_excel(html_path, root_output_path):
     """ Parses input files and outputs to Excel file. """
@@ -56,7 +59,7 @@ def to_excel(html_path, root_output_path):
     out_file_path = os.path.join(output_folder_path, file_basename + ".xlsx")
     with pd.ExcelWriter(out_file_path, engine='openpyxl') as excel_writer:
         file_dict['df'].to_excel(excel_writer, index=False)
-    print(f"Output to: {out_file_path}")
+    logger.info(f"Output: {out_file_path}")
 
 def to_pickle(html_path, root_output_path):
     """ Parses input files and outputs to pickle. """
@@ -67,7 +70,7 @@ def to_pickle(html_path, root_output_path):
     file_basename = _strip_special_chars(f"League Standings - {file_dict['league_name']}")
     out_file_path = os.path.join(output_folder_path, file_basename + ".pickle")
     pickle.dump(file_dict['df'], open(out_file_path, 'wb'))
-    print(f"Output to: {out_file_path}")
+    logger.info(f"Output: {out_file_path}")
 
 def _strip_special_chars(input_str):
     """ Helper function to strip special characters and replace them with an underscore. """
@@ -85,4 +88,3 @@ if __name__ == "__main__":
     to_csv(args.i, output_folder_path)
     to_excel(args.i, output_folder_path)
     to_pickle(args.i, output_folder_path)
-    print("Done.\n")
