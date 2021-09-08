@@ -47,24 +47,18 @@ if __name__ == "__main__":
     print("\n------------------------------------------- Parsing ESPN clubhouse HTML files -------------------------------------------")
     for folder_path in folder_paths:
         file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_CLUBHOUSE)
-        espn_clubhouse_html_parser.to_csv(file_paths, folder_path)
-        espn_clubhouse_html_parser.to_excel(file_paths, folder_path)
-        espn_clubhouse_html_parser.to_pickle(file_paths, folder_path)
+        espn_clubhouse_html_parser.process(file_paths, folder_path)
 
     print("\n------------------------------------------ Parsing ESPN draft recap HTML files ------------------------------------------")
     for folder_path in folder_paths:
         file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_DRAFT_RECAP)
         for file_path in file_paths:
-            espn_draft_recap_html_parser.to_csv(file_path, folder_path)
-            espn_draft_recap_html_parser.to_excel(file_path, folder_path)
-            espn_draft_recap_html_parser.to_pickle(file_path, folder_path)
+            espn_draft_recap_html_parser.process(file_path, folder_path)
 
     print("\n------------------------------------- Parsing ESPN league roster standings HTML files -----------------------------------")
     for folder_path in folder_paths:
         file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS)
         for file_path in file_paths:
-            espn_league_rosters_standings_html_parser.to_csv(file_path, folder_path)
-            espn_league_rosters_standings_html_parser.to_excel(file_path, folder_path)
-            espn_league_rosters_standings_html_parser.to_pickle(file_path, folder_path)
+            espn_league_rosters_standings_html_parser.process(file_path, folder_path)
 
     print("Done.")

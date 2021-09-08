@@ -12,8 +12,6 @@ logger = espn_logger.logger()
 
 def get_dict(html_path):
     """ Parses the HTML file and returns dictionary of various information. """
-    logger.info(f"Processing: {html_path}")
-
     # Read HTML file for all tables/data and update dataframes to get proper parsing
     html_dfs = pd.read_html(html_path)
 
@@ -38,37 +36,34 @@ def get_dict(html_path):
 
     return {'league_name': league_name, 'df': pd.DataFrame(standings_dicts)}
 
-def to_csv(html_path, root_output_path):
-    """ Parses input files and outputs to CSV file. """
-    output_folder_path = os.path.join(root_output_path, "csv")
-    os.makedirs(output_folder_path, exist_ok=True)
+def process(html_path, root_output_path):
+    """ Parses input file and outputs to various files. """
+    logger.info(f"Processing: {html_path}")
 
+    # Generate folders
+    csv_folder_path = os.path.join(root_output_path, "csv")
+    excel_folder_path = os.path.join(root_output_path, "excel")
+    pickles_folder_path = os.path.join(root_output_path, "pickles")
+    os.makedirs(csv_folder_path, exist_ok=True)
+    os.makedirs(excel_folder_path, exist_ok=True)
+    os.makedirs(pickles_folder_path, exist_ok=True)
+
+    # Parse
     file_dict = get_dict(html_path)
     file_basename = _strip_special_chars(f"League Standings - {file_dict['league_name']}")
-    out_file_path = os.path.join(output_folder_path, file_basename + ".csv")
+
+    # CSV output
+    out_file_path = os.path.join(csv_folder_path, file_basename + ".csv")
     file_dict['df'].to_csv(out_file_path, index=False)
     logger.info(f"Output: {out_file_path}")
 
-def to_excel(html_path, root_output_path):
-    """ Parses input files and outputs to Excel file. """
-    output_folder_path = os.path.join(root_output_path, "excel")
-    os.makedirs(output_folder_path, exist_ok=True)
-
-    file_dict = get_dict(html_path)
-    file_basename = _strip_special_chars(f"League Standings - {file_dict['league_name']}")
-    out_file_path = os.path.join(output_folder_path, file_basename + ".xlsx")
-    with pd.ExcelWriter(out_file_path, engine='openpyxl') as excel_writer:
-        file_dict['df'].to_excel(excel_writer, index=False)
+    # Excel output
+    out_file_path = os.path.join(excel_folder_path, file_basename + ".xlsx")
+    file_dict['df'].to_excel(out_file_path, index=False)
     logger.info(f"Output: {out_file_path}")
 
-def to_pickle(html_path, root_output_path):
-    """ Parses input files and outputs to pickle. """
-    output_folder_path = os.path.join(root_output_path, "pickles")
-    os.makedirs(output_folder_path, exist_ok=True)
-
-    file_dict = get_dict(html_path)
-    file_basename = _strip_special_chars(f"League Standings - {file_dict['league_name']}")
-    out_file_path = os.path.join(output_folder_path, file_basename + ".pickle")
+    # Pickle output
+    out_file_path = os.path.join(pickles_folder_path, file_basename + ".pickle")
     pickle.dump(file_dict['df'], open(out_file_path, 'wb'))
     logger.info(f"Output: {out_file_path}")
 
@@ -85,6 +80,4 @@ if __name__ == "__main__":
 
     # Assumes all input files are from same directory
     output_folder_path = os.path.dirname(args.i)
-    to_csv(args.i, output_folder_path)
-    to_excel(args.i, output_folder_path)
-    to_pickle(args.i, output_folder_path)
+    process(args.i, output_folder_path)
