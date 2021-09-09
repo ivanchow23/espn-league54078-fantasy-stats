@@ -13,6 +13,7 @@ import espn_league_rosters_standings_html_parser
 import espn_utils
 import os
 import re
+import timeit
 
 def _find_files_recursive(root_folder, file_pattern_re):
     """ Recursively finds files with given pattern in a root folder. """
@@ -36,6 +37,7 @@ def _find_folders_with_html(root_folder):
 if __name__ == "__main__":
     """ Main function. """
     # Read arguments
+    start_time = timeit.default_timer()
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-d', required=True, help="Input directory containing folder or folders of HTML pages to parse.")
     args = arg_parser.parse_args()
@@ -61,4 +63,4 @@ if __name__ == "__main__":
         for file_path in file_paths:
             espn_league_rosters_standings_html_parser.process(file_path, folder_path)
 
-    print("Done.")
+    print(f"Finished in {round(timeit.default_timer() - start_time, 1)}s.")
