@@ -129,7 +129,7 @@ def process(html_paths, root_output_path):
         # Excel writer can't make new file using just 'a' mode
         # First check if file already exists to append to, otherwise write to new file
         if os.path.exists(file_path):
-            with pd.ExcelWriter(file_path, engine='openpyxl', mode='a') as excel_writer:
+            with pd.ExcelWriter(file_path, engine='openpyxl', mode='a', if_sheet_exists='replace') as excel_writer:
                 file_dict['skaters_df'].to_excel(excel_writer, sheet_name=skaters_sheet_name)
                 file_dict['goalies_df'].to_excel(excel_writer, sheet_name=goalies_sheet_name)
         else:
