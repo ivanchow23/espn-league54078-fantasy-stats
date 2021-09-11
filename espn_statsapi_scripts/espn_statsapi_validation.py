@@ -21,11 +21,15 @@ import argparse
 import csv # TODO: Used for loading and reading CSV map files - could go into utility
 import json # TODO: Used for loading JSON file from statsapi data cache - could go into utility
 import pandas as pd
-import pickle # TODO: Required for loading ESPN files - could go into utility
 import os
 import re
+import sys
 
 SCRIPT_NAME = os.path.basename(__file__)
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_scripts"))
+from espn_loader import EspnLoader
 
 # Regex pattern to find a season string
 #   - ^ used to denote start of string searching
@@ -106,8 +110,17 @@ def main(espn_path, statsapi_path, out_path):
          continue
 
       # Load ESPN data
-      espn_draft_recap_df = _load_espn_draft_recap(espn_path, season_string)
-      espn_clubhouses_df = _load_espn_clubhouses(espn_path, season_string)
+      espn_loader = EspnLoader(espn_path)
+      espn_draft_recap_df = espn_loader.load_draft_recap_data(season_string)
+      espn_clubhouses_list = espn_loader.load_clubhouses_data(season_string)
+
+      # Combine all clubhouses into single dataframe
+      espn_clubhouses_df = pd.DataFrame()
+      for team_dict in espn_clubhouses_list:
+         # Multi-index dataframes
+         skaters_df = team_dict['skaters_df']['Skaters']
+         goalies_df = team_dict['goalies_df']['Goalies']
+         espn_clubhouses_df = pd.concat([espn_clubhouses_df, skaters_df, goalies_df], ignore_index=True)
 
       # Combine into master list of dictionaries
       master_players_list += _combine_dfs_to_dicts(espn_draft_recap_df, espn_clubhouses_df, season_string)
@@ -179,58 +192,6 @@ def _check_season_paths(espn_path, statsapi_path, season_string):
       ret = False
 
    return ret
-
-def _load_espn_draft_recap(espn_path, season_string):
-   """ Finds and loads the ESPN draft recap file.
-       Returns None if file doesn't exist or on error.
-       TODO: This could be ported to an ESPN loading utility. """
-   pickle_data_df = None
-
-   # Look for draft recap files
-   season_path = os.path.join(espn_path, season_string)
-   draft_recap_pickle_path = None
-   for root, _, files in os.walk(season_path):
-      for f in files:
-         if "Draft Recap" in f and f.endswith(".pickle"):
-            draft_recap_pickle_path = os.path.join(root, f)
-
-   # Read data if available
-   if draft_recap_pickle_path:
-      with open(draft_recap_pickle_path, 'rb') as pickle_path:
-         # Read pickle data and convert dataframe to list of dicts
-         pickle_data_df = pickle.load(pickle_path)
-
-   return pickle_data_df
-
-def _load_espn_clubhouses(espn_path, season_string):
-   """ Finds and loads the ESPN clubhouses file. Concat team rosters into a
-       list before returning. Returns None if file doesn't exist or on error.
-       TODO: This could be ported to an ESPN loading utility. """
-   pickle_data_df = None
-
-   # Look for draft recap files
-   season_path = os.path.join(espn_path, season_string)
-   clubhouses_pickle_path = None
-   for root, _, files in os.walk(season_path):
-      for f in files:
-         if "Clubhouses" in f and f.endswith(".pickle"):
-            clubhouses_pickle_path = os.path.join(root, f)
-
-   # Read data if available
-   if clubhouses_pickle_path:
-      with open(clubhouses_pickle_path, 'rb') as pickle_path:
-         # Read pickle data
-         pickle_data = pickle.load(pickle_path)
-         pickle_data_df = pd.DataFrame()
-
-         # Pickle data contains list of dictionaries
-         for team_dict in pickle_data:
-            # Multi-index dataframes
-            skaters_df = team_dict['skaters_df']['Skaters']
-            goalies_df = team_dict['goalies_df']['Goalies']
-            pickle_data_df = pd.concat([pickle_data_df, skaters_df, goalies_df], axis=0, ignore_index=True)
-
-   return pickle_data_df
 
 def _combine_dfs_to_dicts(espn_draft_recap_df, espn_clubhouses_df, season_string):
    """ Helper function to combine dataframes together. Handles duplicate
