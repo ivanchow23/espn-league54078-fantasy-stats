@@ -9,7 +9,7 @@
 import argparse
 import espn_clubhouse_html_parser
 import espn_draft_recap_html_parser
-import espn_league_rosters_standings_html_parser
+import espn_standings_html_parser
 import espn_utils
 import os
 import re
@@ -57,10 +57,8 @@ if __name__ == "__main__":
         for file_path in file_paths:
             espn_draft_recap_html_parser.process(file_path, folder_path)
 
-    print("\n------------------------------------- Parsing ESPN league roster standings HTML files -----------------------------------")
+    print("\n-------------------------------------------- Parsing ESPN standings HTML files ------------------------------------------")
     for folder_path in folder_paths:
-        file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS)
-        for file_path in file_paths:
-            espn_league_rosters_standings_html_parser.process(file_path, folder_path)
+        espn_standings_html_parser.process(folder_path, folder_path)
 
     print(f"Finished in {round(timeit.default_timer() - start_time, 1)}s.")
