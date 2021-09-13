@@ -53,9 +53,7 @@ if __name__ == "__main__":
 
     print("\n------------------------------------------ Parsing ESPN draft recap HTML files ------------------------------------------")
     for folder_path in folder_paths:
-        file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_DRAFT_RECAP)
-        for file_path in file_paths:
-            espn_draft_recap_html_parser.process(file_path, folder_path)
+        espn_draft_recap_html_parser.process(folder_path, folder_path)
 
     print("\n-------------------------------------------- Parsing ESPN standings HTML files ------------------------------------------")
     for folder_path in folder_paths:
