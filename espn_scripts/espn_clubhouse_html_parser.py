@@ -45,15 +45,11 @@ def get_file_dicts(in_file_paths):
         # Read and parse HTML for various tags
         soup = BeautifulSoup(open(in_file_path, 'r'), 'html.parser')
 
-        # Parse for team name
+        # Parse for team name from file name
         team_name = ""
-        team_name_span_tags = soup.find_all('span', class_='teamName')
-        for tag in team_name_span_tags:
-            try:
-                team_name = tag['title']
-            except KeyError:
-                # Intentional pass - try next tag
-                pass
+        file_name = os.path.basename(in_file_path)
+        if len(file_name.split(" Clubhouse")) != 0:
+            team_name = file_name.split(" Clubhouse")[0]
 
         # Parse for league and owner name, which can be found under secondary team detail as an anchor link
         league_name = ""
