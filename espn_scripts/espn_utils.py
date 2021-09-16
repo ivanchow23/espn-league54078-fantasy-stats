@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """ Common utilities file used between various ESPN scripts. """
+import os
 import re
 
 # Expected file name patterns
@@ -107,3 +108,22 @@ def parse_metadata_from_player_str(player_str):
     # We should just be left with player name here
     player_dict['Player'] = player_str
     return player_dict
+
+def check_html(html_path):
+    """ Helper function to check if input is a valid HTML file. """
+    if (not isinstance(html_path, str) or
+        not html_path.lower().endswith(".html") or
+        not os.path.exists(html_path)):
+        return False
+
+    return True
+
+def sub_special_chars(input_str):
+    """ Helper function to strip special characters and replace them with an underscore. """
+    # Add special character regex as needed - regex pattern contain characters to not replace
+    # Returns original input if no characters are found to need replacing
+    # Group of special characters together gets subbed with a single underscore
+    if not isinstance(input_str, str):
+        return input_str
+
+    return re.sub(r"[^A-Za-z0-9 \-!@#$%^&(),']+", "_", input_str)

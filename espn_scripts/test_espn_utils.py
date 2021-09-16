@@ -1,10 +1,15 @@
 import espn_utils
+import os
+import shutil
 import unittest
 
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
 class TestEspnUtils(unittest.TestCase):
-    def SetUp(self):
+    def setUp(self):
         """ Set-up required items. """
-        pass
+        self._test_folder = os.path.join(SCRIPT_DIR, "test_espn_utils")
+        os.makedirs(self._test_folder, exist_ok=True)
 
     def test_parse_draft_metadata_from_player_str(self):
         """ Tests metadata parsing from draft player string functionality. """
@@ -191,6 +196,51 @@ class TestEspnUtils(unittest.TestCase):
         actual_output = espn_utils.parse_metadata_from_player_str(input_str)
         self.assertEquals(expected_output, actual_output)
 
-    def TearDown(self):
+    def test_check_html(self):
+        """ Test check HTML helper function. """
+        # Create empty HTML file for testing
+        html_path = os.path.join(self._test_folder, "test.html")
+        csv_path = os.path.join(self._test_folder, "test.csv")
+        self._create_empty_file(html_path)
+        self._create_empty_file(csv_path)
+
+        # Test typical case
+        self.assertTrue(espn_utils.check_html(html_path))
+
+        # Test invalid cases
+        self.assertFalse(espn_utils.check_html(csv_path))
+        self.assertFalse(espn_utils.check_html(os.path.join(self._test_folder, "doesnt_exist.html")))
+        self.assertFalse(espn_utils.check_html(r"not/a/path"))
+        self.assertFalse(espn_utils.check_html("123"))
+        self.assertFalse(espn_utils.check_html(123))
+        self.assertFalse(espn_utils.check_html([1, 2, 3]))
+        self.assertFalse(espn_utils.check_html(None))
+
+    def test_sub_special_chars(self):
+        """ Test subbing special characters helper function. """
+        # Test typical cases
+        self.assertEqual(espn_utils.sub_special_chars("Sub?"), "Sub_")
+        self.assertEqual(espn_utils.sub_special_chars("?Sub?"), "_Sub_")
+        self.assertEqual(espn_utils.sub_special_chars("Sub:"), "Sub_")
+        self.assertEqual(espn_utils.sub_special_chars("Sub~"), "Sub_")
+        self.assertEqual(espn_utils.sub_special_chars("?:~Sub?:~"), "_Sub_")
+        self.assertEqual(espn_utils.sub_special_chars("?:~"), "_")
+
+        # Test some exempt special characters
+        self.assertEqual(espn_utils.sub_special_chars("#NoSub"), "#NoSub")
+        self.assertEqual(espn_utils.sub_special_chars("NoSub!"), "NoSub!")
+        self.assertEqual(espn_utils.sub_special_chars("!!!(NoSub)!!!"), "!!!(NoSub)!!!")
+
+        # Test non-string inputs
+        self.assertEqual(espn_utils.sub_special_chars(123), 123)
+        self.assertEqual(espn_utils.sub_special_chars([1, 2, 3]), [1, 2, 3])
+        self.assertEqual(espn_utils.sub_special_chars(None), None)
+
+    def _create_empty_file(self, file_path):
+        """ Helper function to create an empty file. """
+        with open(file_path, 'w') as f:
+            pass
+
+    def tearDown(self):
         """ Remove any items. """
-        pass
+        shutil.rmtree(self._test_folder)
