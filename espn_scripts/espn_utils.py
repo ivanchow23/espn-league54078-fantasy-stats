@@ -4,9 +4,10 @@ import os
 import re
 
 # Expected file name patterns
-FILE_NAME_RE_FORMAT_CLUBHOUSE      = r"[\W\w]+ Clubhouse - [\W\w]+ - ESPN Fantasy Hockey"
-FILE_NAME_RE_FORMAT_DRAFT_RECAP    = r"Draft Recap - [\W\w]+ - ESPN Fantasy Hockey"
-FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS = r"League Rosters - [\W\w]+ - ESPN Fantasy Hockey"
+FILE_NAME_RE_FORMAT_CLUBHOUSE        = r"[\W\w]+ Clubhouse - [\W\w]+ - ESPN Fantasy Hockey"
+FILE_NAME_RE_FORMAT_DRAFT_RECAP      = r"Draft Recap - [\W\w]+ - ESPN Fantasy Hockey"
+FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS   = r"League Rosters - [\W\w]+ - ESPN Fantasy Hockey"
+FILE_NAME_RE_FORMAT_LEAGUE_STANDINGS = r"League Standings - [\W\w]+ - ESPN Fantasy Hockey"
 
 # List of position designations
 POSITIONS_LIST = ["D, F", "D", "F", "G"]
