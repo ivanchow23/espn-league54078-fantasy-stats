@@ -26,15 +26,10 @@ class EspnHtmlParserLeagueRosters():
         self._html_soup = self._read_html_soup()
         self._html_dfs = self._read_html_dfs()
         self._rosters_list = self._parse_rosters_list()
-        self._standings_df = self._parse_team_standings_df()
 
     def get_rosters_list(self):
         """ Returns a list of rosters. """
         return self._rosters_list
-
-    def get_standings_df(self):
-        """ Returns dataframe of team standings. """
-        return self._standings_df
 
     def _parse_rosters_list(self):
         """ Parses HTML file. Returns list of dictionaries for each team's roster. """
@@ -60,32 +55,6 @@ class EspnHtmlParserLeagueRosters():
             rosters_list.append({'team_name': team_name, 'roster_df': self._get_modified_player_df(df)})
 
         return rosters_list
-
-    def _parse_team_standings_df(self):
-        """ Parses HTML file. Returns dataframe of teams and points. """
-        # Initialize
-        standings_df = pd.DataFrame()
-
-        # Invalid check
-        if not self.valid:
-            return standings_df
-
-        # Parse for team name and number of points and add to list
-        standings_dicts = []
-        for rank, (team_name_span_tag, pts_span_tag) in enumerate(zip(self._html_soup.find_all('span', class_='teamName'),
-                                                                      self._html_soup.find_all('span', class_='pl2'))):
-            standings_dicts.append({'Rank': rank + 1,
-                                    'Team Name': team_name_span_tag['title'],
-                                    'Points': int(re.findall(r"\d+", pts_span_tag.text)[0])})
-
-        # Convert to dataframe
-        standings_df = pd.DataFrame(standings_dicts)
-
-        # Replace special characters in the team name to stay consistent with file names
-        if 'Team Name' in standings_df.columns:
-            standings_df['Team Name'] = standings_df['Team Name'].apply(espn_utils.sub_special_chars)
-
-        return standings_df
 
     def _get_modified_player_df(self, df):
         """ Takes in a dataframe containing player information and outputs a
@@ -142,8 +111,6 @@ if __name__ == "__main__":
 
     # Parse
     espn_league_rosters = EspnHtmlParserLeagueRosters(file_path)
-
-    # Rosters
     rosters_list = espn_league_rosters.get_rosters_list()
     rosters_multi_df = pd.DataFrame()
     for roster in rosters_list:
@@ -154,7 +121,3 @@ if __name__ == "__main__":
         roster_df[team_name] = df
         rosters_multi_df = pd.concat([rosters_multi_df, roster_df], axis=1)
     rosters_multi_df.to_csv(os.path.join(folder_path, f"{file_basename}.csv"), index=False)
-
-    # Standings
-    espn_league_rosters.get_standings_df().to_csv(os.path.join(folder_path, f"{file_basename} - Standings.csv"), index=False)
-

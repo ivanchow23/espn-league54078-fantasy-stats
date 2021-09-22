@@ -58,20 +58,6 @@ class TestEspnHtmlParserLeagueRosters(unittest.TestCase):
 
         # Note: No tests for parsing a representative HTML page yet
 
-    def test_get_standings_df(self):
-        """ Test getting standings dataframe. """
-        # Set up input files
-        test_folder = os.path.join(self._test_folder, "test_get_standings_df")
-        os.makedirs(test_folder, exist_ok=True)
-        empty_file_path = os.path.join(test_folder, "empty.html")
-        open(empty_file_path, 'w')
-
-        # Test empty input
-        espn = EspnHtmlParserLeagueRosters(empty_file_path)
-        self.assertTrue(espn.get_standings_df().empty)
-
-        # Note: No tests for parsing a representative HTML page yet
-
     def tearDown(self):
         """ Remove any items. """
         shutil.rmtree(self._test_folder)
