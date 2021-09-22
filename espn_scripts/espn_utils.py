@@ -126,4 +126,4 @@ def sub_special_chars(input_str):
     if not isinstance(input_str, str):
         return input_str
 
-    return re.sub(r"[^A-Za-z0-9 \-!@#$%^&(),']+", "_", input_str)
+    return re.sub(r"[^A-Za-z0-9 \-!@#$%^&(),.']+", "_", input_str)

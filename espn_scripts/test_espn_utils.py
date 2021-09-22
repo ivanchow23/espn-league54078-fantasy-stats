@@ -230,6 +230,7 @@ class TestEspnUtils(unittest.TestCase):
         self.assertEqual(espn_utils.sub_special_chars("#NoSub"), "#NoSub")
         self.assertEqual(espn_utils.sub_special_chars("NoSub!"), "NoSub!")
         self.assertEqual(espn_utils.sub_special_chars("!!!(NoSub)!!!"), "!!!(NoSub)!!!")
+        self.assertEqual(espn_utils.sub_special_chars("No.Sub"), "No.Sub")
 
         # Test non-string inputs
         self.assertEqual(espn_utils.sub_special_chars(123), 123)

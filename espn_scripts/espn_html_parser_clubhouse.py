@@ -67,7 +67,7 @@ class EspnHtmlParserClubhouse():
     def _parse_team_owners(self):
         """ Parses HTML page. Returns parsed team owner information on success. """
         # Initialize
-        return_dict = {'team_name': "", 'owner_name': ""}
+        return_dict = {'Team Name': "", 'Owner Name': ""}
 
         # Invalid check
         if not self.valid:
@@ -78,20 +78,18 @@ class EspnHtmlParserClubhouse():
 
         # Parse for team name from file name
         # Must follow expected naming format: "<team_name> Clubhouse - <...>.html"
-        team_name = ""
         file_name = os.path.splitext(os.path.basename(self._html_path))[0]
         if len(file_name.split(" Clubhouse")) > 1:
-            team_name = file_name.split(" Clubhouse")[0]
+            return_dict['Team Name'] = file_name.split(" Clubhouse")[0]
 
         # Parse for league and owner name, which can be found under secondary team detail as an anchor link
-        owner_name = ""
         team_details_sec_span_tags = soup.find_all('span', class_='team-details-secondary')
         for tag in team_details_sec_span_tags:
             owner_name_search = tag.find('span', class_='owner-name')
             if owner_name_search:
-                owner_name = owner_name_search.text
+                return_dict['Owner Name'] = owner_name_search.text
 
-        return {'team_name': team_name, 'owner_name': owner_name}
+        return return_dict
 
     def _get_combined_df(self, df_list):
         """ Returns a combined dataframe of player, season stats, and fantasy points.
