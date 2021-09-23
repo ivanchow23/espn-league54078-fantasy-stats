@@ -20,9 +20,9 @@ class TestEspnHtmlParserLeagueRosters(unittest.TestCase):
         test_file_path = os.path.join(test_folder, "test.html")
         open(test_file_path, 'w')
 
-        # Test typical case
+        # Test empty input
         espn = EspnHtmlParserLeagueRosters(test_file_path)
-        self.assertTrue(espn.valid)
+        self.assertFalse(espn.valid)
 
         # Test invalid input
         espn = EspnHtmlParserLeagueRosters(os.path.join(self._test_folder, "does_not_exist.html"))

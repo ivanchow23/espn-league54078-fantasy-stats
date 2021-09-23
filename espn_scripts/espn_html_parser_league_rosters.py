@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 import espn_utils
 import os
 import pandas as pd
-import re
 
 import espn_logger
 logger = espn_logger.logger()
@@ -128,6 +127,7 @@ class EspnHtmlParserLeagueRosters():
         # Intentional catch all
         except:
             logger.warning("Unable to read HTML.")
+            self.valid = False
             return []
 
 if __name__ == "__main__":

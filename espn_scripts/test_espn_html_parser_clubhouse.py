@@ -20,9 +20,9 @@ class TestEspnHtmlParserClubhouse(unittest.TestCase):
         test_file_path = os.path.join(test_folder, "test.html")
         open(test_file_path, 'w')
 
-        # Test typical case
+        # Test empty input
         espn = EspnHtmlParserClubhouse(test_file_path)
-        self.assertTrue(espn.valid)
+        self.assertFalse(espn.valid)
 
         # Test invalid input
         espn = EspnHtmlParserClubhouse(os.path.join(self._test_folder, "does_not_exist.html"))
@@ -76,10 +76,10 @@ class TestEspnHtmlParserClubhouse(unittest.TestCase):
         self.assertEqual(team_owners_dict['Team Name'], "")
         self.assertEqual(team_owners_dict['Owner Name'], "")
 
-        # Test empty input, but with valid team name within file name
+        # Test empty input
         espn = EspnHtmlParserClubhouse(test_file_path)
         team_owners_dict = espn.get_team_owners_dict()
-        self.assertEqual(team_owners_dict['Team Name'], "Test Team Name")
+        self.assertEqual(team_owners_dict['Team Name'], "")
         self.assertEqual(team_owners_dict['Owner Name'], "")
 
         # Note: No tests for parsing a representative HTML page yet

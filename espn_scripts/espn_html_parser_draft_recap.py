@@ -44,6 +44,7 @@ class EspnHtmlParserDraftRecap():
         # Intentional except-all
         except:
             logger.warning("Cannot parse input HTML.")
+            self.valid = False
             return combined_df
 
         # Combine dataframes

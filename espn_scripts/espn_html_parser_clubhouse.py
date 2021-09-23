@@ -51,6 +51,7 @@ class EspnHtmlParserClubhouse():
         # Intentional except-all
         except:
             logger.warning("Cannot parse input HTML.")
+            self.valid = False
             return return_dict
 
         # Check if HTML page contains at least expected number of tables
