@@ -74,6 +74,21 @@ class TestEspnHtmlParserLeagueStandings(unittest.TestCase):
 
         # Note: No tests for parsing a representative HTML page yet
 
+    def test_get_standings_dict(self):
+        """ Test getting dictionary of standings information. """
+        # Set up input files
+        test_folder = os.path.join(self._test_folder, "test_get_standings_dict")
+        os.makedirs(test_folder, exist_ok=True)
+        empty_file_path = os.path.join(test_folder, "empty.html")
+        open(empty_file_path, 'w')
+
+        # Test empty input
+        espn = EspnHtmlParserLeagueStandings(empty_file_path)
+        standings_dict = espn.get_standings_dict()
+        self.assertTrue(standings_dict, {'season_points': pd.DataFrame(), 'season_stats': pd.DataFrame()})
+
+        # Note: No tests for parsing a representative HTML page yet
+
     def tearDown(self):
         """ Remove any items. """
         shutil.rmtree(self._test_folder)
