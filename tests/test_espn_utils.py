@@ -1,9 +1,13 @@
-import espn_utils
+#!/usr/bin/env python
 import os
 import shutil
 import unittest
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+import sys
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_scripts"))
+import espn_utils
 
 class TestEspnUtils(unittest.TestCase):
     def setUp(self):

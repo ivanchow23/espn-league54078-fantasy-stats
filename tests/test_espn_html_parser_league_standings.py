@@ -1,10 +1,14 @@
-from espn_html_parser_league_standings import EspnHtmlParserLeagueStandings
+#!/usr/bin/env python
 import os
 import pandas as pd
 import shutil
 import unittest
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+import sys
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_scripts"))
+from espn_html_parser_league_standings import EspnHtmlParserLeagueStandings
 
 class TestEspnHtmlParserLeagueStandings(unittest.TestCase):
     def setUp(self):

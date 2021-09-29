@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 import json
 import os
-import statsapi_utils
+import requests
 import unittest
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+import sys
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "statsapi_scripts"))
+import statsapi_utils
 
 class TestStatsApiUtils(unittest.TestCase):
     def setUp(self):
@@ -13,9 +17,9 @@ class TestStatsApiUtils(unittest.TestCase):
 
     def test_load_json_from_url(self):
         """ Test functionality to load stats API data to JSON given a URL. """
-        # Load expected data from known file to begin
-        with open(os.path.join(SCRIPT_DIR, "test_files", "8447492.json")) as f:
-            expected_data = json.load(f)
+        # Directly request data from server as expected data
+        response = requests.get("https://statsapi.web.nhl.com/api/v1/people/8477492")
+        expected_data = response.json()
 
         # Test typical case
         url = "https://statsapi.web.nhl.com/api/v1/people/8477492"

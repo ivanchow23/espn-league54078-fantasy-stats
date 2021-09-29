@@ -2,10 +2,13 @@
 import os
 import pandas as pd
 import shutil
-import statsapi_downloader
 import unittest
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+import sys
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "statsapi_scripts"))
+import statsapi_downloader
 
 class TestStatsApiDownloader(unittest.TestCase):
     def setUp(self):

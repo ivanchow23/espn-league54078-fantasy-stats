@@ -1,11 +1,15 @@
+#!/usr/bin/env python
 import csv
-import espn_loader
 import os
 import pickle
 import shutil
 import unittest
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+import sys
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_scripts"))
+import espn_loader
 
 class TestEspnLoader(unittest.TestCase):
     def setUp(self):

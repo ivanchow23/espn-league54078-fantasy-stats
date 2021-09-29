@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 import csv
-import espn_statsapi_utils
 import os
 import shutil
 import unittest
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_DIR = os.path.join(SCRIPT_DIR, "test_espn_statsapi_utils")
+
+import sys
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_statsapi_scripts"))
+import espn_statsapi_utils
 
 class TestEspnUtils(unittest.TestCase):
     def setUp(self):

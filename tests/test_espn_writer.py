@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import espn_writer
 import os
 import pandas as pd
 import pickle
@@ -7,6 +6,10 @@ import shutil
 import unittest
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+import sys
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_scripts"))
+import espn_writer
 
 class TestEspnWriter(unittest.TestCase):
     def setUp(self):

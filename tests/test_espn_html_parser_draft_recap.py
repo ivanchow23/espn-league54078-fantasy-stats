@@ -1,4 +1,4 @@
-from espn_html_parser_league_rosters import EspnHtmlParserLeagueRosters
+#!/usr/bin/env python
 import os
 import pandas as pd
 import shutil
@@ -6,55 +6,59 @@ import unittest
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
-class TestEspnHtmlParserLeagueRosters(unittest.TestCase):
+import sys
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_scripts"))
+from espn_html_parser_draft_recap import EspnHtmlParserDraftRecap
+
+class TestEspnHtmlParserDraftRecap(unittest.TestCase):
     def setUp(self):
         """ Set-up required items. """
-        self._test_folder = os.path.join(SCRIPT_DIR, "test_espn_html_parser_league_rosters")
+        self._test_folder = os.path.join(SCRIPT_DIR, "test_espn_html_parser_draft_recap")
         os.makedirs(self._test_folder, exist_ok=True)
 
-    def test_EspnHtmlParserLeagueRosters(self):
+    def test_EspnHtmlParserDraftRecap(self):
         """ Test constructor. """
         # Set up input files
-        test_folder = os.path.join(self._test_folder, "test_EspnHtmlParserLeagueRosters")
+        test_folder = os.path.join(self._test_folder, "test_EspnHtmlParserDraftRecap")
         os.makedirs(test_folder, exist_ok=True)
         test_file_path = os.path.join(test_folder, "test.html")
         open(test_file_path, 'w')
 
         # Test empty input
-        espn = EspnHtmlParserLeagueRosters(test_file_path)
+        espn = EspnHtmlParserDraftRecap(test_file_path)
         self.assertFalse(espn.valid)
 
         # Test invalid input
-        espn = EspnHtmlParserLeagueRosters(os.path.join(self._test_folder, "does_not_exist.html"))
+        espn = EspnHtmlParserDraftRecap(os.path.join(self._test_folder, "does_not_exist.html"))
         self.assertFalse(espn.valid)
 
         # Test invalid input
-        espn = EspnHtmlParserLeagueRosters("Not a file.")
+        espn = EspnHtmlParserDraftRecap("Not a file.")
         self.assertFalse(espn.valid)
 
         # Test invalid input
-        espn = EspnHtmlParserLeagueRosters(123)
+        espn = EspnHtmlParserDraftRecap(123)
         self.assertFalse(espn.valid)
 
         # Test invalid input
-        espn = EspnHtmlParserLeagueRosters([1, 2, 3])
+        espn = EspnHtmlParserDraftRecap([1, 2, 3])
         self.assertFalse(espn.valid)
 
         # Test invalid input
-        espn = EspnHtmlParserLeagueRosters(None)
+        espn = EspnHtmlParserDraftRecap(None)
         self.assertFalse(espn.valid)
 
-    def test_get_rosters_list(self):
-        """ Test getting rosters list. """
+    def test_get_df(self):
+        """ Test getting draft recap dataframe. """
         # Set up input files
-        test_folder = os.path.join(self._test_folder, "test_get_rosters_list")
+        test_folder = os.path.join(self._test_folder, "test_get_df")
         os.makedirs(test_folder, exist_ok=True)
         empty_file_path = os.path.join(test_folder, "empty.html")
         open(empty_file_path, 'w')
 
         # Test empty input
-        espn = EspnHtmlParserLeagueRosters(empty_file_path)
-        self.assertTrue(len(espn.get_rosters_list()) == 0)
+        espn = EspnHtmlParserDraftRecap(empty_file_path)
+        self.assertTrue(espn.get_df().empty)
 
         # Note: No tests for parsing a representative HTML page yet
 

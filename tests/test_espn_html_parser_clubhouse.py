@@ -1,10 +1,14 @@
-from espn_html_parser_clubhouse import EspnHtmlParserClubhouse
+#!/usr/bin/env python
 import os
 import pandas as pd
 import shutil
 import unittest
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+import sys
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_scripts"))
+from espn_html_parser_clubhouse import EspnHtmlParserClubhouse
 
 class TestEspnHtmlParserClubhouse(unittest.TestCase):
     def setUp(self):
