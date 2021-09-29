@@ -35,21 +35,27 @@ if __name__ == "__main__":
     # Get standings for each season
     combined_df = pd.DataFrame()
     for season_string in os.listdir(espn_root_path):
-        season_standings_df = espn_loader.load_league_standings_data(season_string)
+        league_standings_dict = espn_loader.load_league_standings_data(season_string)
+        if league_standings_dict is None:
+            print(f"Unable to load league standings data for season {season_string}")
+            continue
+
+        # Extract table of points from league standings dictionary
+        season_standings_df = pd.concat([league_standings_dict['season_points']['Team Info'], league_standings_dict['season_points']['Total']], axis=1)
 
         # Add season column to identify this dataframe section
         season_standings_df['Season'] = season_string
 
         # Calculate stats for each owner
-        season_standings_df['% Average'] = round(season_standings_df['Points'] / season_standings_df['Points'].mean(), 3)
-        season_standings_df['% From First'] = round(season_standings_df['Points'] / season_standings_df['Points'].max(), 3)
+        season_standings_df['% Average'] = round(season_standings_df['TOT'] / season_standings_df['TOT'].mean(), 3)
+        season_standings_df['% From First'] = round(season_standings_df['TOT'] / season_standings_df['TOT'].max(), 3)
         combined_df = pd.concat([combined_df, season_standings_df], ignore_index=True)
 
     # Create new column multi-indexed dataframe with owners at the "top level"
     owners_performance_df = pd.DataFrame()
-    for owner_name, df in combined_df.groupby('Owner Name'):
-        # First, drop redudant owner column
-        df = df.drop(columns='Owner Name')
+    for owner_name, df in combined_df.groupby('Owner'):
+        # First, drop redundant owner column
+        df = df.drop(columns='Owner')
 
         # Next, set season column as the index
         df = df.set_index('Season')
@@ -100,7 +106,7 @@ if __name__ == "__main__":
     for index, owner in enumerate(owners_performance_df.columns.unique(level=0)):
         # Get counts of ranks
         owner_df = owners_performance_df[owner]
-        rank_counts_series = owner_df['Rank'].value_counts().sort_index()
+        rank_counts_series = owner_df['RK'].value_counts().sort_index()
 
         # # Change the index to use ordinal numbering
         # # Example:
