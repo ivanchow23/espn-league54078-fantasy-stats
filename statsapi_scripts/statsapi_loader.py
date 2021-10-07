@@ -40,6 +40,18 @@ class StatsapiLoader():
 
         return self._load_json(os.path.join(self._root_folder_path, "players", f"player{id}.json"))
 
+    def load_player_season_stats_dict(self, player_name, season_string, team=None):
+        """ Loads season stats for a given player and season as a
+            dictionary. Optional parameters are to be more specific in
+            the search in case there are multiple players with the same
+            name. """
+        id = self._get_player_id(player_name, team, season_string)
+        if id == -1:
+            return None
+
+        return self._load_json(os.path.join(self._root_folder_path, season_string, "season_stats",
+                               f"{season_string}_player{id}_season_stats.json"))
+
     def _load_json(self, file_path):
         """ Helper function to load a JSON file.
             Returns None on failure. """

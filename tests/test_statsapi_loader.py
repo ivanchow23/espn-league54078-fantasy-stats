@@ -66,6 +66,28 @@ class TestStatsapiLoader(unittest.TestCase):
         # Test known season but unknown team
         self.assertIsNone(statsapi.load_player_dict("Connor McDavid", team="CGY", season_string="20202021"))
 
+    def test_load_player_season_stats_dict(self):
+        """ Tests loading player season stats as a dictionary. """
+        test_folder = os.path.join(self._test_folder, "test_load_player_season_stats_dict")
+        self._generate_typical_test_folder_structure(test_folder)
+        statsapi = StatsapiLoader(test_folder)
+
+        # Test typical case
+        expected_data = {'Points': 105}
+        actual_data = statsapi.load_player_season_stats_dict("Connor McDavid", "20202021")
+        self.assertEqual(expected_data, actual_data)
+
+        # Test typical case - player name, team, and season
+        expected_data = {'Points': 105}
+        actual_data = statsapi.load_player_season_stats_dict("Connor McDavid", "20202021", team="EDM")
+        self.assertEqual(expected_data, actual_data)
+
+        # Test unknown team
+        self.assertIsNone(statsapi.load_player_season_stats_dict("Connor McDavid", "20202021", team="CGY"))
+
+        # Test unknown season
+        self.assertIsNone(statsapi.load_player_season_stats_dict("Connor McDavid", "19901991"))
+
     def test__get_player_id(self):
         """ Test helper function to get player ID from map file. """
         test_folder = os.path.join(self._test_folder, "test__get_player_id")
@@ -133,7 +155,7 @@ class TestStatsapiLoader(unittest.TestCase):
         os.makedirs(os.path.join(root_path, "players"), exist_ok=True)
         os.makedirs(os.path.join(root_path, "teams"), exist_ok=True)
         os.makedirs(os.path.join(root_path, "20202021"), exist_ok=True)
-        os.makedirs(os.path.join(root_path, "20202021"), exist_ok=True)
+        os.makedirs(os.path.join(root_path, "20202021", "season_stats"), exist_ok=True)
 
         players_map_dicts = [{'Player': "Connor McDavid", 'Team': "EDM", 'Season': "20202021", 'id': 8478402},
                              {'Player': "Alexis Lafrenière", 'Team': "NYR", 'Season': "20202021", 'id': 8482109}]
@@ -143,11 +165,21 @@ class TestStatsapiLoader(unittest.TestCase):
                            {'id': 22, 'name': "Edmonton Oilers", 'abbreviation': "EDM"}]
         self._create_csv_file(os.path.join(root_path, "teams_id_map.csv"), teams_map_dicts)
 
+        # Player data
         test_player_dict = {'Player Name': "Connor McDavid", 'Birth Country': "CAN"}
         json.dump(test_player_dict, open(os.path.join(os.path.join(root_path, "players", "player8478402.json")), 'w'))
 
         test_player_dict = {'Player Name': "Alexis Lafrenière", 'Birth Country': "CAN"}
         json.dump(test_player_dict, open(os.path.join(os.path.join(root_path, "players", "player8482109.json")), 'w'))
+
+        # Season stats data
+        test_player_dict = {'Points': 105}
+        json.dump(test_player_dict, open(os.path.join(os.path.join(root_path, "20202021", "season_stats",
+                  "20202021_player8478402_season_stats.json")), 'w'))
+
+        test_player_dict = {'Points': 21}
+        json.dump(test_player_dict, open(os.path.join(os.path.join(root_path, "20202021", "season_stats",
+                  "20202021_player8482109_season_stats.json")), 'w'))
 
     def _create_csv_file(self, file_path, data_dicts):
         """ Helper function to create a CSV file. """
