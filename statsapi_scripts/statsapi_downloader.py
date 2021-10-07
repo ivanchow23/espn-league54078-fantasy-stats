@@ -94,9 +94,6 @@ def download_players_data(root_path, in_file_path, overwrite=False):
         file names have the form: "player<id>.json". Also generates a map
         file in the root directory to map players to their unique ID. Returns
         True on success. False otherwise. """
-    # Required headers to be present in the input file
-    required_headers = ['Player', 'statsapi_endpoint']
-
     # Output folder
     output_folder_path = _create_dir_if_not_exist(root_path, "players")
     if not output_folder_path:
@@ -109,14 +106,10 @@ def download_players_data(root_path, in_file_path, overwrite=False):
         return False
 
     # Read file
-    players_data_dict_list = []
-    with open(in_file_path, 'r', encoding='utf-8') as csv_file:
-        dict_reader = csv.DictReader(csv_file)
-        file_headers = dict_reader.fieldnames
-        if not file_headers or not set(required_headers).issubset(set(file_headers)):
-            logger.warning(f"Input file does not contain required headers. Requires: {required_headers}. Skipping download.")
-            return False
-        players_data_dict_list = list(dict_reader)
+    players_data_dict_list = _read_csv(in_file_path)
+    if not players_data_dict_list:
+        logger.warning("Invalid CSV input. Skipping download.")
+        return False
 
     # Iterate through each endpoint and download
     total_players = len(players_data_dict_list)
@@ -204,6 +197,54 @@ def download_team_rosters_data(root_path, start_year, end_year, overwrite=False)
 
     return True
 
+def download_players_season_stats_data(root_path, overwrite=False):
+    """ Read player mapping file generated from function:
+        "download_players_data()" and downloads all player data into
+        each season folder within the root path. Downloaded files have
+        the form: "XXXXYYYY_player<id>_season_stats.json" where XXXXYYYY
+        is the season. Returns True on success. False otherwise.
+    """
+    # Check if map file exists
+    if not os.path.exists(os.path.join(root_path, "players_id_map.csv")):
+        logger.warning(f"Cannot find players ID map file in: {root_path}. Skipping download.")
+        return False
+
+    # Read file
+    players_data_dict_list = _read_csv(os.path.join(root_path, "players_id_map.csv"))
+    if not players_data_dict_list:
+        logger.warning("Invalid CSV input. Skipping download.")
+        return False
+
+    # Download progress counters
+    file_counter = 0
+    num_files = len(players_data_dict_list)
+
+    # Process each player in list
+    for player_dict in players_data_dict_list:
+        # Read season, which is where folder of downloaded data goes
+        season_string = ""
+        try:
+            season_string = player_dict['Season']
+        except KeyError:
+            logger.warning("Key error in file. Skipping download.")
+            return False
+
+        output_folder_path = _create_dir_if_not_exist(root_path, season_string, "season_stats")
+        if not output_folder_path:
+            logger.warning(f"Invalid path: {output_folder_path}. Skipping download.")
+            return False
+
+        # Example link: https://statsapi.web.nhl.com/api/v1/people/8478402/stats?stats=statsSingleSeason&season=20192020
+        file_counter += 1
+        id = player_dict['id']
+        endpoint = player_dict['statsapi_endpoint']
+        output_file_path = os.path.join(output_folder_path, f"{season_string}_player{id}_season_stats.json")
+        url = f"{statsapi_utils.get_full_url(endpoint)}/stats?stats=statsSingleSeason&season={season_string}"
+        info_str = _save_file(url, output_file_path, overwrite, file_counter=file_counter, total_files=num_files)
+        logger.info(info_str)
+
+    return True
+
 def _create_dir_if_not_exist(root_path, *dirs):
     """ Helper function that creates "nested" directories within the root. Handles if
         directory already exists and other basic errors. Returns a path if directory
@@ -222,6 +263,23 @@ def _create_dir_if_not_exist(root_path, *dirs):
         return output_folder_path
     except(OSError, TypeError):
         return None
+
+def _read_csv(file_path):
+    """ Helper function to read a CSV file. Returns list of dictionaries
+        data structure on success. None otherwise. """
+    # Required headers to be present in the input file
+    required_headers = ["Player", "statsapi_endpoint"]
+
+    # Read file and return list of dictionaries
+    players_data_dict_list = []
+    with open(file_path, 'r', encoding='utf-8') as csv_file:
+        dict_reader = csv.DictReader(csv_file)
+        file_headers = dict_reader.fieldnames
+        if not file_headers or not set(required_headers).issubset(set(file_headers)):
+            logger.warning(f"Input file does not contain required headers. Requires: {required_headers}.")
+            return None
+
+        return list(dict_reader)
 
 def _check_year_range(start_year, end_year):
     """ Helper function to check the start and end year ranges for seasons.
@@ -286,3 +344,4 @@ if __name__ == "__main__":
     download_teams_data(root_data_folder, overwrite=ow)
     download_players_data(root_data_folder, players_file_path, overwrite=ow)
     download_team_rosters_data(root_data_folder, start_year=start_year, end_year=end_year, overwrite=ow)
+    download_players_season_stats_data(root_data_folder, overwrite=ow)

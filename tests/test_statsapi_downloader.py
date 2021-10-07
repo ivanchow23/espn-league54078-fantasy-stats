@@ -270,6 +270,25 @@ class TestStatsApiDownloader(unittest.TestCase):
         self.assertFalse(statsapi_downloader.download_team_rosters_data(test_folder_path, "1916", 2021))
         self.assertFalse(statsapi_downloader.download_team_rosters_data(test_folder_path, 1916, 2021))
 
+    def test_download_players_season_stats_data(self):
+        """ Tests functionality to download players season stats data. """
+        # Create root folder for this test
+        # Generate a mock players map file here
+        test_folder_path = os.path.join(self._root_folder_path, "test_download_players_season_stats_data")
+        os.mkdir(test_folder_path)
+        player_map_file_path = os.path.join(test_folder_path, "players_id_map.csv")
+        self._write_csv(player_map_file_path, [{'Player': "Ryan Getzlaf", 'Season': "20142015", 'statsapi_endpoint': "/api/v1/people/8470612", 'id': 8470612},
+                                               {'Player': "Sidney Crosby", 'Season': "20192020", 'statsapi_endpoint': "/api/v1/people/8471675", 'id': 8471675},
+                                               {'Player': "Connor McDavid", 'Season': "20202021", 'statsapi_endpoint': "/api/v1/people/8478402", 'id': 8478402}])
+
+        # Test typical case
+        # - Check True return
+        # - Check output files exists
+        self.assertTrue(statsapi_downloader.download_players_season_stats_data(test_folder_path))
+        self.assertTrue(os.path.exists(os.path.join(test_folder_path, "20142015", "season_stats", "20142015_player8470612_season_stats.json")))
+        self.assertTrue(os.path.exists(os.path.join(test_folder_path, "20192020", "season_stats", "20192020_player8471675_season_stats.json")))
+        self.assertTrue(os.path.exists(os.path.join(test_folder_path, "20202021", "season_stats", "20202021_player8478402_season_stats.json")))
+
     def _create_empty_file(self, file_path):
         """ Helper function to simply create an empty file. """
         with open(file_path, 'w') as f:
