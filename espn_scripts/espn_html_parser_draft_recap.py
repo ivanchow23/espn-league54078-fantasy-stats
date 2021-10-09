@@ -54,7 +54,9 @@ class EspnHtmlParserDraftRecap():
     def _get_combined_df(self, df_list):
         """ Combines list of dataframes into one big list. """
         combined_df = pd.DataFrame()
-        for df in df_list:
+        for index, df in enumerate(df_list):
+            # Add round number column to beginning of dataframe
+            df.insert(0, 'Round Number', index + 1)
             combined_df = pd.concat([combined_df, df], axis=0, ignore_index=True)
 
         # Rename "Team" column to differentiate between player's actual NHL team,
