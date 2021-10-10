@@ -189,9 +189,10 @@ def main(root_folder_path):
             espn_writer.df_to_csv(roster['roster_df'], f"{file_basename}.csv")
 
         espn_writer.df_to_csv(draft_recap_df, f"{season_string} Draft Recap.csv")
-        espn_writer.df_to_csv(league_standings_dict['season_points'], f"{season_string} League Standings - Season Points.csv")
-        espn_writer.df_to_csv(league_standings_dict['season_stats'], f"{season_string} League Standings - Season Stats.csv")
         espn_writer.df_to_csv(team_owners_df, f"{season_string} Team Owners.csv")
+        if len(league_standings_dict) != 0:
+            espn_writer.df_to_csv(league_standings_dict['season_points'], f"{season_string} League Standings - Season Points.csv")
+            espn_writer.df_to_csv(league_standings_dict['season_stats'], f"{season_string} League Standings - Season Stats.csv")
 
         # Excel outputs
         logger.info("Outputting Excel files.")
@@ -205,8 +206,9 @@ def main(root_folder_path):
             espn_writer.df_to_excel(roster['roster_df'], f"{season_string} League Rosters.xlsx", sheet_name=roster['team_name'])
 
         espn_writer.df_to_excel(draft_recap_df, f"{season_string} Draft Recap.xlsx")
-        espn_writer.df_to_excel(league_standings_dict['season_points'], f"{season_string} League Standings.xlsx", sheet_name="Season Points")
-        espn_writer.df_to_excel(league_standings_dict['season_stats'], f"{season_string} League Standings.xlsx", sheet_name="Season Stats")
+        if len(league_standings_dict) != 0:
+            espn_writer.df_to_excel(league_standings_dict['season_points'], f"{season_string} League Standings.xlsx", sheet_name="Season Points")
+            espn_writer.df_to_excel(league_standings_dict['season_stats'], f"{season_string} League Standings.xlsx", sheet_name="Season Stats")
 
         # Pickle outputs
         logger.info("Outputting Pickle files.")
