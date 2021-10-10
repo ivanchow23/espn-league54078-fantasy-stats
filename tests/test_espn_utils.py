@@ -222,19 +222,19 @@ class TestEspnUtils(unittest.TestCase):
 
     def test_sub_special_chars(self):
         """ Test subbing special characters helper function. """
-        # Test typical cases
+        # Test typical cases to replace
         self.assertEqual(espn_utils.sub_special_chars("Sub?"), "Sub_")
         self.assertEqual(espn_utils.sub_special_chars("?Sub?"), "_Sub_")
         self.assertEqual(espn_utils.sub_special_chars("Sub:"), "Sub_")
-        self.assertEqual(espn_utils.sub_special_chars("Sub~"), "Sub_")
-        self.assertEqual(espn_utils.sub_special_chars("?:~Sub?:~"), "_Sub_")
-        self.assertEqual(espn_utils.sub_special_chars("?:~"), "_")
+        self.assertEqual(espn_utils.sub_special_chars("?:~"), "__~")
+        self.assertEqual(espn_utils.sub_special_chars(r"Sub\/123:"), "Sub__123_")
 
-        # Test some exempt special characters
+        # Test some characters that don't require replacing
         self.assertEqual(espn_utils.sub_special_chars("#NoSub"), "#NoSub")
         self.assertEqual(espn_utils.sub_special_chars("NoSub!"), "NoSub!")
         self.assertEqual(espn_utils.sub_special_chars("!!!(NoSub)!!!"), "!!!(NoSub)!!!")
         self.assertEqual(espn_utils.sub_special_chars("No.Sub"), "No.Sub")
+        self.assertEqual(espn_utils.sub_special_chars("ミスター スパーコル.NoSub"), "ミスター スパーコル.NoSub")
 
         # Test non-string inputs
         self.assertEqual(espn_utils.sub_special_chars(123), 123)

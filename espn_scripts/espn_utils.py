@@ -121,10 +121,12 @@ def check_html(html_path):
 
 def sub_special_chars(input_str):
     """ Helper function to strip special characters and replace them with an underscore. """
-    # Add special character regex as needed - regex pattern contain characters to not replace
-    # Returns original input if no characters are found to need replacing
-    # Group of special characters together gets subbed with a single underscore
+    # Add special character regex as needed - regex pattern contain characters to replace.
+    # Returns original input if no characters are found to need replacing.
     if not isinstance(input_str, str):
         return input_str
 
-    return re.sub(r"[^A-Za-z0-9 \-!@#$%^&(),.']+", "_", input_str)
+    # Note: \\ delimits \
+    # Note: \" delimits "
+    # Set contains special characters that can't be used in file names
+    return re.sub(r"[\\/:*?\"<>|]", "_", input_str)
