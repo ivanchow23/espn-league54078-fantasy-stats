@@ -74,6 +74,26 @@ class TestEspnLoader(unittest.TestCase):
         self.assertIsNone(espn.load_league_standings_data(None))
         self.assertIsNone(espn.load_league_standings_data(123))
 
+    def test_get_seasons(self):
+        """ Test getting season strings from root folder. """
+        # Build test folder structure with empty files
+        test_folder_root_path = os.path.join(self._test_folder, "test_get_seasons")
+        os.makedirs(os.path.join(test_folder_root_path, "20192020"))
+        os.makedirs(os.path.join(test_folder_root_path, "20202021"))
+        os.makedirs(os.path.join(test_folder_root_path, "1234512346"))
+        os.makedirs(os.path.join(test_folder_root_path, "invalid"))
+        open(os.path.join(test_folder_root_path, "20032004"), 'w')
+        open(os.path.join(test_folder_root_path, "empty.csv"), 'w')
+
+        # Instantiate
+        espn = espn_loader.EspnLoader(test_folder_root_path)
+
+        # Test typical case
+        expected_data = ["20192020", "20202021", "1234512346"]
+        actual_data = espn.get_seasons()
+        self.assertEqual(set(expected_data), set(actual_data))
+
+
     def test__check_path(self):
         """ Test helper function. """
         # Build test folder structure with some data in it

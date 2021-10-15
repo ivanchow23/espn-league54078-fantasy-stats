@@ -3,6 +3,7 @@
 import csv
 import json
 import os
+import re
 import statsapi_logger
 
 logger = statsapi_logger.logger()
@@ -51,6 +52,30 @@ class StatsapiLoader():
 
         return self._load_json(os.path.join(self._root_folder_path, season_string, "season_stats",
                                f"{season_string}_player{id}_season_stats.json"))
+
+    def get_seasons(self):
+        """ Returns a list of season folders from the root.
+            Folder must be in the form XXXXYYYY. """
+        # Regex pattern to find a season string
+        #   - ^ used to denote start of string searching
+        #   - $ used to denote end of string searching
+        #   - + used to denote any repeating numbers between [0-9]
+        # Examples:
+        #  - "20192020" (ok)
+        #  - "aaa20192020" (no)
+        #  - "20192020aaa" (no)
+        season_string_re_pattern = "^[0-9]+$"
+
+        if not self._check_path(self._root_folder_path):
+            return []
+
+        ret_list = []
+        for item in os.listdir(self._root_folder_path):
+            item_path = os.path.join(self._root_folder_path, item)
+            if os.path.isdir(item_path) and re.match(season_string_re_pattern, item):
+                ret_list.append(item)
+
+        return ret_list
 
     def _load_json(self, file_path):
         """ Helper function to load a JSON file.

@@ -2,6 +2,7 @@
 """ Utility to load data generated from ESPN parser scripts. """
 import os
 import pickle
+import re
 
 class EspnLoader():
     """ Holds a reference to the root ESPN data folder and provides APIs to load data from it.
@@ -34,6 +35,30 @@ class EspnLoader():
     def load_league_standings_data(self, season_string):
         """ Loads data from league standings file given season string. Returns None on failure. """
         return self._load_pickle(season_string, "League Standings")
+
+    def get_seasons(self):
+        """ Returns a list of season folders from the root.
+            Folder must be in the form XXXXYYYY. """
+        # Regex pattern to find a season string
+        #   - ^ used to denote start of string searching
+        #   - $ used to denote end of string searching
+        #   - + used to denote any repeating numbers between [0-9]
+        # Examples:
+        #  - "20192020" (ok)
+        #  - "aaa20192020" (no)
+        #  - "20192020aaa" (no)
+        season_string_re_pattern = "^[0-9]+$"
+
+        if not self._check_path(self._root_folder_path):
+            return []
+
+        ret_list = []
+        for item in os.listdir(self._root_folder_path):
+            item_path = os.path.join(self._root_folder_path, item)
+            if os.path.isdir(item_path) and re.match(season_string_re_pattern, item):
+                ret_list.append(item)
+
+        return ret_list
 
     def _load_pickle(self, season_string, file_search_string):
         """ Helper function to load pickle file. """

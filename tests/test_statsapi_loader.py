@@ -88,6 +88,25 @@ class TestStatsapiLoader(unittest.TestCase):
         # Test unknown season
         self.assertIsNone(statsapi.load_player_season_stats_dict("Connor McDavid", "19901991"))
 
+    def test_get_seasons(self):
+        """ Test getting season strings from root folder. """
+        # Build test folder structure with empty files
+        test_folder = os.path.join(self._test_folder, "test_get_seasons")
+        os.makedirs(os.path.join(test_folder, "20192020"))
+        os.makedirs(os.path.join(test_folder, "20202021"))
+        os.makedirs(os.path.join(test_folder, "1234512346"))
+        os.makedirs(os.path.join(test_folder, "invalid"))
+        open(os.path.join(test_folder, "20032004"), 'w')
+        open(os.path.join(test_folder, "players_id_map.csv"), 'w')
+
+        # Instantiate
+        statsapi = StatsapiLoader(test_folder)
+
+        # Test typical case
+        expected_data = ["20192020", "20202021", "1234512346"]
+        actual_data = statsapi.get_seasons()
+        self.assertEqual(set(expected_data), set(actual_data))
+
     def test__get_player_id(self):
         """ Test helper function to get player ID from map file. """
         test_folder = os.path.join(self._test_folder, "test__get_player_id")
