@@ -1,6 +1,7 @@
 bs4
 html5lib
 lxml
+matplotlib
 openpyxl
 pandas
 requests
