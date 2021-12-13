@@ -40,308 +40,236 @@
       - etc.
 """
 import argparse
-import csv
-import pandas as pd
+import json
 import os
-import re
+import pandas as pd
 import statsapi_logger
 import statsapi_utils
+import timeit
+
 logger = statsapi_logger.logger()
 
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+class StatsapiDownloader():
+    def __init__(self, root_output_folder, overwrite):
+        """ Constructor. """
+        self.TEAMS_MAPFILE_NAME = "teams_id_map.csv"
+        self.PLAYERS_MAPFILE_NAME = "players_id_map.csv"
 
-# Limit to prevent trying to access season data before this year
-# Based on founding year: https://en.wikipedia.org/wiki/History_of_the_National_Hockey_League_(1917%E2%80%931942)
-SEASON_START_YEAR_LIMIT = 1917
+        self._root_output_folder = root_output_folder
+        self._overwrite = overwrite
+        self._teams_mapfile_path = os.path.join(self._root_output_folder, self.TEAMS_MAPFILE_NAME)
+        self._players_mapfile_path = os.path.join(self._root_output_folder, self.PLAYERS_MAPFILE_NAME)
 
-def download_teams_data(root_path, overwrite=False):
-    """ Download all teams data into its own folder within the specified
-        output path. Downloaded file names have the form: "team<id>.json".
-        Also generates a map file in the root directory to map teams to
-        their unique ID. Returns True on success. False otherwise. """
-    # Output folder
-    output_folder_path = _create_dir_if_not_exist(root_path, "teams")
-    if not output_folder_path:
-        logger.warning(f"Invalid path: {output_folder_path}. Skipping download.")
-        return False
+        # Create root output folder where downloaded data be output
+        os.makedirs(self._root_output_folder, exist_ok=True)
 
-    # Get data of current teams from server
-    teams_url = statsapi_utils.get_full_url("/api/v1/teams/")
-    teams_dict = statsapi_utils.load_json_from_url(teams_url)
-    total_team_dicts = len(teams_dict['teams'])
+    @property
+    def overwrite(self):
+        """ Overwrite property and getter. """
+        return self._overwrite
 
-    # Iterate through each team and download
-    teams_id_map = []
-    for index, team_dict in enumerate(teams_dict['teams']):
-        # Keep track of team IDs to generate map file
-        teams_id_map.append({'id': team_dict['id'], 'name': team_dict['name'], 'abbreviation': team_dict['abbreviation']})
+    @overwrite.setter
+    def overwrite(self, overwrite):
+        """ Overwrite setter. """
+        self._overwrite = overwrite
 
-        # Download file
-        output_file_path = os.path.join(output_folder_path, f"team{team_dict['id']}.json")
-        url = statsapi_utils.get_full_url(team_dict['link'])
-        info_str = _save_file(url, output_file_path, overwrite, file_counter=index + 1, total_files=total_team_dicts)
-        logger.info(info_str)
-
-    # Generate map file in root folder
-    teams_id_map_df = pd.DataFrame(teams_id_map)
-    teams_id_map_df.to_csv(os.path.join(root_path, "teams_id_map.csv"), index=False)
-    return True
-
-def download_players_data(root_path, in_file_path, overwrite=False):
-    """ Download all players data into its own folder within the specified
-        output path. Accepts an input CSV file with player information and
-        statsapi endpoints used to access data from the server. Downloaded
-        file names have the form: "player<id>.json". Also generates a map
-        file in the root directory to map players to their unique ID. Returns
-        True on success. False otherwise. """
-    # Output folder
-    output_folder_path = _create_dir_if_not_exist(root_path, "players")
-    if not output_folder_path:
-        logger.warning(f"Invalid path: {output_folder_path}. Skipping download.")
-        return False
-
-    # Check input file
-    if not isinstance(in_file_path, str) or not os.path.exists(in_file_path) or not in_file_path.lower().endswith(".csv"):
-        logger.warning(f"Invalid input file: {in_file_path}. Skipping download.")
-        return False
-
-    # Read file
-    players_data_dict_list = _read_csv(in_file_path)
-    if not players_data_dict_list:
-        logger.warning("Invalid CSV input. Skipping download.")
-        return False
-
-    # Iterate through each endpoint and download
-    total_players = len(players_data_dict_list)
-    for index, player_dict in enumerate(players_data_dict_list):
-        # Add new key for ID mapping
-        player_dict['id'] = ""
-
-        # Check endpoint pattern matches
-        endpoint = player_dict['statsapi_endpoint']
-        if not isinstance(endpoint, str) or not re.match(f"{statsapi_utils.API_ENDPOINT_PREFIX}/people/[0-9]+", endpoint):
-            logger.warning(f"Invalid endpoint ({endpoint}). Skipping download.")
-            continue
-
-        # Parse ID from endpoint string
-        id = re.findall(f"[0-9]+", endpoint)[-1]
-        player_dict['id'] = id
-
-        # Download file
-        output_file_path = os.path.join(output_folder_path, f"player{id}.json")
-        url = statsapi_utils.get_full_url(endpoint)
-        info_str = _save_file(url, output_file_path, overwrite, file_counter=index + 1, total_files=total_players)
-        logger.info(info_str)
-
-    # Generate map file in root folder
-    players_id_map_df = pd.DataFrame(players_data_dict_list)
-    players_id_map_df.to_csv(os.path.join(root_path, "players_id_map.csv"), index=False)
-    return True
-
-def download_team_rosters_data(root_path, start_year, end_year, overwrite=False):
-    """ Download all team rosters data into each year's folder within the specified
-        output path for all seasons between the specified years. Downloaded files have
-        the form: "XXXXYYYY_team<id>_roster.json" where XXXXYYYY is the season. Returns
-        True on success. False otherwise.
-
-        Example: start_year = 2018 end_year = 2020 will try and download data for the
-        seasons: 20182019, 20192020, 20202021.
-
-        Note: Depends on teams data to be present locally within the root path! Call
-        download_teams_data() first. """
-    # Error check
-    if not _check_year_range(start_year, end_year):
-        logger.warning(f"Invalid start/end year: start={repr(start_year)} end={repr(end_year)}. Skipping download.")
-        return False
-
-    # This function depends on teams data to be present locally
-    # Check for prescence of teams folder and data
-    teams_data_folder_path = os.path.join(root_path, "teams")
-    if not os.path.exists(teams_data_folder_path):
-        logger.warning(f"Cannot find teams data in {root_path}")
-        logger.warning("Run the 'download_teams_data()' function first.")
-        logger.warning("Skipping download.")
-        return False
-
-    # Look for files within teams folder and get list of all team IDs
-    # File names are in a known format, so simply parse out ID from names rather than opening the file
-    # Example: ["team1.json", "team10.json", "team23.json"] -> [1, 10, 23]
-    # Reference: https://stackoverflow.com/a/4289557
-    file_list = os.listdir(teams_data_folder_path)
-    team_id_list = [int("".join(filter(str.isdigit, f))) for f in file_list]
-
-    # Download progress counters
-    file_counter = 0
-    num_files = len(team_id_list) * (end_year + 1 - start_year)
-
-    # Process each year
-    for year in range(start_year, end_year + 1):
-        # Current season is the current year + the next year
-        # Example: The season for year 2018 is 2018-2019
-        curr_season_string = f"{year}{year + 1}"
-
+    def download_teams_data(self):
+        """ Download all teams data. This provides us with each team's ID.
+            Downloaded file names have the form: "team<id>.json". Also
+            generates a map file in the root directory to map teams to their
+            unique ID. """
         # Output folder
-        output_folder_path = _create_dir_if_not_exist(root_path, curr_season_string, "team_rosters")
-        if not output_folder_path:
-            logger.warning(f"Invalid path: {output_folder_path}. Skipping download.")
-            return False
-
-        # Iterate through each team and download
-        # Example link: https://statsapi.web.nhl.com/api/v1/teams/20?expand=team.roster&season=20122013
-        for id in team_id_list:
-            file_counter += 1
-            url = statsapi_utils.get_full_url(f"/api/v1/teams/{id}?expand=team.roster&season={curr_season_string}")
-            output_file_path = os.path.join(output_folder_path, f"{curr_season_string}_team{id}_roster.json")
-            info_str = _save_file(url, output_file_path, overwrite, file_counter=file_counter, total_files=num_files)
-            logger.info(info_str)
-
-    return True
-
-def download_players_season_stats_data(root_path, overwrite=False):
-    """ Read player mapping file generated from function:
-        "download_players_data()" and downloads all player data into
-        each season folder within the root path. Downloaded files have
-        the form: "XXXXYYYY_player<id>_season_stats.json" where XXXXYYYY
-        is the season. Returns True on success. False otherwise.
-    """
-    # Check if map file exists
-    if not os.path.exists(os.path.join(root_path, "players_id_map.csv")):
-        logger.warning(f"Cannot find players ID map file in: {root_path}. Skipping download.")
-        return False
-
-    # Read file
-    players_data_dict_list = _read_csv(os.path.join(root_path, "players_id_map.csv"))
-    if not players_data_dict_list:
-        logger.warning("Invalid CSV input. Skipping download.")
-        return False
-
-    # Download progress counters
-    file_counter = 0
-    num_files = len(players_data_dict_list)
-
-    # Process each player in list
-    for player_dict in players_data_dict_list:
-        # Read season, which is where folder of downloaded data goes
-        season_string = ""
-        try:
-            season_string = player_dict['Season']
-        except KeyError:
-            logger.warning("Key error in file. Skipping download.")
-            return False
-
-        output_folder_path = _create_dir_if_not_exist(root_path, season_string, "season_stats")
-        if not output_folder_path:
-            logger.warning(f"Invalid path: {output_folder_path}. Skipping download.")
-            return False
-
-        # Example link: https://statsapi.web.nhl.com/api/v1/people/8478402/stats?stats=statsSingleSeason&season=20192020
-        file_counter += 1
-        id = player_dict['id']
-        endpoint = player_dict['statsapi_endpoint']
-        output_file_path = os.path.join(output_folder_path, f"{season_string}_player{id}_season_stats.json")
-        url = f"{statsapi_utils.get_full_url(endpoint)}/stats?stats=statsSingleSeason&season={season_string}"
-        info_str = _save_file(url, output_file_path, overwrite, file_counter=file_counter, total_files=num_files)
-        logger.info(info_str)
-
-    return True
-
-def _create_dir_if_not_exist(root_path, *dirs):
-    """ Helper function that creates "nested" directories within the root. Handles if
-        directory already exists and other basic errors. Returns a path if directory
-        already exists or if it is successfully created. Returns None otherwise.
-
-        Examples:
-          _create_dir_if_not_exist("root", "folder") -> "root/folder"
-          _create_dir_if_not_exist("root", "dir1", "dir2") -> "root/dir1/dir2"
-          _create_dir_if_not_exist("root", "dir1", "dir2", "dir3") -> "root/dir1/dir2/dir3" """
-    if not root_path:
-        return None
-
-    try:
-        output_folder_path = os.path.join(root_path, *dirs)
+        output_folder_path = os.path.join(self._root_output_folder, "teams")
         os.makedirs(output_folder_path, exist_ok=True)
-        return output_folder_path
-    except(OSError, TypeError):
-        return None
 
-def _read_csv(file_path):
-    """ Helper function to read a CSV file. Returns list of dictionaries
-        data structure on success. None otherwise. """
-    # Required headers to be present in the input file
-    required_headers = ["Player", "statsapi_endpoint"]
+        # Get data of current teams from server
+        teams_url = statsapi_utils.get_full_url("/api/v1/teams/")
+        teams_dict = statsapi_utils.load_json_from_url(teams_url)
 
-    # Read file and return list of dictionaries
-    players_data_dict_list = []
-    with open(file_path, 'r', encoding='utf-8') as csv_file:
-        dict_reader = csv.DictReader(csv_file)
-        file_headers = dict_reader.fieldnames
-        if not file_headers or not set(required_headers).issubset(set(file_headers)):
-            logger.warning(f"Input file does not contain required headers. Requires: {required_headers}.")
-            return None
+        # Prepare links and output paths for download
+        download_dict_list = [{'url': statsapi_utils.get_full_url(d['link']),
+                               'out_file_path': os.path.join(output_folder_path, f"team{d['id']}.json")}
+                               for d in teams_dict['teams']]
+        download_dict_list = self._check_download_dict_list(download_dict_list)
 
-        return list(dict_reader)
+        # Download
+        logger.info(f"Downloading to: {output_folder_path}")
+        start_time = timeit.default_timer()
+        num_saved = statsapi_utils.save_jsons_from_urls_async(download_dict_list)
+        logger.info(f"Downloaded {num_saved} files in {round(timeit.default_timer() - start_time, 1)}s.")
 
-def _check_year_range(start_year, end_year):
-    """ Helper function to check the start and end year ranges for seasons.
-        Returns True if inputs and range are valid. False otherwise. """
-    # Error check
-    if not isinstance(start_year, int) or not isinstance(end_year, int) or start_year > end_year:
-        logger.debug(f"Invalid start/end year: start={repr(start_year)} end={repr(end_year)}.")
-        return False
+        # Generate map file
+        teams_id_map = [{'id': d['id'],
+                         'name': d['name'],
+                         'abbreviation': d['abbreviation']}
+                         for d in teams_dict['teams']]
 
-    # Limit access attempt before a certain year
-    if start_year < SEASON_START_YEAR_LIMIT:
-        logger.warning(f"Start year ({start_year}) must be >= {SEASON_START_YEAR_LIMIT}")
-        return False
+        teams_id_map_df = pd.DataFrame(teams_id_map)
+        teams_id_map_df.to_csv(self._teams_mapfile_path, index=False)
 
-    return True
+    def download_team_rosters_data(self, season_string):
+        """ Download all team rosters data for the given season. Downloaded
+            files have the form: "XXXXYYYY_team<id>_roster.json", where
+            XXXXYYYY is the season. Also generates a map file in the root
+            directory to map players to their unique ID. This is done after
+            the download step by gathering relevant data of all players from
+            each rosters of the given season.
 
-def _save_file(url, output_file_path, overwrite, file_counter=0, total_files=0):
-    """ Helper function that saves data from the given URL to the output file path.
-        Does not access and save data if overwrite flag is false.
+            Note: Depends on the teams ID map file to be present. Therefore,
+            ensure download_teams_data() is called first. """
+        # Output folder
+        output_folder_path = os.path.join(self._root_output_folder, season_string, "team_rosters")
+        os.makedirs(output_folder_path, exist_ok=True)
 
-        Also returns a string for download progress. This is returned so the original
-        caller can make logger output "more correctly" show which function is actually
-        downloading the data (rather than this one). """
-    # Build string for logger
-    info_string = ""
-    if total_files != 0:
-        info_string += f"[{file_counter}/{total_files}] "
+        # Read teams map file to retrieve IDs of interest
+        teams_mapfile_df = pd.read_csv(self._teams_mapfile_path)
+        team_id_list = list(teams_mapfile_df['id'])
 
-    # If file already exists locally, skip
-    if not overwrite:
-        if os.path.exists(output_file_path):
-            info_string += f"{output_file_path} exists. Skipping."
-            return info_string
+        # Prepare links and output paths for download
+        # Example link: https://statsapi.web.nhl.com/api/v1/teams/20?expand=team.roster&season=20122013
+        download_dict_list = [{'url': statsapi_utils.get_full_url(f"/api/v1/teams/{id}?expand=team.roster&season={season_string}"),
+                               'out_file_path': os.path.join(output_folder_path, f"{season_string}_team{id}_roster.json")}
+                               for id in team_id_list]
+        download_dict_list = self._check_download_dict_list(download_dict_list)
 
-    # Save team data
-    if statsapi_utils.save_json_from_url(url, output_file_path):
-        info_string += f"Downloaded to: {output_file_path}"
-        return info_string
-    else:
-        # Generic error message - relying on utility logger messages
-        info_string += "Cannot download data."
-        return info_string
+        # Download
+        logger.info(f"Downloading to: {output_folder_path}")
+        start_time = timeit.default_timer()
+        num_saved = statsapi_utils.save_jsons_from_urls_async(download_dict_list)
+        logger.info(f"Downloaded {num_saved} files in {round(timeit.default_timer() - start_time, 1)}s.")
+
+        # Gather players data from each roster by reading back the downloaded rosters
+        player_mapfile_dicts = []
+        for f in os.listdir(output_folder_path):
+            json_dict = json.load(open(os.path.join(output_folder_path, f), 'r'))
+
+            try:
+                for player in json_dict['teams'][0]['roster']['roster']:
+                    player_mapfile_dicts.append({'id': player['person']['id'],
+                                                  'Player': player['person']['fullName'],
+                                                  'Team': json_dict['teams'][0]['abbreviation'],
+                                                  # Convert season string to int to match how pandas
+                                                  # read-back this column from CSV below
+                                                  'Season': int(season_string),
+                                                  'statsapi_endpoint': player['person']['link']})
+            except KeyError:
+                continue
+
+        # Update/generate mapfile
+        players_mapfile_df = pd.DataFrame()
+        if os.path.exists(self._players_mapfile_path):
+            players_mapfile_df = pd.read_csv(self._players_mapfile_path)
+
+        # Append to dataframe, drop any duplicate entries (possible if downloading data
+        # from the year and rosters already in mapfile), and output to CSV
+        players_mapfile_df = pd.concat([players_mapfile_df, pd.DataFrame(player_mapfile_dicts)])
+        players_mapfile_df = players_mapfile_df.drop_duplicates()
+        players_mapfile_df.to_csv(self._players_mapfile_path, index=False)
+
+    def download_players_data(self, season_string):
+        """ Download players data for those on a roster for a given season.
+            Downloaded files have the form: "player<id>.json".
+
+            Note: Depends on the players ID map file to be present. Therefore,
+            ensure download_team_rosters_data() is called first. """
+        # Output folder
+        output_folder_path = os.path.join(self._root_output_folder, "players")
+        os.makedirs(output_folder_path, exist_ok=True)
+
+        # Read players map file to retrieve mappings for given season
+        players_mapfile_df = pd.read_csv(self._players_mapfile_path)
+        players_id_list = list(players_mapfile_df[players_mapfile_df['Season'] == int(season_string)]['id'])
+
+        # Prepare links and output paths for download
+        # Example link: https://statsapi.web.nhl.com/api/v1/people/8478402
+        download_dict_list = [{'url': statsapi_utils.get_full_url(f"/api/v1/people/{id}"),
+                               'out_file_path': os.path.join(output_folder_path, f"player{id}.json")}
+                               for id in players_id_list]
+        download_dict_list = self._check_download_dict_list(download_dict_list)
+
+        # Download
+        logger.info(f"Downloading to: {output_folder_path}")
+        start_time = timeit.default_timer()
+        num_saved = statsapi_utils.save_jsons_from_urls_async(download_dict_list)
+        logger.info(f"Downloaded {num_saved} files in {round(timeit.default_timer() - start_time, 1)}s.")
+
+    def download_players_season_stats_data(self, season_string):
+        """ Download players season stats data for a given season. Downloaded
+            files have the form: "XXXXYYYY_player<id>_season_stats.json" where
+            XXXXYYYY is the season.
+
+            Note: Depends on the players ID map file to be present. Therefore,
+            ensure download_team_rosters_data() is called first. """
+        # Output folder
+        output_folder_path = os.path.join(self._root_output_folder, season_string, "season_stats")
+        os.makedirs(output_folder_path, exist_ok=True)
+
+        # Read players map file to retrieve mappings for given season
+        players_mapfile_df = pd.read_csv(self._players_mapfile_path)
+        players_id_list = list(players_mapfile_df[players_mapfile_df['Season'] == int(season_string)]['id'])
+
+        # Prepare links and output paths for download
+        # Example link: https://statsapi.web.nhl.com/api/v1/people/8478402/stats?stats=statsSingleSeason&season=20192020
+        download_dict_list = [{'url': statsapi_utils.get_full_url(f"/api/v1/people/{id}/stats?stats=statsSingleSeason&season={season_string}"),
+                               'out_file_path': os.path.join(output_folder_path, f"{season_string}_player{id}_season_stats.json")}
+                               for id in players_id_list]
+        download_dict_list = self._check_download_dict_list(download_dict_list)
+
+        # Download
+        logger.info(f"Downloading to: {output_folder_path}")
+        start_time = timeit.default_timer()
+        num_saved = statsapi_utils.save_jsons_from_urls_async(download_dict_list)
+        logger.info(f"Downloaded {num_saved} files in {round(timeit.default_timer() - start_time, 1)}s.")
+
+    def _check_download_dict_list(self, download_dict_list):
+        """ Checks the list of dictionaries consisting of URLs and output
+            file paths. Removes duplicate URL links from the list. Returns
+            a modified list of dictionaries if items were modified. Returns
+            the original list back otherwise. """
+        ret_list = []
+
+        # First, remove duplicate dictionaries from the list
+        # A duplicate is when the entire dictionary's contents are identical
+        # Do this first so entries still exist to check in the return list
+        for d in download_dict_list:
+            if d not in ret_list:
+                ret_list.append(d)
+
+        # Check for entries we don't want to download if file already exists
+        if not self._overwrite:
+            ret_list = [d for d in ret_list if not os.path.exists(d['out_file_path'])]
+
+        return ret_list
 
 if __name__ == "__main__":
     """ Main function. """
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("-o", required=True, help="Root directory for all downloaded data.")
-    arg_parser.add_argument("--start_year", required=False, type=int, help="Starting year used for downloading season data.")
-    arg_parser.add_argument("--end_year", required=False, type=int, help="Ending year used for downloading season data.")
-    arg_parser.add_argument("--players_file", required=False, help="CSV file path to list of players with statsapi endpoints for downloading player data.")
-    arg_parser.add_argument("--overwrite", required=False, action='store_true', help="Flag to overwrite all existing files when downloading.")
-    args = arg_parser.parse_args()
+    start_timer = timeit.default_timer()
 
-    # Store arguments
-    root_data_folder = args.o
+    # Read arguments
+    arg_parse = argparse.ArgumentParser()
+    arg_parse.add_argument("--start_year", "-s", required=True, type=int, help="Starting season of data to download.")
+    arg_parse.add_argument("--end_year", "-e", required=True, type=int, help="End season of data to download.")
+    arg_parse.add_argument("--output_path", "-o", required=True, type=str, help="Output path of where downloaded data will go.")
+
+    args = arg_parse.parse_args()
     start_year = args.start_year
     end_year = args.end_year
-    players_file_path = args.players_file
-    ow = args.overwrite
+    output_path = args.output_path
 
-    # Download data
-    download_teams_data(root_data_folder, overwrite=ow)
-    download_players_data(root_data_folder, players_file_path, overwrite=ow)
-    download_team_rosters_data(root_data_folder, start_year=start_year, end_year=end_year, overwrite=ow)
-    download_players_season_stats_data(root_data_folder, overwrite=ow)
+    # Instantiate
+    statsapi_downloader = StatsapiDownloader(output_path, overwrite=False)
+
+    # Download most up-to-date teams data
+    statsapi_downloader.overwrite = True
+    statsapi_downloader.download_teams_data()
+
+    # Download relevant data for each season
+    statsapi_downloader.overwrite = False
+    for season in range(start_year, end_year + 1):
+        # Example: The 2020 season will be "20202021"
+        season_string = f"{season}{season + 1}"
+        statsapi_downloader.download_team_rosters_data(season_string)
+        statsapi_downloader.download_players_data(season_string)
+        statsapi_downloader.download_players_season_stats_data(season_string)
+
+    print(f"Finished in {round(timeit.default_timer() - start_timer, 1)}s.")
