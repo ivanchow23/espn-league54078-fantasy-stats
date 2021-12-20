@@ -1,5 +1,7 @@
 [modules]
 run_list = [
              "draft",
+             "draft_age",
+             "draft_birth_countries",
              "standings"
            ]
