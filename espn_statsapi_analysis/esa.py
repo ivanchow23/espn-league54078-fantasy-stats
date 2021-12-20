@@ -126,13 +126,17 @@ if __name__ == "__main__":
         module_base_name = m.split(".")[-1]
 
         # Instantiate class in the module and run
-        for name, cl in inspect.getmembers(module, inspect.isclass):
-            module_class = getattr(module, name)
-            m_obj = module_class(espn_loader, statsapi_loader,
-                                 os.path.join(out_path, module_base_name))
+        # Note: It is possible each module instantiates a parent class and
+        # inspect.getmembers will detect both the parent and sub-class.
+        # In this case, we only want to run the sub-class, hence use [-1]
+        # index to get the last element, which should be the module itself.
+        name, cl = inspect.getmembers(module, inspect.isclass)[-1]
+        module_class = getattr(module, name)
+        m_obj = module_class(espn_loader, statsapi_loader,
+                             os.path.join(out_path, module_base_name))
 
-            logger.info(f"Processing: {m}.{name}")
-            m_obj.process()
+        logger.info(f"Processing: {m}.{name}")
+        m_obj.process()
 
     # Done
     logger.info(f"Finished in {round(timeit.default_timer() - start_time, 1)}s.")
