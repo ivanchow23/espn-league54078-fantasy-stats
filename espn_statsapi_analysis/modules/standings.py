@@ -56,7 +56,7 @@ class Standings():
             standings_dict[season_string] = {}
 
             league_standings_dict = self._espn_loader.load_league_standings_data(season_string)
-            if league_standings_dict is None:
+            if league_standings_dict is None or len(league_standings_dict) == 0:
                 continue
 
             standings_dict[season_string]['season_points'] = league_standings_dict['season_points']
