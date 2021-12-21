@@ -93,6 +93,24 @@ def _get_import_modules_from_toml_list(modules_list, root_modules_path=None):
 
     return ret_list
 
+def _get_module_name_class(inspect_list, module_name):
+    """ Given a list of tuples that is returned from inspect.getmembers() and
+        the module name, find the correct class to dynamically import. This
+        can occur when trying to dynamically look for classes in a file but
+        contains/uses/inherits multiple other classes.
+
+        Example:
+        module_name = "child_class"
+        inspect_list = [('BaseClass', <class>),
+                        ('ChildClass', <class>),
+                        ('AnotherClass', <class>)]
+
+        Example returns "ChildClass" and its corresponding <class> object. """
+    for name, cl in inspect_list:
+        module_name_stripped = module_name.replace("_", "")
+        if module_name_stripped == name.lower():
+            return name, cl
+
 if __name__ == "__main__":
     """ Entry point for ESA. """
     # Timing
@@ -125,12 +143,9 @@ if __name__ == "__main__":
         module = importlib.import_module(m)
         module_base_name = m.split(".")[-1]
 
-        # Instantiate class in the module and run
-        # Note: It is possible each module instantiates a parent class and
-        # inspect.getmembers will detect both the parent and sub-class.
-        # In this case, we only want to run the sub-class, hence use [-1]
-        # index to get the last element, which should be the module itself.
-        name, cl = inspect.getmembers(module, inspect.isclass)[-1]
+        # Find the correct class to import within the module and run
+        inspect_list = inspect.getmembers(module, inspect.isclass)
+        name, cl = _get_module_name_class(inspect_list, module_base_name)
         module_class = getattr(module, name)
         m_obj = module_class(espn_loader, statsapi_loader,
                              os.path.join(out_path, module_base_name))
