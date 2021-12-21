@@ -16,7 +16,11 @@ class MatplotlibPie():
         series = df.value_counts()
 
         # Show only the top 5 labels on pie chart to not cram text for smaller wedges
-        labels = list(series.index[0:5]) + ["" for i in range(5, len(series.index))]
+        # But, don't show labels that equate to an empty slice (i.e.: 0%)
+        labels = [series.index[i] if series[series.index[i]] != 0 else "" for i in range(5)]
+
+        # Don't show labels for the rest of the data
+        labels += ["" for i in range(5, len(series.index))]
 
         # Set-up wedge colours
         wedge_colours = None
@@ -57,7 +61,11 @@ class MatplotlibPie():
             series = data_dict['df'].value_counts()
 
             # Show only the top 5 labels on pie chart to not cram text for smaller wedges
-            labels = list(series.index[0:5]) + ["" for i in range(5, len(series.index))]
+            # But, don't show labels that equate to an empty slice (i.e.: 0%)
+            labels = [series.index[i] if series[series.index[i]] != 0 else "" for i in range(5)]
+
+            # Don't show labels for the rest of the data
+            labels += ["" for i in range(5, len(series.index))]
 
             # Set-up wedge colours
             wedge_colours = None
