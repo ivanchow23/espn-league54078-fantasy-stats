@@ -52,6 +52,10 @@ class Draft():
             lambda player: self._get_player_info(self._statsapi_loader.load_player_dict(player), 'birthCountry'))
         combined_df['Player Age'] = combined_df.apply(
             lambda x: self._get_player_age(self._statsapi_loader.load_player_dict(x['Player']), x['Season']), axis=1)
+        combined_df['Player Weight (lbs)'] = combined_df['Player'].apply(
+            lambda player: self._get_player_info(self._statsapi_loader.load_player_dict(player), 'weight'))
+        combined_df['Player Height (cm)'] = combined_df['Player'].apply(
+            lambda player: self._get_player_height_cm(self._statsapi_loader.load_player_dict(player)))
 
         return combined_df
 
@@ -87,6 +91,32 @@ class Draft():
         # Parse for start of season XXXX
         season = int(season_string[0:4])
         return season - birth_year
+
+    def _get_player_height_cm(self, player_dict):
+        """ Takes in a dictionary from statsapi loaded JSON file and converts
+            the string of a player's height from feet and inches into an
+            integer in units cm. The height string is directly the value that
+            comes from the player's height in the JSON file. Note: This
+            method's string parsing logic is meant to be super simple.
+
+            Example: '6\' 3"' = 190.5 cm """
+        # Height string is expected to be in the form like: '6\' 3"'
+        height_string = self._get_player_info(player_dict, 'height')
+
+        # Very basic way to parse for the values
+        # First, split the string into sections
+        str_list = height_string.split()
+
+        # Next, assume 1st element in list is feet, 2nd element is inches
+        # Remove corresponding ' and " charaters
+        str_list[0] = str_list[0].replace("\'", "")
+        str_list[1] = str_list[1].replace("\"", "")
+
+        # Convert height to inches
+        height_in = (int(str_list[0]) * 12) + int(str_list[1])
+
+        # Finally, convert to cm
+        return round(height_in * 2.54, 1)
 
 def _number_ordinal(val):
     """ Simple function to convert an integer to a "numerical ordinal"

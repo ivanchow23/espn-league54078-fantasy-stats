@@ -3,5 +3,7 @@ run_list = [
              "draft",
              "draft_age",
              "draft_birth_countries",
+             "draft_height",
+             "draft_weight",
              "standings"
            ]
