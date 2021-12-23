@@ -4,6 +4,7 @@ import argparse
 import esa_logger
 import importlib
 import inspect
+import multiprocessing
 import os
 import sys
 import timeit
@@ -111,6 +112,23 @@ def _get_module_name_class(inspect_list, module_name):
         if module_name_stripped == name.lower():
             return name, cl
 
+def _import_and_process_module(m, espn_loader, statsapi_loader, out_path):
+    """ Wrapper function to dynamically import and run the process()
+        method of the given module. """
+    # Dynamically import the module
+    module = importlib.import_module(m)
+    module_base_name = m.split(".")[-1]
+
+    # Find the correct class to import within the module and run
+    inspect_list = inspect.getmembers(module, inspect.isclass)
+    name, cl = _get_module_name_class(inspect_list, module_base_name)
+    module_class = getattr(module, name)
+    m_obj = module_class(espn_loader, statsapi_loader,
+                         os.path.join(out_path, module_base_name))
+
+    logger.info(f"Processing: {m}.{name}")
+    m_obj.process()
+
 if __name__ == "__main__":
     """ Entry point for ESA. """
     # Timing
@@ -136,22 +154,19 @@ if __name__ == "__main__":
     espn_loader = EspnLoader(espn_data_path)
     statsapi_loader = StatsapiLoader(statsapi_data_path)
 
-    # Import all modules in list and run its functions
+    # Import all modules in list and run its functions using multi-processing
+    # Each module will run on its own process
+    p = multiprocessing.Pool(os.cpu_count())
     for m in modules_to_run:
-        # Dynamically import the module
-        logger.info(f"Importing: {m}")
-        module = importlib.import_module(m)
-        module_base_name = m.split(".")[-1]
+        async_result = p.apply_async(func=_import_and_process_module,
+                                     args=[m, espn_loader, statsapi_loader, out_path])
+    p.close()
+    p.join()
 
-        # Find the correct class to import within the module and run
-        inspect_list = inspect.getmembers(module, inspect.isclass)
-        name, cl = _get_module_name_class(inspect_list, module_base_name)
-        module_class = getattr(module, name)
-        m_obj = module_class(espn_loader, statsapi_loader,
-                             os.path.join(out_path, module_base_name))
-
-        logger.info(f"Processing: {m}.{name}")
-        m_obj.process()
+    # Print any results from processes, such as exceptions
+    result = async_result.get()
+    if result is not None:
+        print(result)
 
     # Done
     logger.info(f"Finished in {round(timeit.default_timer() - start_time, 1)}s.")
