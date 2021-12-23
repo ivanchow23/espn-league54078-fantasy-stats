@@ -35,7 +35,7 @@ class StatsapiLoader():
         """ Loads data about the given player as a dictionary.
             Optional parameters are to be more specific in the search
             in case there are multiple players with the same name. """
-        id = self._get_player_id(player_name, team, season_string)
+        id = self.get_player_id(player_name, team, season_string)
         if id == -1:
             return None
 
@@ -46,7 +46,7 @@ class StatsapiLoader():
             dictionary. Optional parameters are to be more specific in
             the search in case there are multiple players with the same
             name. """
-        id = self._get_player_id(player_name, team, season_string)
+        id = self.get_player_id(player_name, team, season_string)
         if id == -1:
             return None
 
@@ -77,16 +77,7 @@ class StatsapiLoader():
 
         return ret_list
 
-    def _load_json(self, file_path):
-        """ Helper function to load a JSON file.
-            Returns None on failure. """
-        if not os.path.exists(file_path):
-            logger.warning(f"Cannot load from {file_path}")
-            return None
-
-        return json.load(open(file_path))
-
-    def _get_player_id(self, player_name, team=None, season_string=None):
+    def get_player_id(self, player_name, team=None, season_string=None):
         """ Returns the player ID from the player map file. """
         if self._players_map_dicts is None:
             return -1
@@ -106,6 +97,15 @@ class StatsapiLoader():
                     if d['Team'] == team and d['Season'] == season_string:
                         return int(d['id'])
         return -1
+
+    def _load_json(self, file_path):
+        """ Helper function to load a JSON file.
+            Returns None on failure. """
+        if not os.path.exists(file_path):
+            logger.warning(f"Cannot load from {file_path}")
+            return None
+
+        return json.load(open(file_path))
 
     def _read_csv_as_dicts(self, file_path):
         """ Reads a CSV file as a list of dictionaries.

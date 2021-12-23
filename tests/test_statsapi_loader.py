@@ -107,65 +107,65 @@ class TestStatsapiLoader(unittest.TestCase):
         actual_data = statsapi.get_seasons()
         self.assertEqual(set(expected_data), set(actual_data))
 
-    def test__get_player_id(self):
-        """ Test helper function to get player ID from map file. """
-        test_folder = os.path.join(self._test_folder, "test__get_player_id")
+    def test_get_player_id(self):
+        """ Test function to get player ID from map file. """
+        test_folder = os.path.join(self._test_folder, "test_get_player_id")
         self._generate_typical_test_folder_structure(test_folder)
         statsapi = StatsapiLoader(test_folder)
 
         # Test typical case - player name only
         expected_id = 8478402
-        actual_id = statsapi._get_player_id("Connor McDavid")
+        actual_id = statsapi.get_player_id("Connor McDavid")
         self.assertEqual(expected_id, actual_id)
 
         # Test typical case - player name and team name
         expected_id = 8478402
-        actual_id = statsapi._get_player_id("Connor McDavid", team="EDM")
+        actual_id = statsapi.get_player_id("Connor McDavid", team="EDM")
         self.assertEqual(expected_id, actual_id)
 
         # Test typical case - player name and season
         expected_id = 8478402
-        actual_id = statsapi._get_player_id("Connor McDavid", season_string="20202021")
+        actual_id = statsapi.get_player_id("Connor McDavid", season_string="20202021")
         self.assertEqual(expected_id, actual_id)
 
         # Test typical case - player name, team, and season
         expected_id = 8478402
-        actual_id = statsapi._get_player_id("Connor McDavid", team="EDM", season_string="20202021")
+        actual_id = statsapi.get_player_id("Connor McDavid", team="EDM", season_string="20202021")
         self.assertEqual(expected_id, actual_id)
 
         # Test typical case - with utf-8 encoded string
         expected_id = 8482109
-        actual_id = statsapi._get_player_id("Alexis Lafrenière")
+        actual_id = statsapi.get_player_id("Alexis Lafrenière")
         self.assertEqual(expected_id, actual_id)
 
         # Test unknown player
         expected_id = -1
-        actual_id = statsapi._get_player_id("Sidney Crosby")
+        actual_id = statsapi.get_player_id("Sidney Crosby")
         self.assertEqual(expected_id, actual_id)
 
         # Test unknown team
         expected_id = -1
-        actual_id = statsapi._get_player_id("Connor McDavid", team="CGY")
+        actual_id = statsapi.get_player_id("Connor McDavid", team="CGY")
         self.assertEqual(expected_id, actual_id)
 
         # Test unknown season
         expected_id = -1
-        actual_id = statsapi._get_player_id("Connor McDavid", season_string="19901991")
+        actual_id = statsapi.get_player_id("Connor McDavid", season_string="19901991")
         self.assertEqual(expected_id, actual_id)
 
         # Test unknown team and season
         expected_id = -1
-        actual_id = statsapi._get_player_id("Connor McDavid", team="CGY", season_string="19901991")
+        actual_id = statsapi.get_player_id("Connor McDavid", team="CGY", season_string="19901991")
         self.assertEqual(expected_id, actual_id)
 
         # Test known team but unknown season
         expected_id = -1
-        actual_id = statsapi._get_player_id("Connor McDavid", team="EDM", season_string="19901991")
+        actual_id = statsapi.get_player_id("Connor McDavid", team="EDM", season_string="19901991")
         self.assertEqual(expected_id, actual_id)
 
         # Test known season but unknown team
         expected_id = -1
-        actual_id = statsapi._get_player_id("Connor McDavid", team="CGY", season_string="20202021")
+        actual_id = statsapi.get_player_id("Connor McDavid", team="CGY", season_string="20202021")
         self.assertEqual(expected_id, actual_id)
 
     def _generate_typical_test_folder_structure(self, root_path):
