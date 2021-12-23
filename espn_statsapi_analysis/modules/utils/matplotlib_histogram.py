@@ -68,3 +68,4 @@ class MatplotlibHistogram():
         plt.suptitle(title)
         plt.tight_layout()
         plt.savefig(os.path.join(self._out_path, image_name))
+        plt.close()
