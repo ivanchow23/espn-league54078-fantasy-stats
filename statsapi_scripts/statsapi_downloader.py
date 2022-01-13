@@ -44,8 +44,12 @@ import json
 import os
 import pandas as pd
 import statsapi_logger
-import statsapi_utils
+import sys
 import timeit
+
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "utils"))
+from requests_util import RequestsUtil
 
 logger = statsapi_logger.logger()
 
@@ -59,6 +63,8 @@ class StatsapiDownloader():
         self._overwrite = overwrite
         self._teams_mapfile_path = os.path.join(self._root_output_folder, self.TEAMS_MAPFILE_NAME)
         self._players_mapfile_path = os.path.join(self._root_output_folder, self.PLAYERS_MAPFILE_NAME)
+
+        self._req = RequestsUtil("https://statsapi.web.nhl.com")
 
         # Create root output folder where downloaded data be output
         os.makedirs(self._root_output_folder, exist_ok=True)
@@ -83,11 +89,10 @@ class StatsapiDownloader():
         os.makedirs(output_folder_path, exist_ok=True)
 
         # Get data of current teams from server
-        teams_url = statsapi_utils.get_full_url("/api/v1/teams/")
-        teams_dict = statsapi_utils.load_json_from_url(teams_url)
+        teams_dict = self._req.load_json_from_endpoint("/api/v1/teams")
 
         # Prepare links and output paths for download
-        download_dict_list = [{'url': statsapi_utils.get_full_url(d['link']),
+        download_dict_list = [{'endpoint': d['link'],
                                'out_file_path': os.path.join(output_folder_path, f"team{d['id']}.json")}
                                for d in teams_dict['teams']]
         download_dict_list = self._check_download_dict_list(download_dict_list)
@@ -95,7 +100,7 @@ class StatsapiDownloader():
         # Download
         logger.info(f"Downloading to: {output_folder_path}")
         start_time = timeit.default_timer()
-        num_saved = statsapi_utils.save_jsons_from_urls_async(download_dict_list)
+        num_saved = self._req.save_jsons_from_endpoints_async(download_dict_list)
         logger.info(f"Downloaded {num_saved} files in {round(timeit.default_timer() - start_time, 1)}s.")
 
         # Generate map file
@@ -127,7 +132,7 @@ class StatsapiDownloader():
 
         # Prepare links and output paths for download
         # Example link: https://statsapi.web.nhl.com/api/v1/teams/20?expand=team.roster&season=20122013
-        download_dict_list = [{'url': statsapi_utils.get_full_url(f"/api/v1/teams/{id}?expand=team.roster&season={season_string}"),
+        download_dict_list = [{'endpoint': f"/api/v1/teams/{id}?expand=team.roster&season={season_string}",
                                'out_file_path': os.path.join(output_folder_path, f"{season_string}_team{id}_roster.json")}
                                for id in team_id_list]
         download_dict_list = self._check_download_dict_list(download_dict_list)
@@ -135,7 +140,7 @@ class StatsapiDownloader():
         # Download
         logger.info(f"Downloading to: {output_folder_path}")
         start_time = timeit.default_timer()
-        num_saved = statsapi_utils.save_jsons_from_urls_async(download_dict_list)
+        num_saved = self._req.save_jsons_from_endpoints_async(download_dict_list)
         logger.info(f"Downloaded {num_saved} files in {round(timeit.default_timer() - start_time, 1)}s.")
 
         # Gather players data from each roster by reading back the downloaded rosters
@@ -182,7 +187,7 @@ class StatsapiDownloader():
 
         # Prepare links and output paths for download
         # Example link: https://statsapi.web.nhl.com/api/v1/people/8478402
-        download_dict_list = [{'url': statsapi_utils.get_full_url(f"/api/v1/people/{id}"),
+        download_dict_list = [{'endpoint': f"/api/v1/people/{id}",
                                'out_file_path': os.path.join(output_folder_path, f"player{id}.json")}
                                for id in players_id_list]
         download_dict_list = self._check_download_dict_list(download_dict_list)
@@ -190,7 +195,7 @@ class StatsapiDownloader():
         # Download
         logger.info(f"Downloading to: {output_folder_path}")
         start_time = timeit.default_timer()
-        num_saved = statsapi_utils.save_jsons_from_urls_async(download_dict_list)
+        num_saved = self._req.save_jsons_from_endpoints_async(download_dict_list)
         logger.info(f"Downloaded {num_saved} files in {round(timeit.default_timer() - start_time, 1)}s.")
 
     def download_players_season_stats_data(self, season_string):
@@ -210,7 +215,7 @@ class StatsapiDownloader():
 
         # Prepare links and output paths for download
         # Example link: https://statsapi.web.nhl.com/api/v1/people/8478402/stats?stats=statsSingleSeason&season=20192020
-        download_dict_list = [{'url': statsapi_utils.get_full_url(f"/api/v1/people/{id}/stats?stats=statsSingleSeason&season={season_string}"),
+        download_dict_list = [{'endpoint': f"/api/v1/people/{id}/stats?stats=statsSingleSeason&season={season_string}",
                                'out_file_path': os.path.join(output_folder_path, f"{season_string}_player{id}_season_stats.json")}
                                for id in players_id_list]
         download_dict_list = self._check_download_dict_list(download_dict_list)
@@ -218,7 +223,7 @@ class StatsapiDownloader():
         # Download
         logger.info(f"Downloading to: {output_folder_path}")
         start_time = timeit.default_timer()
-        num_saved = statsapi_utils.save_jsons_from_urls_async(download_dict_list)
+        num_saved = self._req.save_jsons_from_endpoints_async(download_dict_list)
         logger.info(f"Downloaded {num_saved} files in {round(timeit.default_timer() - start_time, 1)}s.")
 
     def _check_download_dict_list(self, download_dict_list):
