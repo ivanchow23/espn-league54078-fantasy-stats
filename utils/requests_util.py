@@ -86,7 +86,8 @@ class RequestsUtil():
             a list of dictionaries where each dictionary is expected to
             be in the same order as the input URL list. """
         json_data_list = []
-        async with aiohttp.ClientSession() as session:
+        connector = aiohttp.TCPConnector(limit=50)
+        async with aiohttp.ClientSession(connector=connector) as session:
             tasks = []
             for url in url_list:
                 tasks.append(asyncio.create_task(self._load_json_from_session(session, url, headers, cookies)))
