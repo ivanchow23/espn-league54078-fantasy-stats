@@ -1,9 +1,10 @@
 aiohttp
 bs4
 html5lib
+kaleido
 lxml
 matplotlib
 openpyxl
 pandas
+plotly
 requests
-selenium
