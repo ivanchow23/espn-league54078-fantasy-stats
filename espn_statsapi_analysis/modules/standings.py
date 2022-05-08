@@ -3,8 +3,10 @@ import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import sys
+from .utils.plot_pie import PlotPie
 
 SCRIPT_DIR = os.path.join(os.path.abspath(__file__))
+PLOT_BACKEND = 'matplotlib'
 
 # Suppress verbose logger messages from matplotlib
 plt.set_loglevel('WARNING')
@@ -171,35 +173,16 @@ def owner_standings_placement(input_df, out_path):
     # Assumes min. and max. seasons to be the range of the available data
     seasons_range_string = f"{input_df['Season'].min()} - {input_df['Season'].max()}"
 
-    num_owners = input_df['Owner'].nunique()
-    fig, ax = plt.subplots(1, num_owners, figsize=(16, 5))
-    for index, (owner, owner_df) in enumerate(input_df.groupby('Owner')):
-        # Get counts of ranks
-        rank_counts_series = owner_df['RK'].value_counts().sort_index()
+    # Set-up pie plots
+    colour_map = {"1st": '#ffd700',
+                  "2nd": '#b0c4de',
+                  "3rd": '#d2b48c'}
+    pie = PlotPie(out_path, backend=PLOT_BACKEND, wedge_colour_map=colour_map)
 
-        # Change the index to use ordinal numbering
-        # Example:
-        # Index  Count  ->  Index  Count
-        # 1      2          1st    2
-        # 2      0          2nd    0
-        # 3      1          3rd    1
-        # 4      0          4th    0
-        rank_counts_series.index = rank_counts_series.index.map(_number_ordinal)
+    # Number of times each owner had a certain draft position
+    input_data_dicts = []
+    for owner, df in input_df.groupby('Owner'):
+        input_data_dicts.append({'sub_title': owner, 'df': df['RK'].apply(_number_ordinal)})
 
-        # Pie chart colour mappings
-        rank_colour_map = {'1st': "gold", '2nd': "lightsteelblue", '3rd': "tan"}
-        wedge_colours = [rank_colour_map[rank] if rank in rank_colour_map else "darkgray" for rank in rank_counts_series.index]
-
-        # Generate pie chart
-        ax[index].pie(rank_counts_series, labels=rank_counts_series.index, autopct='%1.1f%%',
-                      wedgeprops={'edgecolor': "white", 'linewidth': 0.75}, textprops={'fontsize': "small"}, colors=wedge_colours)
-
-        # Generate labels for legend that displays number of times an owner achieved a rank
-        total_times = rank_counts_series.sum()
-        legend_labels = [f"{rank}: {rank_counts_series[rank]}/{total_times} times" for rank in rank_counts_series.index]
-        ax[index].set_title(owner)
-        ax[index].legend(labels=legend_labels, loc='upper center', bbox_to_anchor=(0.5, 0), fontsize='small')
-
-    plt.suptitle(f"Standings Placements\n{seasons_range_string}")
-    plt.tight_layout()
-    plt.savefig(os.path.join(out_path, "owner_standings_placement_pie.png"))
+    pie.plot_pies(input_data_dicts, fig_w=1600, fig_h=500, title=f"Standings Placements\n{seasons_range_string}",
+                  image_name="owner_standings_placement_pie.png")

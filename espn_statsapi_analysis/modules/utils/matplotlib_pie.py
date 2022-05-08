@@ -2,6 +2,8 @@
 import matplotlib.pyplot as plt
 import os
 
+DEFAULT_DPI = 100
+
 class MatplotlibPie():
     """ Wrapper for plotting common pie graphs using matplotlib. """
     def __init__(self, out_folder_path, wedge_colour_map=None):
@@ -12,7 +14,7 @@ class MatplotlibPie():
     def plot_pie(self, df, figsize, title, image_name):
         """ Plots a single pie graph and saves it as an image. The dataframe
             is a single column of the data to generate the pie chart with. """
-        fig, ax = plt.subplots(1, 1, figsize=figsize)
+        fig, ax = plt.subplots(1, 1, figsize=(figsize[0] / DEFAULT_DPI, figsize[1] / DEFAULT_DPI)) # Convert figsize from pixels to inches
         series = df.value_counts()
 
         # Show only the top 5 labels on pie chart to not cram text for smaller wedges
@@ -56,7 +58,7 @@ class MatplotlibPie():
 
             The dataframe in 'df' should contain a single column of the data
             to generate the pie chart with. """
-        fig, ax = plt.subplots(1, len(input_data_dicts), figsize=figsize)
+        fig, ax = plt.subplots(1, len(input_data_dicts), figsize=(figsize[0] / DEFAULT_DPI, figsize[1] / DEFAULT_DPI)) # Convert figsize from pixels to inches
         for index, data_dict in enumerate(input_data_dicts):
             series = data_dict['df'].value_counts()
 

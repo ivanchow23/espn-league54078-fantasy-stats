@@ -2,9 +2,11 @@
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
+from .utils.plot_pie import PlotPie
 import sys
 
 SCRIPT_DIR = os.path.join(os.path.abspath(__file__))
+PLOT_BACKEND = 'matplotlib'
 
 class Draft():
     """ Base class for loading draft-related data. """
@@ -139,41 +141,23 @@ def owner_draft_order(input_df, out_path):
     # Assumes min. and max. seasons to be the range of the available data
     seasons_range_string = f"{input_df['Season'].min()} - {input_df['Season'].max()}"
 
-    num_owners = len(input_df['Owner Name'].unique())
-    fig, ax = plt.subplots(1, num_owners, figsize=(16, 5))
-    colour_map = {"1st": "tab:blue", "2nd": "tab:orange", "3rd": "tab:green",
-                  "4th": "tab:red", "5th": "tab:purple", "6th": "tab:cyan",
-                  "7th": "tab:pink"}
+    # Set-up pie plots
+    colour_map = {"1st": '#1f77b4',
+                  "2nd": '#ff7f0e',
+                  "3rd": '#2ca02c',
+                  "4th": '#d62728',
+                  "5th": '#9467bd',
+                  "6th": '#17becf',
+                  "7th": '#e377c2'}
+    pie = PlotPie(out_path, backend=PLOT_BACKEND, wedge_colour_map=colour_map)
 
-    for index, (owner, df) in enumerate(input_df.groupby('Owner Name')):
-        # Draft number column indicates draft order since we are
-        # only counting the first round here
-        series = df['Draft Number'].value_counts().sort_index()
+    # Number of times each owner had a certain draft position
+    input_data_dicts = []
+    for owner, df in input_df.groupby('Owner Name'):
+        input_data_dicts.append({'sub_title': owner, 'df': df['Draft Number'].apply(_number_ordinal)})
 
-        # Change the index to use ordinal numbering
-        # Example:
-        # Index  Count  ->  Index  Count
-        # 1      2          1st    2
-        # 2      0          2nd    0
-        # 3      1          3rd    1
-        # 4      0          4th    0
-        series.index = series.index.map(_number_ordinal)
-
-        # Pie chart colour mappings
-        wedge_colours = [colour_map[pos] for pos in series.index]
-
-        # Generate pie chart
-        ax[index].pie(series, labels=series.index, autopct='%1.1f%%',
-                      wedgeprops={'edgecolor': "white", 'linewidth': 0.75},
-                      textprops={'fontsize': "small"}, colors=wedge_colours)
-
-        ax[index].set_title(owner)
-        legend_labels = [f"{pos}: {series[pos]}/{series.sum()}" for pos in series.index]
-        ax[index].legend(labels=legend_labels, loc='upper center', bbox_to_anchor=(0.5, 0), fontsize='small')
-
-    plt.suptitle(f"Owner's Draft Order\n{seasons_range_string}")
-    plt.tight_layout()
-    plt.savefig(os.path.join(out_path, "owner_draft_order.png"))
+    pie.plot_pies(input_data_dicts, fig_w=1600, fig_h=500, title=f"Owner's Draft Order\n{seasons_range_string}",
+                  image_name="owner_draft_order.png")
 
 def average_player_draft_position(input_df, out_path):
     """ Stats for each player's average drafted position. """

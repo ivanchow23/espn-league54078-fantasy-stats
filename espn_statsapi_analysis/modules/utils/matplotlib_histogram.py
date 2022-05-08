@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
 import os
 
+DEFAULT_DPI = 100
+
 class MatplotlibHistogram():
     """ Wrapper for plotting common histograms using matplotlib. """
     def __init__(self, out_folder_path):
@@ -11,7 +13,7 @@ class MatplotlibHistogram():
 
     def plot_histogram(self, df, figsize, title, xlabel, ylabel, image_name):
         """ Plots a single histogram and saves to an image. """
-        fig, ax = plt.subplots(1, 1, figsize=figsize)
+        fig, ax = plt.subplots(1, 1, figsize=(figsize[0] / DEFAULT_DPI, figsize[1] / DEFAULT_DPI))
 
         # Histogram stats
         mean = round(df.mean(), 1)
@@ -45,7 +47,7 @@ class MatplotlibHistogram():
 
             The dataframe in 'df' should contain a single column of the data
             to generate the pie chart with. """
-        fig, ax = plt.subplots(1, len(input_data_dicts), figsize=figsize, sharex=True, sharey=True)
+        fig, ax = plt.subplots(1, len(input_data_dicts), figsize=(figsize[0] / DEFAULT_DPI, figsize[1] / DEFAULT_DPI), sharex=True, sharey=True)
         for index, data_dict in enumerate(input_data_dicts):
             # Histogram stats
             mean = round(data_dict['df'].mean(), 1)
