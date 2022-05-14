@@ -15,7 +15,9 @@ from requests_util import RequestsUtil
 class EspnFantasyApiDownloader:
     def __init__(self, root_output_folder, season, league_id, cookies):
         """ Constructor. """
-        self._root_output_folder = os.path.join(root_output_folder, str(season))
+        # Store in a season string folder "XXXXYYYY"
+        # Example: 2022 season corresponds to: 20212022
+        self._root_output_folder = os.path.join(root_output_folder, f"{season - 1}{season}")
         os.makedirs(self._root_output_folder, exist_ok=True)
 
         self._season = season
