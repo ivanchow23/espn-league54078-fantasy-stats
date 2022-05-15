@@ -16,8 +16,9 @@ class EspnFantasyApiDownloader:
     def __init__(self, root_output_folder, season, league_id, cookies):
         """ Constructor. """
         # Store in a season string folder "XXXXYYYY"
-        # Example: 2022 season corresponds to: 20212022
-        self._root_output_folder = os.path.join(root_output_folder, f"{season - 1}{season}")
+        # Example: 2022 season corresponds to: "20212022"
+        self._season_string = f"{season - 1}{season}"
+        self._root_output_folder = os.path.join(root_output_folder, self._season_string)
         os.makedirs(self._root_output_folder, exist_ok=True)
 
         self._season = season
@@ -32,7 +33,7 @@ class EspnFantasyApiDownloader:
 
     def download_league_info(self):
         """ Downloads data containing general information about the league. """
-        output_path = os.path.join(self._root_output_folder, f"{self._season}_league_info.json")
+        output_path = os.path.join(self._root_output_folder, f"{self._season_string}_league_info.json")
         print(f"Downloading to: {output_path}")
         start_time = timeit.default_timer()
         if not self._req.save_json_from_endpoint("view=mSettings&view=mTeam", output_path, cookies=self._cookies):
@@ -48,7 +49,7 @@ class EspnFantasyApiDownloader:
         os.makedirs(output_folder_path, exist_ok=True)
         dt = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-        output_path = os.path.join(output_folder_path, f"{self._season}_realtime_stats_{dt}.json")
+        output_path = os.path.join(output_folder_path, f"{self._season_string}_realtime_stats_{dt}.json")
         print(f"Downloading to: {output_path}")
         start_time = timeit.default_timer()
         if not self._req.save_json_from_endpoint("view=mLiveScoring&view=mMatchupScore&view=mRoster&view=mSettings&view=mStandings&view=mStatus&view=mTeam",
@@ -64,7 +65,7 @@ class EspnFantasyApiDownloader:
         output_folder_path = os.path.join(self._root_output_folder, "scoring_periods")
         os.makedirs(output_folder_path, exist_ok=True)
 
-        output_path = os.path.join(output_folder_path, f"{self._season}_scoring_period{id}.json")
+        output_path = os.path.join(output_folder_path, f"{self._season_string}_scoring_period{id}.json")
         print(f"Downloading to: {output_path}")
         start_time = timeit.default_timer()
         if not self._req.save_json_from_endpoint(f"scoringPeriodId={id}&view=mRoster&view=mScoreboard&view=mSettings&view=mStatus&view=modular&view=mNav",
@@ -84,7 +85,7 @@ class EspnFantasyApiDownloader:
         os.makedirs(output_folder_path, exist_ok=True)
 
         # Read league information file to get scoring periods
-        league_info_path = os.path.join(self._root_output_folder, f"{self._season}_league_info.json")
+        league_info_path = os.path.join(self._root_output_folder, f"{self._season_string}_league_info.json")
         league_info_json = json.load(open(league_info_path, 'r'))
 
         # Handle older season data formats
@@ -101,7 +102,7 @@ class EspnFantasyApiDownloader:
 
         # Build links to download rosters for each scoring periods
         download_dict_list = [{'endpoint': f"scoringPeriodId={id}&view=mRoster&view=mScoreboard&view=mSettings&view=mStatus&view=modular&view=mNav",
-                               'out_file_path': os.path.join(output_folder_path, f"{self._season}_scoring_period{id}.json")}
+                               'out_file_path': os.path.join(output_folder_path, f"{self._season_string}_scoring_period{id}.json")}
                                 for id in range(scoring_period_id_start, scoring_period_id_end + 1)]
         # Download
         print(f"Downloading to: {output_folder_path}")
