@@ -18,7 +18,7 @@ DETAILED_POSITIONS_LIST = ["LW", "RW", "C", "D", "G"]
 # List of NHL team abbreviations found in various ESPN HTML pages
 NHL_TEAM_ABBREVIATIONS_LIST = ["Ana", "Ari", "Bos", "Buf", "Cgy", "Car", "Chi", "Col", "Cls", "Dal", "Det", "Edm",
                                "Fla", "LA",  "Min", "Mon", "Nsh", "NJ",  "NYI", "NYR", "Ott", "Phi", "Pit", "Sea",
-                               "SJ", "StL", "TB",  "Tor", "Van", "Vgs", "Wsh", "Wpg"]
+                               "SJ", "StL", "TB",  "Tor", "Van", "Vgk", "Vgs", "Wsh", "Wpg"]
 
 # List of injury designations found in various ESPN HTML pages
 INJURY_DESIGNATION_LIST = ["IR", "O", "DTD", "D", "Q", "P"]

@@ -9,8 +9,8 @@ ESPN_STATSAPI_TEAM_ABBREV_MAP = { "Ana": "ANA", "Ari": "ARI", "Bos": "BOS", "Buf
                                   "Chi": "CHI", "Col": "COL", "Cls": "CBJ", "Dal": "DAL", "Det": "DET", "Edm": "EDM",
                                   "Fla": "FLA", "LA":  "LAK", "Min": "MIN", "Mon": "MTL", "Nsh": "NSH", "NJ":  "NJD",
                                   "NYI": "NYI", "NYR": "NYR", "Ott": "OTT", "Phi": "PHI", "Pit": "PIT", "Sea": "SEA",
-                                  "SJ":  "SJS", "StL": "STL", "TB":  "TBL", "Tor": "TOR", "Van": "VAN", "Vgs": "VGK",
-                                  "Wsh": "WSH", "Wpg": "WPG" }
+                                  "SJ":  "SJS", "StL": "STL", "TB":  "TBL", "Tor": "TOR", "Van": "VAN", "Vgk": "VGK",
+                                  "Vgs": "VGK", "Wsh": "WSH", "Wpg": "WPG" }
 
 # statsapi to ESPN teams abbreviaion mapping (Inverse of ESPN to statsapi teams mapping)
 # Key = statsapi abbreviation, Value = ESPN abbreviation
