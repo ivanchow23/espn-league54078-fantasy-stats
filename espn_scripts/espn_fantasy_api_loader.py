@@ -1,57 +1,7 @@
 #!/usr/bin/env python
+from espn_fantasy_api_utils import STATS_MAP
 import json
 import os
-
-# Scoring stats map (Reference: https://github.com/cwendt94/espn-api)
-STATS_MAP = {
-    0: 'GS',
-    1: 'W',
-    2: 'L',
-    3: 'SA',
-    4: 'GA',
-    5: '5',
-    6: 'SV',
-    7: 'SO',
-    8: 'MIN ?',
-    9: 'OTL',
-    10: 'GAA',
-    11: 'SV%',
-    12: '12',
-    13: 'G',
-    14: 'A',
-    15: '+/-',
-    16: '16',
-    17: 'PIM',
-    18: 'PPG',
-    19: '19',
-    20: 'SHG',
-    21: 'SHA',
-    22: 'GWG',
-    23: 'FOW',
-    24: 'FOL',
-    25: '25',
-    26: 'TTOI ?',
-    27: 'ATOI',
-    28: 'HAT',
-    29: 'SOG',
-    30: '30',
-    31: 'HIT',
-    32: 'BLK',
-    33: 'DEF',
-    34: 'GP',
-    35: '35',
-    36: '36',
-    37: '37',
-    38: 'PPP',
-    39: 'SHP',
-    40: '40',
-    41: '41',
-    42: '42',
-    43: '43',
-    44: '44',
-    45: '45',
-    99: '99'
-    }
 
 class EspnFantasyApiLoader():
     """ Holds a reference to the root ESPN fantasy API data folder and provides APIs
