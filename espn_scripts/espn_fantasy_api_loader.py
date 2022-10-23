@@ -2,6 +2,7 @@
 from espn_fantasy_api_utils import STATS_MAP
 import json
 import os
+import re
 
 class EspnFantasyApiLoader():
     """ Holds a reference to the root ESPN fantasy API data folder and provides APIs
@@ -28,6 +29,27 @@ class EspnFantasyApiLoader():
     def __init__(self, root_folder_path):
         """ Constructor. Takes in path to root data folder. """
         self._root_folder_path = root_folder_path
+
+    def get_seasons(self):
+        """ Returns a list of season folders from the root.
+            Folder must be in the form XXXXYYYY. """
+        # Regex pattern to find a season string
+        #   - ^ used to denote start of string searching
+        #   - $ used to denote end of string searching
+        #   - + used to denote any repeating numbers between [0-9]
+        # Examples:
+        #  - "20192020" (ok)
+        #  - "aaa20192020" (no)
+        #  - "20192020aaa" (no)
+        season_string_re_pattern = "^[0-9]+$"
+
+        ret_list = []
+        for item in os.listdir(self._root_folder_path):
+            item_path = os.path.join(self._root_folder_path, item)
+            if os.path.isdir(item_path) and re.match(season_string_re_pattern, item):
+                ret_list.append(item)
+
+        return ret_list
 
     def get_members_id_map(self, season_string):
         """ Returns a dictionary mapping of IDs to members for given season.
@@ -68,7 +90,14 @@ class EspnFantasyApiLoader():
             return None
 
         # Handle special case of data in different format for older seasons
-        if int(season_string) < 2018:
+        if self._parse_year_from_season_string(season_string) < 2018:
             return json.load(open(file_path, 'r'))[0]
         else:
             return json.load(open(file_path, 'r'))
+
+    def _parse_year_from_season_string(self, season_string):
+        """ Returns the current year given a season string as an integer.
+            Example: season string of "20192020" returns 2020. """
+        # Simply parse the last 4 digits of the season string
+        # Example: 20192020 will give 2020 here
+        return int(season_string[4:])
