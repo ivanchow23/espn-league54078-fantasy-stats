@@ -55,17 +55,3 @@ class EspnFantasyApiScoringPeriodParser():
             Example: If 0 = "G", 1 = "A", 2 = "PTS"
                      {0: x, 1: y, 2: z} -> {'G': x, 'A': y, 'PTS': z} """
         return {STATS_MAP[int(key)]: val for key, val in stats_dict.items()}
-
-if __name__ == "__main__":
-    """ Main function for testing. """
-    from espn_fantasy_api_loader import EspnFantasyApiLoader
-
-    season_string = "20212022"
-    scoring_period_id = 23
-    espn_fantasy_api = EspnFantasyApiLoader(r"C:\Users\Ivan\Desktop\nhl-stats-sandbox\espn_fantasy_api_downloads")
-    members_id_map = espn_fantasy_api.get_members_id_map(season_string)
-    owner_id = list(members_id_map.keys())[0] # Just get one of the IDs
-
-    scoring_period_parser = EspnFantasyApiScoringPeriodParser(espn_fantasy_api.get_scoring_period_dict(season_string, scoring_period_id))
-    roster_df = scoring_period_parser.get_owner_roster_applied_stats_as_df(owner_id)
-    print(roster_df)
