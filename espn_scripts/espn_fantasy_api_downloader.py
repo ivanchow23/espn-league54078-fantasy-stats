@@ -14,7 +14,7 @@ sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "utils"))
 from requests_util import RequestsUtil
 
 class EspnFantasyApiDownloader:
-    def __init__(self, root_output_folder, season, league_id, cookies):
+    def __init__(self, season, league_id, root_output_folder=DEFAULT_DOWNLOADS_DIR, cookies={}):
         """ Constructor. """
         # Store in a season string folder "XXXXYYYY"
         # Example: 2022 season corresponds to: "20212022"
@@ -133,7 +133,7 @@ if __name__ == "__main__":
 
     # Download various data for all given seasons
     for season in range(start_year, end_year + 1):
-        espn_api = EspnFantasyApiDownloader(output_path, season, league_id, cookies={'espn_s2': espn_s2})
+        espn_api = EspnFantasyApiDownloader(season, league_id, root_output_folder=output_path, cookies={'espn_s2': espn_s2})
         espn_api.download_league_info()
         #espn_api.download_scoring_period(144)
         espn_api.download_scoring_periods()
