@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 # %%
 # Configurations
 daily_rosters_df_path = "espn_fantasy_api_daily_rosters_df.csv"
-cols_of_interest = ['appliedTotal', 'G', 'A', 'PPP', 'SHP', 'GWG', 'HAT', 'W', 'SO']
+cols_of_interest = ['GP', 'appliedTotal', 'G', 'A', 'PPP', 'SHP', 'GWG', 'HAT', 'W', 'SO']
 daily_rosters_df = pd.read_csv(daily_rosters_df_path)
 
 # %%
