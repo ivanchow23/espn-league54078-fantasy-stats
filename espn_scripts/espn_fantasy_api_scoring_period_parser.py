@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """ Parser to extract information for a given scoring_period.json file. """
 from espn_fantasy_api_utils import STATS_MAP
+import math
 import pandas as pd
 
 class EspnFantasyApiScoringPeriodParser():
@@ -33,6 +34,7 @@ class EspnFantasyApiScoringPeriodParser():
                 if applied_stats_dict is not None:
                     roster_dict.update(self._map_stats_index_to_names(applied_stats_dict['appliedStats']))
                     roster_dict['appliedTotal'] = applied_stats_dict['appliedTotal']
+                    roster_dict['GP'] = 1 if not math.isnan(roster_dict['appliedTotal']) else float('nan')
 
                 roster_dicts.append(roster_dict)
         return roster_dicts
