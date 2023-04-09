@@ -52,6 +52,25 @@ class TestEspnFantasyApiScoringPeriodParser(unittest.TestCase):
 
         self.assertEquals(expected_result, actual_result)
 
+    def test_get_owner_roster_applied_stats_as_dicts_empty_applied_stats_for_scoring_period(self):
+        """ Test when player(s) did not play a game (even though there was a game)
+            for a given scoring period. Pattern appears to be when scoringPeriodId
+            of a dictionary exists, but appliedStats dictionary is empty. """
+        # Mimic part of the loaded dictionary structure
+        input_dict = {'scoringPeriodId': 1,
+                      'teams': [{'owners': ["1a2b"],
+                                 'roster': {'entries': [{'lineupSlotId': 3, 'playerPoolEntry': {'player': {'fullName': "Player 1", 'stats': [{'scoringPeriodId': 1, 'appliedTotal': 0, 'appliedStats': {}}]}}},
+                                                        {'lineupSlotId': 4, 'playerPoolEntry': {'player': {'fullName': "Player 2", 'stats': [{'scoringPeriodId': 1, 'appliedTotal': 0, 'appliedStats': {}}]}}},
+                                                        {'lineupSlotId': 5, 'playerPoolEntry': {'player': {'fullName': "Player 3", 'stats': [{'scoringPeriodId': 1, 'appliedTotal': 0, 'appliedStats': {}}]}}}
+                                                       ]}}]}
+
+        parser = EspnFantasyApiScoringPeriodParser(input_dict)
+        actual_result = parser.get_owner_roster_applied_stats_as_dicts("1a2b")
+        expected_result = [{'fullName': "Player 1", 'lineupSlotId': 3, 'appliedTotal': 0},
+                           {'fullName': "Player 2", 'lineupSlotId': 4, 'appliedTotal': 0},
+                           {'fullName': "Player 3", 'lineupSlotId': 5, 'appliedTotal': 0}]
+
+        self.assertEquals(expected_result, actual_result)
 
     def tearDown(self):
         """ Remove any items. """

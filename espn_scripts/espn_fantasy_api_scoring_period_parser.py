@@ -21,11 +21,7 @@ class EspnFantasyApiScoringPeriodParser():
             # Append various information to list of dictionaries
             for roster_entry in team_roster['roster']['entries']:
                 roster_dict = {'fullName': roster_entry['playerPoolEntry']['player']['fullName'],
-                               'lineupSlotId': roster_entry['lineupSlotId'],
-                               #'injuryStatus': roster_entry['injuryStatus'],
-                               #'injured': roster_entry['playerPoolEntry']['player']['injured'],
-                               #'player_injuryStatus': roster_entry['playerPoolEntry']['player']['injuryStatus']
-                              }
+                               'lineupSlotId': roster_entry['lineupSlotId']}
 
                 # First, get dictionary from list of stats that correspond to this scoring period ID
                 applied_stats_dict = self._get_scoring_period_applied_stats_dict(roster_entry['playerPoolEntry']['player']['stats'])
@@ -34,7 +30,10 @@ class EspnFantasyApiScoringPeriodParser():
                 if applied_stats_dict is not None:
                     roster_dict.update(self._map_stats_index_to_names(applied_stats_dict['appliedStats']))
                     roster_dict['appliedTotal'] = applied_stats_dict['appliedTotal']
-                    roster_dict['GP'] = 1 if not math.isnan(roster_dict['appliedTotal']) else float('nan')
+
+                    # Empty dictionary applied stats dictionary don't qualify for a game played
+                    if applied_stats_dict['appliedStats']:
+                        roster_dict['GP'] = 1
 
                 roster_dicts.append(roster_dict)
         return roster_dicts
