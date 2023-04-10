@@ -8,18 +8,6 @@ from pathlib import Path
 import pandas as pd
 
 # %%
-# Declare helper functions
-def _get_num_games_played(season_player_df):
-    """ Get number of games played given dataframe of a season. """
-    # First, filter out for all n/a entries in applied stats
-    df = season_player_df.dropna(subset=['appliedTotal'])
-
-    # Next, filter out entries that have 0 applied total stats but for
-    # some reason has n/a entries for every other stat
-    df = df[~((df['appliedTotal'] == 0) & (df[['G', 'A', 'PPP', 'SHP', 'GWG', 'HAT', 'W', 'SO']].isna().all(axis=1) == True))]
-    return len(df)
-
-# %%
 # Configurations
 daily_rosters_df_path = "espn_fantasy_api_daily_rosters_df.csv"
 daily_rosters_df = pd.read_csv(daily_rosters_df_path)
@@ -43,7 +31,7 @@ for season, season_df in daily_rosters_df.groupby('season'):
         bench_pts = []
         for player, player_df in bench_df.groupby('fullName'):
             bench_pts.append({'player': player,
-                              'gp': _get_num_games_played(player_df),
+                              'gp': int(player_df['GP'].sum()),
                               'pts': int(player_df['appliedTotal'].sum())})
 
         # Sort by descending points for printing purposes
@@ -56,7 +44,7 @@ for season, season_df in daily_rosters_df.groupby('season'):
         ir_pts = []
         for player, player_df in ir_df.groupby('fullName'):
             ir_pts.append({'player': player,
-                           'gp': _get_num_games_played(player_df),
+                           'gp': int(player_df['GP'].sum()),
                            'pts': int(player_df['appliedTotal'].sum())})
 
         # Sort by descending points for printing purposes
