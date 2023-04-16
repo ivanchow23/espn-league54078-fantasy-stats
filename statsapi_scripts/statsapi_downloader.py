@@ -262,14 +262,12 @@ if __name__ == "__main__":
     output_path = args.output_path
 
     # Instantiate
-    statsapi_downloader = StatsapiDownloader(output_path, overwrite=False)
+    statsapi_downloader = StatsapiDownloader(output_path, overwrite=True)
 
     # Download most up-to-date teams data
-    statsapi_downloader.overwrite = True
     statsapi_downloader.download_teams_data()
 
     # Download relevant data for each season
-    statsapi_downloader.overwrite = False
     for season in range(start_year, end_year + 1):
         # Example: The 2020 season will be "20202021"
         season_string = f"{season}{season + 1}"
