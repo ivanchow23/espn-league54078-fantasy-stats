@@ -46,10 +46,12 @@ for season, season_df in daily_rosters_non_ir_bench_df.groupby('season'):
     total_df['appliedTotal/GP'] = round(total_df['appliedTotal'] / total_df['GP'], 2)
 
     # Analyze contributions of each player in each position
+    print(season)
     for pos, pos_df in total_df.groupby('position'):
         # Normalize by max slots for the season
         num_slots = _get_season_max_position_slots(season_df, pos)
         avg_pts_per_slot = pos_df['appliedTotal'].sum() / num_slots / num_owners
+        print(f"Average points per slot for {pos}: {round(avg_pts_per_slot, 2)}")
 
         # This is how many slots does the player actually take up based on their
         # accumulated total compared to league average points contribution per slot
@@ -60,4 +62,6 @@ for season, season_df in daily_rosters_non_ir_bench_df.groupby('season'):
 
         pos_df['season'] = season
         combined_df = pd.concat([combined_df, pos_df], ignore_index=True)
+    print()
 combined_df.to_csv("player_contribution_analysis.csv", index=False)
+# %%
