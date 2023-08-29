@@ -74,15 +74,124 @@ class DraftDataGenerator():
         combined_df['HITS'] = combined_df.apply(
             lambda x: self._get_player_season_stat(
                 self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'hits'), axis=1)
+        combined_df['S'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'shots'), axis=1)
+        combined_df['S%'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'shotPct'), axis=1)
+        combined_df['PPG'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'powerPlayGoals'), axis=1)
+        combined_df['PPP'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'powerPlayPoints'), axis=1)
+        combined_df['GWG'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'gameWinningGoals'), axis=1)
+        combined_df['OTG'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'overTimeGoals'), axis=1)
+        combined_df['SHG'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'shortHandedGoals'), axis=1)
+        combined_df['SHP'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'shortHandedPoints'), axis=1)
+        combined_df['FO%'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'faceOffPct'), axis=1)
+        combined_df['BKS'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'blocked'), axis=1)
+        combined_df['SHFT'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'shifts'), axis=1)
+        combined_df['TOI'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'timeOnIce'), axis=1)
+        combined_df['PPTOI'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'powerPlayTimeOnIce'), axis=1)
+        combined_df['ETOI'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'evenTimeOnIce'), axis=1)
+        combined_df['SHTOI'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'shortHandedTimeOnIce'), axis=1)
+        combined_df['TOI/G'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'timeOnIcePerGame'), axis=1)
+        combined_df['ETOI/G'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'evenTimeOnIcePerGame'), axis=1)
+        combined_df['SHTOI/G'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'shortHandedTimeOnIcePerGame'), axis=1)
+        combined_df['PPTOI/G'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'powerPlayTimeOnIcePerGame'), axis=1)
+
+        combined_df['GS'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'gamesStarted'), axis=1)
         combined_df['W'] = combined_df.apply(
             lambda x: self._get_player_season_stat(
                 self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'wins'), axis=1)
         combined_df['L'] = combined_df.apply(
             lambda x: self._get_player_season_stat(
                 self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'losses'), axis=1)
+        combined_df['OT'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'ot'), axis=1)
+        combined_df['T'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'ties'), axis=1)
         combined_df['SO'] = combined_df.apply(
             lambda x: self._get_player_season_stat(
                 self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'shutouts'), axis=1)
+        combined_df['SV%'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'SavePercentage'), axis=1)
+        combined_df['GAA'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'goalAgainstAverage'), axis=1)
+        combined_df['SV'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'saves'), axis=1)
+        combined_df['SA'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'shotsAgainst'), axis=1)
+        combined_df['GA'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'goalsAgainst'), axis=1)
+        combined_df['PPSV'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'powerPlaySaves'), axis=1)
+        combined_df['SHSV'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'shortHandedSaves'), axis=1)
+        combined_df['ESV'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'evenSaves'), axis=1)
+        combined_df['PPSA'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'powerPlayShots'), axis=1)
+        combined_df['SHSA'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'shortHandedShots'), axis=1)
+        combined_df['ESA'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'evenShots'), axis=1)
+        combined_df['PPSV%'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'powerPlaySavePercentage'), axis=1)
+        combined_df['SHSV%'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'shortHandedSavePercentage'), axis=1)
+        combined_df['ESV%'] = combined_df.apply(
+            lambda x: self._get_player_season_stat(
+                self._statsapi_loader.load_player_season_stats_dict(x['Player'], x['Season']), 'evenStrengthSavePercentage'), axis=1)
 
         return combined_df
 
