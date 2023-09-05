@@ -1,9 +1,11 @@
 aiohttp
 bs4
 html5lib
+ipykernel
 kaleido
 lxml
 matplotlib
+nbformat
 openpyxl
 pandas
 plotly
