@@ -1,4 +1,5 @@
 .vscode/launch.json
+.venv/*
 **/__pycache__/*
 **/*.log
 espn_scripts/espn_fantasy_api_downloads

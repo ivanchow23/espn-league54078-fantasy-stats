@@ -7,5 +7,5 @@ set START_YEAR=2023
 set END_YEAR=2023
 set DOWNLOAD_PATH="%~dp0statsapi_downloads"
 
-%~dp0statsapi_scripts\statsapi_downloader.py -s %START_YEAR% -e %END_YEAR% -o %DOWNLOAD_PATH%
+%~dp0.venv\Scripts\python.exe %~dp0statsapi_scripts\statsapi_downloader.py -s %START_YEAR% -e %END_YEAR% -o %DOWNLOAD_PATH%
 pause
