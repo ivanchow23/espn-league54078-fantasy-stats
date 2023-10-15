@@ -75,7 +75,7 @@ class EspnHtmlParserClubhouse():
             return return_dict
 
         # Read and parse HTML for various tags
-        soup = BeautifulSoup(open(self._html_path, 'r'), 'html.parser')
+        soup = BeautifulSoup(open(self._html_path, 'r', encoding='utf-8'), 'html.parser')
 
         # Parse for team name from file name
         # Must follow expected naming format: "<team_name> Clubhouse - <...>.html"

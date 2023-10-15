@@ -83,7 +83,7 @@ class EspnHtmlParserLeagueRosters():
             return None
 
         # Read HTML file for various information
-        return BeautifulSoup(open(self._html_path, 'r'), 'html.parser')
+        return BeautifulSoup(open(self._html_path, 'r', encoding='utf-8'), 'html.parser')
 
     def _read_html_dfs(self):
         """ Reads HTML file and returns list of dataframes. """
