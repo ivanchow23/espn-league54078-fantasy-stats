@@ -3,8 +3,10 @@
     Supports JSON data loading, downloading, etc. """
 import aiohttp
 import asyncio
+import certifi
 import json
 import requests
+import ssl
 import sys
 
 class RequestsUtil():
@@ -86,7 +88,8 @@ class RequestsUtil():
             a list of dictionaries where each dictionary is expected to
             be in the same order as the input URL list. """
         json_data_list = []
-        connector = aiohttp.TCPConnector(limit=50)
+        ssl_context = ssl.create_default_context(cafile=certifi.where())
+        connector = aiohttp.TCPConnector(ssl=ssl_context, limit=50)
         async with aiohttp.ClientSession(connector=connector) as session:
             tasks = []
             for url in url_list:
