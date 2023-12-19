@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from datetime import datetime
 import dominate
 from dominate.tags import *
 from dominate.util import raw
@@ -36,10 +37,15 @@ class EspnHtmlDashboardGenerator():
     def _setup_html_doc(self):
         """ Sets up an HTML document. """
         doc = dominate.document(title="ESPN HTML Dashboard")
+        dt_str = datetime.now().strftime(r"%m/%d/%Y %H:%M")
 
         # Enable plotly interactive graphs
         with doc.head:
             script(src="plotly-2.27.0.min.js", charset="utf-8")
+
+        # Add title headers
+        doc.add(h2(f"ESPN League 54078 Dashboard", align='center', style="font-family:tahoma; font-size:28px; color:black;"))
+        doc.add(p(f"Generated: {dt_str}", align='center', style="font-family:tahoma; color:black;"))
 
         return doc
 
