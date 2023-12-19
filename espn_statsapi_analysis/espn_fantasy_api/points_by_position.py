@@ -40,9 +40,9 @@ class PointsByPosition():
         # Build dataframe table of stats by position for each owner
         season_stats_df = pd.DataFrame()
         for owner, owner_df in season_df.groupby('owner'):
-            stat_dict = {'Owner': owner, 'Total Points': owner_df['appliedTotal'].sum()}
+            stat_dict = {'Owner': owner, 'Total Points': round(owner_df['appliedTotal'].sum(), 2)}
             for pos, pos_df in owner_df.groupby('position'):
-                pos_pts = int(pos_df['appliedTotal'].iloc[0])
+                pos_pts = round(pos_df['appliedTotal'].iloc[0], 2)
                 pos_plus_minus_avg = round((pos_df['appliedTotal (norm. by avg)'].iloc[0] - 1.0) * 100, 1)
                 stat_dict[f'{pos} (+/- Avg)'] = f"{pos_pts} ({pos_plus_minus_avg}%)"
             season_stats_df = pd.concat([season_stats_df, pd.DataFrame([stat_dict])], ignore_index=True)
