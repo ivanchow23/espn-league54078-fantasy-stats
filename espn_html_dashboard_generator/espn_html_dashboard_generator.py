@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+import dominate
+from dominate.tags import *
+from dominate.util import raw
+import os
+
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+import sys
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_statsapi_analysis"))
+from espn_fantasy_api.daily_points import DailyPoints
+from espn_fantasy_api.points_by_position import PointsByPosition
+
+SEASON = 20232024
+ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH = os.path.join(SCRIPT_DIR, "..", "espn_statsapi_analysis", "espn_fantasy_api", "espn_fantasy_api_daily_rosters_df.csv")
+
+class EspnHtmlDashboardGenerator():
+    def __init__(self, html_output_path=os.path.join(SCRIPT_DIR, "espn_html_dashboard.html")):
+        """ Default constructor. """
+        self._html_output_path = html_output_path
+        self._doc = dominate.document(title="ESPN HTML Dashboard")
+
+    def get_doc(self):
+        """ Returns a reference to the HTML document. """
+        return self._doc
+
+    def generate(self):
+        """ Generate the HTML dashboard page. """
+        with open(self._html_output_path, 'wb') as html_file:
+            html_doc_string = self._doc.render()
+            html_doc_encoded = html_doc_string.encode('utf-8')
+            html_file.write(html_doc_encoded)
+
+if __name__ == "__main__":
+    dashboard = EspnHtmlDashboardGenerator()
+    doc = dashboard.get_doc()
+
+    dp = DailyPoints(ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH)
+    pbp = PointsByPosition(ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH)
+
+    dp_fig = dp.get_cumulative_points_plot(key="appliedTotal", season=SEASON)
+    dp_norm_avg_fig = dp.get_cumulative_points_norm_by_avg_plot(key="appliedTotal", season=SEASON)
+    dp_norm_first_fig = dp.get_cumulative_points_norm_by_first_plot(key="appliedTotal", season=SEASON)
+    pbp_fig = pbp.get_stats_table(season=SEASON)
+
+    dp_html = dp_fig.to_html(include_plotlyjs=True, full_html=False)
+    dp_norm_avg_html = dp_norm_avg_fig.to_html(include_plotlyjs=True, full_html=False)
+    dp_norm_first_html = dp_norm_first_fig.to_html(include_plotlyjs=True, full_html=False)
+    pbp_html = pbp_fig.to_html(include_plotlyjs=True, full_html=False)
+
+    with doc:
+        with div() as d:
+            raw(dp_html)
+            raw(dp_norm_avg_html)
+            raw(dp_norm_first_html)
+            raw(pbp_html)
+
+    dashboard.generate()
