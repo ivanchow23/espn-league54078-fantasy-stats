@@ -27,7 +27,8 @@ class EspnFantasyApiDailyRostersDataGenerator():
 
             # Get scoring period start and ends
             scoring_period_start = self._loader.get_league_info_dict(season_string)['status']['firstScoringPeriod']
-            scoring_period_end = self._loader.get_league_info_dict(season_string)['status']['finalScoringPeriod']
+            scoring_period_end = min(self._loader.get_league_info_dict(season_string)['status']['latestScoringPeriod'],
+                                     self._loader.get_league_info_dict(season_string)['status']['finalScoringPeriod'])
 
             # Store roster data for each scoring period and owner
             for scoring_period in range(scoring_period_start, scoring_period_end + 1):
