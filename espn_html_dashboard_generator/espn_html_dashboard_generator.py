@@ -41,7 +41,10 @@ class EspnHtmlDashboardGenerator():
 
         # Enable plotly interactive graphs
         with doc.head:
-            script(src="plotly-2.27.0.min.js", charset="utf-8")
+            plotly_js = ""
+            with open(os.path.join(SCRIPT_DIR, "plotly-2.27.0.min.js"), 'r', encoding='utf-8') as plotly_js_file:
+                plotly_js = plotly_js_file.read()
+            script(raw(plotly_js))
 
         # Add title headers
         doc.add(h2(f"ESPN League 54078 Dashboard", align='center', style="font-family:tahoma; font-size:28px; color:black;"))
