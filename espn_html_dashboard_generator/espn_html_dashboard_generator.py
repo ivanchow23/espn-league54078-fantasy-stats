@@ -16,7 +16,7 @@ SEASON = 20232024
 ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH = os.path.join(SCRIPT_DIR, "..", "espn_statsapi_analysis", "espn_fantasy_api", "espn_fantasy_api_daily_rosters_df.csv")
 
 class EspnHtmlDashboardGenerator():
-    def __init__(self, html_output_path=os.path.join(SCRIPT_DIR, "espn_html_dashboard.html")):
+    def __init__(self, html_output_path=os.path.join(SCRIPT_DIR, "index.html")):
         """ Default constructor. """
         self._html_output_path = html_output_path
 
