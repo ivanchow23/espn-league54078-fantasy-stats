@@ -13,6 +13,11 @@ daily_rosters_df_path = "espn_fantasy_api_daily_rosters_df.csv"
 daily_rosters_df = pd.read_csv(daily_rosters_df_path)
 
 # %%
+# Filter out for when players are placed on the bench or IR
+daily_rosters_df = daily_rosters_df[daily_rosters_df['lineupSlotId'] != 7]
+daily_rosters_df = daily_rosters_df[daily_rosters_df['lineupSlotId'] != 8]
+
+# %%
 # Go through each season and filter for players who was on multiple owner teams
 for season, season_df in daily_rosters_df.groupby('season'):
     for player, player_df in season_df.groupby('fullName'):
