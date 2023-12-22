@@ -50,5 +50,5 @@ for season, season_df in man_games_lost_rosters_df.groupby('season'):
 
     fig = go.Figure([go.Table(header={'values': man_games_lost_table_df.columns},
                               cells={'values': [man_games_lost_table_df[col].to_list() for col in man_games_lost_table_df.columns]})])
-    fig.update_layout(title=f"{season} Man Games Lost")
+    fig.update_layout(title=f"{season} Man Games Lost<br>(Total # of Games Player was Out/IR but Left on Roster)")
     fig.show()
