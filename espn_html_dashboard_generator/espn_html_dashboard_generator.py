@@ -11,6 +11,7 @@ import sys
 sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_statsapi_analysis"))
 from espn_fantasy_api.daily_points import DailyPoints
 from espn_fantasy_api.points_by_position import PointsByPosition
+from espn_fantasy_api.player_with_different_owners import PlayerWithDifferentOwners
 
 SEASON = 20232024
 ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH = os.path.join(SCRIPT_DIR, "..", "espn_statsapi_analysis", "espn_fantasy_api", "espn_fantasy_api_daily_rosters_df.csv")
@@ -58,16 +59,19 @@ if __name__ == "__main__":
 
     dp = DailyPoints(ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH)
     pbp = PointsByPosition(ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH)
+    pwdo = PlayerWithDifferentOwners(ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH)
 
     dp_fig = dp.get_cumulative_points_plot(key="appliedTotal", season=SEASON)
     dp_norm_avg_fig = dp.get_cumulative_points_norm_by_avg_plot(key="appliedTotal", season=SEASON)
     dp_norm_first_fig = dp.get_cumulative_points_norm_by_first_plot(key="appliedTotal", season=SEASON)
     pbp_fig = pbp.get_stats_table(season=SEASON)
+    pwdo_fig = pwdo.get_table_fig(season=SEASON)
 
     dp_html = dp_fig.to_html(include_plotlyjs=False, full_html=False)
     dp_norm_avg_html = dp_norm_avg_fig.to_html(include_plotlyjs=False, full_html=False)
     dp_norm_first_html = dp_norm_first_fig.to_html(include_plotlyjs=False, full_html=False)
     pbp_html = pbp_fig.to_html(include_plotlyjs=False, full_html=False)
+    pwdo_html = pwdo_fig.to_html(include_plotlyjs=False, full_html=False)
 
     with doc:
         with div() as d:
@@ -75,5 +79,6 @@ if __name__ == "__main__":
             raw(dp_norm_avg_html)
             raw(dp_norm_first_html)
             raw(pbp_html)
+            raw(pwdo_html)
 
     dashboard.generate()
