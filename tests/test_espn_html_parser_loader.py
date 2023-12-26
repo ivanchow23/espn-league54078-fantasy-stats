@@ -9,12 +9,12 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 import sys
 sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_scripts"))
-import espn_loader
+import espn_html_parser_loader
 
-class TestEspnLoader(unittest.TestCase):
+class TestEspnHtmlParserLoader(unittest.TestCase):
     def setUp(self):
         """ Set-up required items. """
-        self._test_folder = os.path.join(SCRIPT_DIR, "test_espn_loader_folder")
+        self._test_folder = os.path.join(SCRIPT_DIR, "test_espn_html_parser_loader_folder")
         os.makedirs(self._test_folder, exist_ok=True)
 
     def test_load_clubhouse_data(self):
@@ -24,7 +24,7 @@ class TestEspnLoader(unittest.TestCase):
         self._generate_typical_test_folder_structure(test_folder_root_path, "20202021")
 
         # Instantiate
-        espn = espn_loader.EspnLoader(test_folder_root_path)
+        espn = espn_html_parser_loader.EspnHtmlParserLoader(test_folder_root_path)
 
         # Test typical case
         expected_data = [1, 2, 3]
@@ -43,7 +43,7 @@ class TestEspnLoader(unittest.TestCase):
         self._generate_typical_test_folder_structure(test_folder_root_path, "20202021")
 
         # Instantiate
-        espn = espn_loader.EspnLoader(test_folder_root_path)
+        espn = espn_html_parser_loader.EspnHtmlParserLoader(test_folder_root_path)
 
         # Test typical case
         expected_data = [1, 2, 3]
@@ -62,7 +62,7 @@ class TestEspnLoader(unittest.TestCase):
         self._generate_typical_test_folder_structure(test_folder_root_path, "20202021")
 
         # Instantiate
-        espn = espn_loader.EspnLoader(test_folder_root_path)
+        espn = espn_html_parser_loader.EspnHtmlParserLoader(test_folder_root_path)
 
         # Test typical case
         expected_data = [1, 2, 3]
@@ -86,7 +86,7 @@ class TestEspnLoader(unittest.TestCase):
         open(os.path.join(test_folder_root_path, "empty.csv"), 'w')
 
         # Instantiate
-        espn = espn_loader.EspnLoader(test_folder_root_path)
+        espn = espn_html_parser_loader.EspnHtmlParserLoader(test_folder_root_path)
 
         # Test typical case
         expected_data = ["20192020", "20202021", "1234512346"]
@@ -104,7 +104,7 @@ class TestEspnLoader(unittest.TestCase):
         self._generate_typical_test_folder_structure(test_folder_root_path, "20202021")
 
         # Instantiate
-        espn = espn_loader.EspnLoader(test_folder_root_path)
+        espn = espn_html_parser_loader.EspnHtmlParserLoader(test_folder_root_path)
 
         # Test typical paths that should exist (folders and files)
         self.assertTrue(espn._check_path(self._test_folder))
@@ -131,7 +131,7 @@ class TestEspnLoader(unittest.TestCase):
         self._generate_typical_test_folder_structure(test_folder_root_path, "20202021")
 
         # Instantiate
-        espn = espn_loader.EspnLoader(test_folder_root_path)
+        espn = espn_html_parser_loader.EspnHtmlParserLoader(test_folder_root_path)
 
         # Test typical case
         expected_path = os.path.join(test_pickle_folder_path, "Test.pickle")

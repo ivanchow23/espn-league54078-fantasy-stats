@@ -2,12 +2,12 @@
 """ Parser for ESPN clubhouse files. """
 import argparse
 from bs4 import BeautifulSoup
-import espn_utils
+import espn_html_parser_utils
 import os
 import pandas as pd
 
-import espn_logger
-logger = espn_logger.logger()
+import espn_html_parser_logger
+logger = espn_html_parser_logger.logger()
 
 NUM_EXPECTED_HTML_TABLES = 6
 
@@ -19,7 +19,7 @@ class EspnHtmlParserClubhouse():
         self.valid = True
 
         # Input check
-        if not espn_utils.check_html(html_path):
+        if not espn_html_parser_utils.check_html(html_path):
             logger.warning(f"Invalid input: {html_path}. Skipping...")
             self.valid = False
 
@@ -126,7 +126,7 @@ class EspnHtmlParserClubhouse():
         # Parse for additional metadata embedded in the player strings
         player_metadata_dict_list = []
         for player in player_df[index_key, 'Player']:
-            player_metadata_dict_list.append(espn_utils.parse_metadata_from_player_str(player))
+            player_metadata_dict_list.append(espn_html_parser_utils.parse_metadata_from_player_str(player))
 
         # Convert list of dictionaries to dataframe
         player_metadata_df = pd.DataFrame(player_metadata_dict_list)

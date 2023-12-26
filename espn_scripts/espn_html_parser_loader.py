@@ -4,7 +4,7 @@ import os
 import pickle
 import re
 
-class EspnLoader():
+class EspnHtmlParserLoader():
     """ Holds a reference to the root ESPN data folder and provides APIs to load data from it.
         Assumes the following general structure in data folder:
 

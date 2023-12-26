@@ -4,10 +4,10 @@ import os
 import pandas as pd
 import pickle
 
-import espn_logger
-logger = espn_logger.logger()
+import espn_html_parser_logger
+logger = espn_html_parser_logger.logger()
 
-class EspnWriter():
+class EspnHtmlParserWriter():
     """ Holds a reference to a data folder and provides APIs to write data to it.
         Assumes the ESPN data is in the following general structure:
 

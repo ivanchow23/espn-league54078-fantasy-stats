@@ -12,13 +12,13 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 import sys
 sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_scripts"))
 sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "statsapi_scripts"))
-from espn_loader import EspnLoader
+from espn_html_parser_loader import EspnHtmlParserLoader
 from statsapi_loader import StatsapiLoader
 
 class DraftDataGenerator():
     """ Generate draft related data. """
-    def __init__(self, espn_loader, statsapi_loader, out_dir):
-        self._espn_loader = espn_loader
+    def __init__(self, espn_html_parser_loader, statsapi_loader, out_dir):
+        self._espn_html_parser_loader = espn_html_parser_loader
         self._statsapi_loader = statsapi_loader
         self._out_dir = out_dir
 
@@ -32,8 +32,8 @@ class DraftDataGenerator():
         combined_df = pd.DataFrame()
 
         # Load draft information for all seasons and combine
-        for season_string in self._espn_loader.get_seasons():
-            draft_df = self._espn_loader.load_draft_recap_data(season_string)
+        for season_string in self._espn_html_parser_loader.get_seasons():
+            draft_df = self._espn_html_parser_loader.load_draft_recap_data(season_string)
             if draft_df is None:
                 continue
 
@@ -272,8 +272,8 @@ class DraftDataGenerator():
 
 class StandingsDataGenerator():
     """ Generate season standings related data. """
-    def __init__(self, espn_loader, out_dir):
-        self._espn_loader = espn_loader
+    def __init__(self, espn_html_parser_loader, out_dir):
+        self._espn_html_parser_loader = espn_html_parser_loader
         self._out_dir = out_dir
 
         self._standings_dict = self._load_standings_dict()
@@ -306,10 +306,10 @@ class StandingsDataGenerator():
         standings_dict = {}
 
         # Load standings information and combine into respective dataframes
-        for season_string in self._espn_loader.get_seasons():
+        for season_string in self._espn_html_parser_loader.get_seasons():
             standings_dict[season_string] = {}
 
-            league_standings_dict = self._espn_loader.load_league_standings_data(season_string)
+            league_standings_dict = self._espn_html_parser_loader.load_league_standings_data(season_string)
             if league_standings_dict is None or len(league_standings_dict) == 0:
                 continue
 
@@ -369,8 +369,8 @@ if __name__ == "__main__":
     arg_parser.add_argument("--statsapi", required=True, help="Root path of statsapi data cache from statsapi downloader.")
     arg_parser.add_argument("--outdir", required=True, help="Path to folder where output data will go.")
     args = arg_parser.parse_args()
-    espn_loader = EspnLoader(args.espn)
+    espn_html_parser_loader = EspnHtmlParserLoader(args.espn)
     statsapi_loader = StatsapiLoader(args.statsapi)
 
-    DraftDataGenerator(espn_loader, statsapi_loader, args.outdir).generate()
-    StandingsDataGenerator(espn_loader, args.outdir).generate()
+    DraftDataGenerator(espn_html_parser_loader, statsapi_loader, args.outdir).generate()
+    StandingsDataGenerator(espn_html_parser_loader, args.outdir).generate()

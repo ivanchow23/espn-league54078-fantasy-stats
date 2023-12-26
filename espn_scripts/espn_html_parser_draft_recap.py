@@ -2,12 +2,12 @@
 """ Parser for ESPN draft recap files. """
 import argparse
 from bs4 import BeautifulSoup
-import espn_utils
+import espn_html_parser_utils
 import os
 import pandas as pd
 
-import espn_logger
-logger = espn_logger.logger()
+import espn_html_parser_logger
+logger = espn_html_parser_logger.logger()
 
 class EspnHtmlParserDraftRecap():
     """ Class for ESPN draft recap file parsing. """
@@ -17,7 +17,7 @@ class EspnHtmlParserDraftRecap():
         self.valid = True
 
         # Input check
-        if not espn_utils.check_html(html_path):
+        if not espn_html_parser_utils.check_html(html_path):
             logger.warning(f"Invalid input: {html_path}. Skipping...")
             self.valid = False
 
@@ -73,7 +73,7 @@ class EspnHtmlParserDraftRecap():
         combined_df = combined_df.rename(columns={'index': 'Draft Number'})
 
         # Replace special characters in the team name to stay consistent with file names
-        combined_df['Team Name'] = combined_df['Team Name'].apply(espn_utils.sub_special_chars)
+        combined_df['Team Name'] = combined_df['Team Name'].apply(espn_html_parser_utils.sub_special_chars)
         return combined_df
 
     def _modify_player_col(self, df):
@@ -82,7 +82,7 @@ class EspnHtmlParserDraftRecap():
         # Parse for additional metadata embedded in the player strings
         player_metadata_dict_list = []
         for player in df['Player']:
-            player_metadata_dict_list.append(espn_utils.parse_draft_metadata_from_player_str(player))
+            player_metadata_dict_list.append(espn_html_parser_utils.parse_draft_metadata_from_player_str(player))
 
         # New dataframe to add into original
         new_player_df = pd.DataFrame(player_metadata_dict_list)

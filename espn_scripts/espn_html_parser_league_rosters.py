@@ -2,12 +2,12 @@
 """ Parser for ESPN league rosters files. """
 import argparse
 from bs4 import BeautifulSoup
-import espn_utils
+import espn_html_parser_utils
 import os
 import pandas as pd
 
-import espn_logger
-logger = espn_logger.logger()
+import espn_html_parser_logger
+logger = espn_html_parser_logger.logger()
 
 class EspnHtmlParserLeagueRosters():
     """ Class for ESPN league rosters file parsing. """
@@ -17,7 +17,7 @@ class EspnHtmlParserLeagueRosters():
         self.valid = True
 
         # Input check
-        if not espn_utils.check_html(html_path):
+        if not espn_html_parser_utils.check_html(html_path):
             logger.warning(f"Invalid input: {html_path}. Skipping...")
             self.valid = False
 
@@ -43,7 +43,7 @@ class EspnHtmlParserLeagueRosters():
         # First, parse for list of team names (and replace special characters to stay consistent with file names)
         team_names_list = []
         for span_tag in self._html_soup.find_all('span', class_='teamName'):
-            team_names_list.append(espn_utils.sub_special_chars(span_tag['title']))
+            team_names_list.append(espn_html_parser_utils.sub_special_chars(span_tag['title']))
 
         # Error check
         if len(self._html_dfs) != len(team_names_list):
@@ -64,7 +64,7 @@ class EspnHtmlParserLeagueRosters():
         # Parse for additional metadata embedded in the player strings
         player_metadata_dict_list = []
         for player in player_df['PLAYER']:
-            player_metadata_dict_list.append(espn_utils.parse_metadata_from_player_str(player))
+            player_metadata_dict_list.append(espn_html_parser_utils.parse_metadata_from_player_str(player))
 
         # Convert list of dictionaries to dataframe
         player_metadata_df = pd.DataFrame(player_metadata_dict_list)

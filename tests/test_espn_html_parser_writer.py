@@ -9,20 +9,20 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 import sys
 sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_scripts"))
-import espn_writer
+import espn_html_parser_writer
 
-class TestEspnWriter(unittest.TestCase):
+class TestEspnHtmlParserWriter(unittest.TestCase):
     def setUp(self):
         """ Set-up required items. """
-        self._test_folder = os.path.join(SCRIPT_DIR, "test_espn_writer_folder")
+        self._test_folder = os.path.join(SCRIPT_DIR, "test_espn_html_parser_writer_folder")
         os.makedirs(self._test_folder, exist_ok=True)
 
-    def test_EspnWriter(self):
+    def test_EspnHtmlParserWriter(self):
         """ Test instantiation of class. """
-        test_folder = os.path.join(self._test_folder, "test_EspnWriter")
+        test_folder = os.path.join(self._test_folder, "test_EspnHtmlParserWriter")
 
         # Test typical case
-        espn = espn_writer.EspnWriter(test_folder)
+        espn = espn_html_parser_writer.EspnHtmlParserWriter(test_folder)
         self.assertTrue(os.path.exists(os.path.join(test_folder, "csv")))
         self.assertTrue(os.path.exists(os.path.join(test_folder, "excel")))
         self.assertTrue(os.path.exists(os.path.join(test_folder, "pickles")))
@@ -31,7 +31,7 @@ class TestEspnWriter(unittest.TestCase):
         """ Test dataframe to CSV. """
         test_folder = os.path.join(self._test_folder, "test_df_to_csv")
         test_df = pd.DataFrame([{'A': 1, 'B': 2}, {'A': 3, 'B': 4}])
-        espn = espn_writer.EspnWriter(test_folder)
+        espn = espn_html_parser_writer.EspnHtmlParserWriter(test_folder)
 
         # Test typical case
         espn.df_to_csv(test_df, "test_df.csv")
@@ -67,7 +67,7 @@ class TestEspnWriter(unittest.TestCase):
         test_df3 = pd.DataFrame([{'E': 9, 'F': 10}, {'E': 11, 'F': 12}])
         test_multi_df = pd.DataFrame(columns=pd.MultiIndex.from_tuples([("Test", "Col1"), ("Test", "Col2")]))
         test_multi_df['Test'] = pd.DataFrame([{'Col1': 100, 'Col2': 200}, {'Col1': 101, 'Col2': 201}])
-        espn = espn_writer.EspnWriter(test_folder)
+        espn = espn_html_parser_writer.EspnHtmlParserWriter(test_folder)
 
         # Test typical case - no sheet specified
         file_name = "test_file_single_sheet.xlsx"
@@ -114,7 +114,7 @@ class TestEspnWriter(unittest.TestCase):
         """ Test data to pickle. """
         test_folder = os.path.join(self._test_folder, "test_to_pickle")
         test_file_path = os.path.join(test_folder, "test.pickle")
-        espn = espn_writer.EspnWriter(test_folder)
+        espn = espn_html_parser_writer.EspnHtmlParserWriter(test_folder)
 
         # Test typical case of various inputs
         input_data = 123

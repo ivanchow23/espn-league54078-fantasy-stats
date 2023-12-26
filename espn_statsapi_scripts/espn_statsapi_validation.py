@@ -29,7 +29,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_scripts"))
 sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "statsapi_scripts"))
-from espn_loader import EspnLoader
+from espn_html_parser_loader import EspnHtmlParserLoader
 from statsapi_loader import StatsapiLoader
 
 # Regex pattern to find a season string
@@ -111,9 +111,9 @@ def main(espn_path, statsapi_path, out_path):
             continue
 
         # Load ESPN data
-        espn_loader = EspnLoader(espn_path)
-        espn_draft_recap_df = espn_loader.load_draft_recap_data(season_string)
-        espn_clubhouses_list = espn_loader.load_clubhouses_data(season_string)
+        espn_html_parser_loader = EspnHtmlParserLoader(espn_path)
+        espn_draft_recap_df = espn_html_parser_loader.load_draft_recap_data(season_string)
+        espn_clubhouses_list = espn_html_parser_loader.load_clubhouses_data(season_string)
 
         # Combine all clubhouses into single dataframe
         espn_clubhouses_df = pd.DataFrame()

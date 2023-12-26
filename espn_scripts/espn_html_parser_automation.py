@@ -26,8 +26,8 @@ from espn_html_parser_clubhouse import EspnHtmlParserClubhouse
 from espn_html_parser_league_rosters import EspnHtmlParserLeagueRosters
 from espn_html_parser_league_standings import EspnHtmlParserLeagueStandings
 from espn_html_parser_draft_recap import EspnHtmlParserDraftRecap
-import espn_utils
-from espn_writer import EspnWriter
+import espn_html_parser_utils
+from espn_html_parser_writer import EspnHtmlParserWriter
 import os
 import pandas as pd
 import pickle
@@ -35,8 +35,8 @@ import re
 import sys
 import timeit
 
-import espn_logger
-logger = espn_logger.logger()
+import espn_html_parser_logger
+logger = espn_html_parser_logger.logger()
 
 sys.path.insert(1, os.path.join(sys.path[0], "..", "espn_statsapi_scripts"))
 import espn_statsapi_utils
@@ -56,14 +56,14 @@ def main(root_folder_path):
         season_string = os.path.basename(folder_path)
 
         # Find files to parse
-        clubhouse_file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_CLUBHOUSE)
-        league_roster_file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS)
-        league_standing_file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_LEAGUE_STANDINGS)
-        draft_recap_file_paths = _find_files_recursive(folder_path, espn_utils.FILE_NAME_RE_FORMAT_DRAFT_RECAP)
+        clubhouse_file_paths = _find_files_recursive(folder_path, espn_html_parser_utils.FILE_NAME_RE_FORMAT_CLUBHOUSE)
+        league_roster_file_paths = _find_files_recursive(folder_path, espn_html_parser_utils.FILE_NAME_RE_FORMAT_LEAGUE_ROSTERS)
+        league_standing_file_paths = _find_files_recursive(folder_path, espn_html_parser_utils.FILE_NAME_RE_FORMAT_LEAGUE_STANDINGS)
+        draft_recap_file_paths = _find_files_recursive(folder_path, espn_html_parser_utils.FILE_NAME_RE_FORMAT_DRAFT_RECAP)
         correction_files = _find_files_recursive(folder_path, "[0-9]+_corrections")
 
         # Set-up output
-        espn_writer = EspnWriter(folder_path)
+        espn_html_parser_writer = EspnHtmlParserWriter(folder_path)
 
         # Parse clubhouse files
         team_owners_dicts = []
@@ -180,42 +180,42 @@ def main(root_folder_path):
         # CSV outputs
         logger.info("Outputting CSV files.")
         for clubhouse_dict in clubhouse_dicts:
-            file_basename = espn_utils.sub_special_chars((f"{season_string} Clubhouse - {clubhouse_dict['Team Name']} ({clubhouse_dict['Owner Name']})"))
-            espn_writer.df_to_csv(clubhouse_dict['skaters_df'], f"{file_basename} - Skaters.csv")
-            espn_writer.df_to_csv(clubhouse_dict['goalies_df'], f"{file_basename} - Goalies.csv")
+            file_basename = espn_html_parser_utils.sub_special_chars((f"{season_string} Clubhouse - {clubhouse_dict['Team Name']} ({clubhouse_dict['Owner Name']})"))
+            espn_html_parser_writer.df_to_csv(clubhouse_dict['skaters_df'], f"{file_basename} - Skaters.csv")
+            espn_html_parser_writer.df_to_csv(clubhouse_dict['goalies_df'], f"{file_basename} - Goalies.csv")
 
         for roster in rosters_list:
-            file_basename = espn_utils.sub_special_chars(f"{season_string} League Roster - {roster['team_name']}")
-            espn_writer.df_to_csv(roster['roster_df'], f"{file_basename}.csv")
+            file_basename = espn_html_parser_utils.sub_special_chars(f"{season_string} League Roster - {roster['team_name']}")
+            espn_html_parser_writer.df_to_csv(roster['roster_df'], f"{file_basename}.csv")
 
-        espn_writer.df_to_csv(draft_recap_df, f"{season_string} Draft Recap.csv")
-        espn_writer.df_to_csv(team_owners_df, f"{season_string} Team Owners.csv")
+        espn_html_parser_writer.df_to_csv(draft_recap_df, f"{season_string} Draft Recap.csv")
+        espn_html_parser_writer.df_to_csv(team_owners_df, f"{season_string} Team Owners.csv")
         if len(league_standings_dict) != 0:
-            espn_writer.df_to_csv(league_standings_dict['season_points'], f"{season_string} League Standings - Season Points.csv")
-            espn_writer.df_to_csv(league_standings_dict['season_stats'], f"{season_string} League Standings - Season Stats.csv")
+            espn_html_parser_writer.df_to_csv(league_standings_dict['season_points'], f"{season_string} League Standings - Season Points.csv")
+            espn_html_parser_writer.df_to_csv(league_standings_dict['season_stats'], f"{season_string} League Standings - Season Stats.csv")
 
         # Excel outputs
         logger.info("Outputting Excel files.")
         for clubhouse_dict in clubhouse_dicts:
-            skaters_sheet_name = espn_utils.sub_special_chars((f"{clubhouse_dict['Team Name']} ({clubhouse_dict['Owner Name']}) - Skaters"))
-            goalies_sheet_name = espn_utils.sub_special_chars((f"{clubhouse_dict['Team Name']} ({clubhouse_dict['Owner Name']}) - Goalies"))
-            espn_writer.df_to_excel(clubhouse_dict['skaters_df'], f"{season_string} Clubhouses.xlsx", sheet_name=skaters_sheet_name)
-            espn_writer.df_to_excel(clubhouse_dict['goalies_df'], f"{season_string} Clubhouses.xlsx", sheet_name=goalies_sheet_name)
+            skaters_sheet_name = espn_html_parser_utils.sub_special_chars((f"{clubhouse_dict['Team Name']} ({clubhouse_dict['Owner Name']}) - Skaters"))
+            goalies_sheet_name = espn_html_parser_utils.sub_special_chars((f"{clubhouse_dict['Team Name']} ({clubhouse_dict['Owner Name']}) - Goalies"))
+            espn_html_parser_writer.df_to_excel(clubhouse_dict['skaters_df'], f"{season_string} Clubhouses.xlsx", sheet_name=skaters_sheet_name)
+            espn_html_parser_writer.df_to_excel(clubhouse_dict['goalies_df'], f"{season_string} Clubhouses.xlsx", sheet_name=goalies_sheet_name)
 
         for roster in rosters_list:
-            espn_writer.df_to_excel(roster['roster_df'], f"{season_string} League Rosters.xlsx", sheet_name=roster['team_name'])
+            espn_html_parser_writer.df_to_excel(roster['roster_df'], f"{season_string} League Rosters.xlsx", sheet_name=roster['team_name'])
 
-        espn_writer.df_to_excel(draft_recap_df, f"{season_string} Draft Recap.xlsx")
+        espn_html_parser_writer.df_to_excel(draft_recap_df, f"{season_string} Draft Recap.xlsx")
         if len(league_standings_dict) != 0:
-            espn_writer.df_to_excel(league_standings_dict['season_points'], f"{season_string} League Standings.xlsx", sheet_name="Season Points")
-            espn_writer.df_to_excel(league_standings_dict['season_stats'], f"{season_string} League Standings.xlsx", sheet_name="Season Stats")
+            espn_html_parser_writer.df_to_excel(league_standings_dict['season_points'], f"{season_string} League Standings.xlsx", sheet_name="Season Points")
+            espn_html_parser_writer.df_to_excel(league_standings_dict['season_stats'], f"{season_string} League Standings.xlsx", sheet_name="Season Stats")
 
         # Pickle outputs
         logger.info("Outputting Pickle files.")
-        espn_writer.to_pickle(clubhouse_dicts, f"{season_string} Clubhouses.pickle")
-        espn_writer.to_pickle(rosters_list, f"{season_string} League Rosters.pickle")
-        espn_writer.to_pickle(draft_recap_df, f"{season_string} Draft Recap.pickle")
-        espn_writer.to_pickle(league_standings_dict, f"{season_string} League Standings.pickle")
+        espn_html_parser_writer.to_pickle(clubhouse_dicts, f"{season_string} Clubhouses.pickle")
+        espn_html_parser_writer.to_pickle(rosters_list, f"{season_string} League Rosters.pickle")
+        espn_html_parser_writer.to_pickle(draft_recap_df, f"{season_string} Draft Recap.pickle")
+        espn_html_parser_writer.to_pickle(league_standings_dict, f"{season_string} League Standings.pickle")
 
     print(f"Finished in {round(timeit.default_timer() - start_time, 1)}s.")
 

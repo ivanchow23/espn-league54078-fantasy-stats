@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """ Parser for ESPN league standings files. """
 import argparse
-import espn_utils
+import espn_html_parser_utils
 import os
 import pandas as pd
 
-import espn_logger
-logger = espn_logger.logger()
+import espn_html_parser_logger
+logger = espn_html_parser_logger.logger()
 
 NUM_EXPECTED_HTML_TABLES = 6
 class EspnHtmlParserLeagueStandings():
@@ -17,7 +17,7 @@ class EspnHtmlParserLeagueStandings():
         self.valid = True
 
         # Input check
-        if not espn_utils.check_html(html_path):
+        if not espn_html_parser_utils.check_html(html_path):
             logger.warning(f"Invalid input: {html_path}. Skipping...")
             self.valid = False
 
