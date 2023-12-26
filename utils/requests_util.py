@@ -30,7 +30,7 @@ class RequestsUtil():
             json.dump(json_data, out_file)
         return True
 
-    def load_jsons_from_endpoints_async(endpoint_list, headers=None, cookies=None):
+    def load_jsons_from_endpoints_async(self, endpoint_list, headers=None, cookies=None):
         """ Loads JSON data from the given list of endpoints asynchronously.
             Returns a list of dictionaries. """
         # Set policy on Windows and Python 3.8+ to work around runtime exception:
@@ -41,7 +41,7 @@ class RequestsUtil():
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
         url_list = [f"{self._base_url}{endpoint}" for endpoint in endpoint_list]
-        return asyncio.run(_load_jsons_async(url_list, headers, cookies))
+        return asyncio.run(self._load_jsons_async(url_list, headers, cookies))
 
     def save_jsons_from_endpoints_async(self, endpoints_file_path_dict_list, headers=None, cookies=None):
         """ Saves JSON data from the given endpoints and corresponding file
