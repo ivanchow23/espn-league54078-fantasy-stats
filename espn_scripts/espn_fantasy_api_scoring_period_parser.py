@@ -31,8 +31,8 @@ class EspnFantasyApiScoringPeriodParser():
                     roster_dict.update(self._map_stats_index_to_names(applied_stats_dict['appliedStats']))
                     roster_dict['appliedTotal'] = applied_stats_dict['appliedTotal']
 
-                    # Empty dictionary applied stats dictionary don't qualify for a game played
-                    if applied_stats_dict['appliedStats']:
+                    # Empty applied and regular stats dictionaries don't count as a game played
+                    if applied_stats_dict['appliedStats'] and applied_stats_dict['stats']:
                         roster_dict['GP'] = 1
 
                 roster_dicts.append(roster_dict)
