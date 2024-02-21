@@ -111,6 +111,19 @@ class EspnFantasyApiDownloader:
         num_saved = self._req.save_jsons_from_endpoints_async(download_dict_list, cookies=self._cookies)
         print(f"Downloaded {num_saved} files in {round(timeit.default_timer() - start_time, 1)}s.")
 
+    def download_all_players_info(self):
+        """ Downloads data containing information about all players """
+        output_path = os.path.join(self._root_output_folder, f"{self._season_string}_all_players_info.json")
+        print(f"Downloading to: {output_path}")
+        start_time = timeit.default_timer()
+        x_fantasy_filter = {"players": {"limit": 9999, "sortDraftRanks": {"sortPriority": 100, "sortAsc": True, "value": "STANDARD"}}}
+
+        if not self._req.save_json_from_endpoint("view=kona_playercard", output_path, headers={"X-Fantasy-Filter": json.dumps(x_fantasy_filter)}, cookies=self._cookies):
+            print(f"Download failed.")
+            return
+
+        print(f"Downloaded in {round(timeit.default_timer() - start_time, 1)}s.")
+
 if __name__ == "__main__":
     """ Main function. """
     start_time = timeit.default_timer()

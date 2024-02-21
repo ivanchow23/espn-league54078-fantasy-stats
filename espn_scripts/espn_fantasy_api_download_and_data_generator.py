@@ -26,6 +26,7 @@ if __name__ == "__main__":
         downloader = EspnFantasyApiDownloader(season, league_id, cookies={'espn_s2': args.espn_s2})
         downloader.download_league_info()
         downloader.download_scoring_periods()
+        downloader.download_all_players_info()
 
     # Generate data into analysis folder
     print("------------ Running ESPN fantasy API daily roster data generator -----------")
