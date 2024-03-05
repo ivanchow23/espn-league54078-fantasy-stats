@@ -4,6 +4,7 @@
     generate data easily for analysis. """
 import argparse
 from espn_fantasy_api_daily_rosters_data_generator import EspnFantasyApiDailyRostersDataGenerator
+from espn_fantasy_api_all_players_info_data_generator import EspnFantasyApiAllPlayersInfoDataGenerator
 from espn_fantasy_api_downloader import EspnFantasyApiDownloader
 from pathlib import Path
 
@@ -27,8 +28,15 @@ if __name__ == "__main__":
         downloader.download_league_info()
         downloader.download_scoring_periods()
         downloader.download_all_players_info()
+    print("Done.")
 
     # Generate data into analysis folder
     print("------------ Running ESPN fantasy API daily roster data generator -----------")
     generator = EspnFantasyApiDailyRostersDataGenerator(SCRIPT_DIR.joinpath("espn_fantasy_api_downloads"), SCRIPT_DIR.parent.joinpath("espn_statsapi_analysis", "espn_fantasy_api"))
     generator.generate()
+    print("Done.")
+
+    print("------------ Running ESPN fantasy API all player data generator -----------")
+    all_players_generator = EspnFantasyApiAllPlayersInfoDataGenerator(SCRIPT_DIR.joinpath("espn_fantasy_api_downloads"), SCRIPT_DIR.parent.joinpath("espn_statsapi_analysis", "espn_fantasy_api"))
+    all_players_generator.generate()
+    print("Done.")

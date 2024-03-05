@@ -81,6 +81,10 @@ class EspnFantasyApiLoader():
         """ Returns a dictionary for the given scoring period of a season. """
         return self._load_json(season_string, "scoring_periods", f"{season_string}_scoring_period{id}.json")
 
+    def get_all_players_info_dict(self, season_string):
+        """ Returns a dictionary of all players informations."""
+        return self._load_json(season_string, f"{season_string}_all_players_info.json")
+
     def _load_json(self, season_string, *args):
         """ Reads a JSON file as dictionary from given season and arguments.
             Example: self._load_json(20202021, "20202021_league_info.json")

@@ -26,6 +26,7 @@ class TestEspnFantasyApiLoader(unittest.TestCase):
         os.makedirs(os.path.join(root_folder_path, "20192020", "scoring_periods"), exist_ok=True)
         self._create_empty_json(os.path.join(root_folder_path, "20192020", "20192020_league_info.json"))
         self._create_empty_json(os.path.join(root_folder_path, "20192020", "scoring_periods", "20192020_scoring_period1.json"))
+        self._create_empty_json(os.path.join(root_folder_path, "20192020", "20192020_all_players_info.json"))
 
         # Instantiate
         espn_api = EspnFantasyApiLoader(root_folder_path)
@@ -33,10 +34,12 @@ class TestEspnFantasyApiLoader(unittest.TestCase):
         # Test typical cases
         self.assertIsNotNone(espn_api._load_json("20192020", "20192020_league_info.json"))
         self.assertIsNotNone(espn_api._load_json("20192020", "scoring_periods", "20192020_scoring_period1.json"))
+        self.assertIsNotNone(espn_api._load_json("20192020", "20192020_all_players_info.json"))
 
         # Test non-existent folders and files
         self.assertIsNone(espn_api._load_json("20192020", "2019_league_info.json"))
         self.assertIsNone(espn_api._load_json("2019", "2020_league_info.json"))
+        self.assertIsNone(espn_api._load_json("2019", "2020_all_players_info.json"))
 
     def _create_empty_json(self, file_path):
         """ Helper function to create an empty JSON file. """
