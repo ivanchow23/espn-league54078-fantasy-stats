@@ -8,7 +8,8 @@ from player_with_different_owners import PlayerWithDifferentOwners
 # %%
 # Configurations
 daily_rosters_df_path = "espn_fantasy_api_daily_rosters_df.csv"
-pwdo = PlayerWithDifferentOwners(daily_rosters_df_path)
+all_players_df_path = "espn_fantasy_api_all_players_info_df.csv"
+pwdo = PlayerWithDifferentOwners(daily_rosters_df_path, all_players_df_path)
 seasons = pwdo.get_seasons()
 
 # %%
