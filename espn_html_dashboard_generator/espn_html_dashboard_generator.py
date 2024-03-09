@@ -16,6 +16,7 @@ from espn_fantasy_api.man_games_lost import ManGamesLost
 
 SEASON = 20232024
 ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH = os.path.join(SCRIPT_DIR, "..", "espn_statsapi_analysis", "espn_fantasy_api", "espn_fantasy_api_daily_rosters_df.csv")
+ESPN_FANTASY_API_ALL_PLAYERS_INFO_CSV_PATH = os.path.join(SCRIPT_DIR, "..", "espn_statsapi_analysis", "espn_fantasy_api", "espn_fantasy_api_all_players_info_df.csv")
 
 class EspnHtmlDashboardGenerator():
     def __init__(self, html_output_path=os.path.join(SCRIPT_DIR, "index.html")):
@@ -60,7 +61,7 @@ if __name__ == "__main__":
 
     dp = DailyPoints(ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH)
     pbp = PointsByPosition(ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH)
-    pwdo = PlayerWithDifferentOwners(ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH)
+    pwdo = PlayerWithDifferentOwners(ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH, ESPN_FANTASY_API_ALL_PLAYERS_INFO_CSV_PATH)
     mgl = ManGamesLost(ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH)
 
     dp_fig = dp.get_cumulative_points_plot(key="appliedTotal", season=SEASON)
