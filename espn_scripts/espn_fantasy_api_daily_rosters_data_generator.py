@@ -4,6 +4,7 @@
 import argparse
 from espn_fantasy_api_loader import EspnFantasyApiLoader
 from espn_fantasy_api_scoring_period_parser import EspnFantasyApiScoringPeriodParser
+from espn_fantasy_api_scoring_period_util import EspnFantasyApiScoringPeriodUtil
 import os
 import pandas as pd
 
@@ -31,6 +32,7 @@ class EspnFantasyApiDailyRostersDataGenerator():
                                      self._loader.get_league_info_dict(season_string)['status']['finalScoringPeriod'])
 
             # Store roster data for each scoring period and owner
+            scoring_period_util = EspnFantasyApiScoringPeriodUtil()
             for scoring_period in range(scoring_period_start, scoring_period_end + 1):
                 print(f"Processing {season_string} Scoring Period ID {scoring_period}/{scoring_period_end}")
                 for owner_id in owner_id_map:
@@ -40,6 +42,7 @@ class EspnFantasyApiDailyRostersDataGenerator():
 
                     # Add some more metadata to roster dataframe
                     roster_df['scoringPeriodId'] = scoring_period
+                    roster_df['date'] = scoring_period_util.get_scoring_period_date(season_string, scoring_period)
                     roster_df['owner'] = owner_id_map[owner_id]
                     roster_df['season'] = season_string
 
