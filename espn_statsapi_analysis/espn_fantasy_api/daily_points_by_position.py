@@ -20,7 +20,7 @@ class DailyPointsByPosition():
     def get_plots_fig(self, season):
         """ Returns a figure of plots per position for the season. """
         # Filter for season
-        season_df = self._cumsum_df[self._cumsum_df['season'] == season]
+        season_cumsum_df = self._cumsum_df[self._cumsum_df['season'] == season]
 
         # Colour map
         colour_map = {owner: hex for owner, hex in zip(self._cumsum_df['owner'].unique(), px.colors.qualitative.Plotly)}
@@ -28,12 +28,12 @@ class DailyPointsByPosition():
         # Generate multiple subplots in a figure
         fig = make_subplots(rows=len(self._cumsum_df['position'].unique()),
                             cols=1, shared_xaxes='all', vertical_spacing=0.05,
-                            subplot_titles=self._cumsum_df['position'].unique(),
+                            subplot_titles=sorted(self._cumsum_df['position'].unique()),
                             x_title="Scoring Period ID",
                             y_title="Normalized Points")
 
         # Plot cumulative points normalized by average
-        for i, (pos_index, pos_df) in enumerate(season_df.groupby('position')):
+        for i, (pos_index, pos_df) in enumerate(season_cumsum_df.groupby('position')):
             # Normalize
             pos_df['appliedTotal (norm. by avg)'] = pos_df.groupby('scoringPeriodId')['appliedTotal'].apply(lambda x: round(x / x.mean(), 2))
 
