@@ -1,34 +1,39 @@
 #!/usr/bin/env python
 
-""" Utility file to help with converting scoring periods to date by using ESPN API. """
+""" Contains functionality to download the and store the initial data period dates from ESPN fantasy API
+    to local machines. Downloaded data will be organized into season folders. """
 from datetime import date, timedelta
 import time
 import sys
 import os
+import toml
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+DEFAULT_DOWNLOADS_DIR = os.path.join(SCRIPT_DIR, "espn_fantasy_api_downloads")
 sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "utils"))
 from requests_util import RequestsUtil
 
-class EspnFantasyApiScoringPeriodUtil:
-    def __init__(self):
+class EspnFantasyApiScoringPeriodDateDownloader:
+    def __init__(self, season, root_output_folder=DEFAULT_DOWNLOADS_DIR):
         self._req = RequestsUtil(f"https://site.web.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard?")
         self._first_scoring_period_date = None
 
+        # Store in a season string folder "XXXXYYYY"
+        # Example: 2022 season corresponds to: "20212022"
+        self._season_string = f"{season - 1}{season}"
+        self._root_output_folder = os.path.join(root_output_folder, self._season_string)
+        os.makedirs(self._root_output_folder, exist_ok=True)
+        self._season = season
 
-    def get_scoring_period_date(self, season_string, scoring_period):
-        """ Convert scoring period number to an associated date in this date format: YYYY-MM-DD"""
-        # First regular season game will be in the first year of the seasons
-        year = str(season_string[:4])
-        if self._first_scoring_period_date is None:
-            self._first_scoring_period_date = self.__get_first_regular_season_game_date(year)
+    def store_season_metadata(self):
+        date_string = self.__get_first_regular_season_game_date(self._season - 1)
+        data = {
+            self._season_string: date_string
+        }
+        output_folder_path = os.path.join(self._root_output_folder, "metadata.toml")
+        with open(output_folder_path, 'w') as file:
+            toml.dump(data, file)
 
-        # Math to convert the scoring period to date (Complicated due to converting date as a string to a time_struct/date objects)
-        # Add number of days (Scoring Period Number - 1) to the date of the scoring period 1
-        time_tuple = time.strptime(self._first_scoring_period_date,'%Y%m%d')
-        scoring_period_date = date(time_tuple.tm_year, time_tuple.tm_mon, time_tuple.tm_mday) + timedelta(scoring_period - 1)
-        date_string = scoring_period_date.strftime('%Y-%m-%d')
-        return date_string
 
     def __get_first_regular_season_game_date(self, year):
         """ Convert the first scoring period number to an associated date in this date format: YYYYMMDD"""
