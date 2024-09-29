@@ -3,3 +3,4 @@
 **/__pycache__/*
 **/*.log
 espn_scripts/espn_fantasy_api_downloads
+nhlapi_scripts/nhlapi_downloads
