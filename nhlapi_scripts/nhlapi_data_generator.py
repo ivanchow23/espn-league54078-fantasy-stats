@@ -22,7 +22,6 @@ class NhlapiDataGenerator():
             folder_path = os.path.join(self._nhlapi_downloads_root_folder, folder)
             if os.path.isdir(folder_path):
                 season_string = folder
-                print(f"Processing {season_string}")
 
                 for file in os.listdir(os.path.join(folder_path, "team_rosters")):
                     file_path = os.path.join(folder_path, "team_rosters", file)
@@ -45,6 +44,7 @@ class NhlapiDataGenerator():
         return pd.DataFrame(players_list)
 
 if __name__ == "__main__":
+    print("Processing...")
     data_generator = NhlapiDataGenerator()
     data_generator.generate()
     print("Done.")
