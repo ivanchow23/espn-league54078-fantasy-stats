@@ -31,7 +31,7 @@ def parse_draft_metadata_from_player_str(player_str):
         Example: "Sidney Crosby Pit, C"
         {'Player': "Sidney Crosby", 'Team': "Pit", 'Positon': "C"}
     """
-    re_pattern = r"[\W\w]+ [\W\w]+ [\w]+, [\w]+"
+    re_pattern = r"[\W\w]+ [\W\w]+ ([\w]+|), [\w]+"
     player_dict = {'Player': "", 'Team': "", 'Position': ""}
 
     # Check if input is string
@@ -50,11 +50,16 @@ def parse_draft_metadata_from_player_str(player_str):
             break
 
     # Parse for team abbreviation
-    for team in NHL_TEAM_ABBREVIATIONS_LIST:
-        if player_str.endswith(team):
-            player_dict['Team'] = team
-            player_str = player_str[:len(player_str) - len(" ") - len(team)]
-            break
+    # The " " empty string is for players not on a valid team
+    if player_str.endswith(" "):
+        player_dict['Team'] = ""
+        player_str = player_str[:len(player_str) - len(" ")]
+    else:
+        for team in NHL_TEAM_ABBREVIATIONS_LIST:
+            if player_str.endswith(team):
+                player_dict['Team'] = team
+                player_str = player_str[:len(player_str) - len(" ") - len(team)]
+                break
 
     # We should just be left with player name here
     player_dict['Player'] = player_str

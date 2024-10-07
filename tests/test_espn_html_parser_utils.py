@@ -33,6 +33,11 @@ class TestEspnHtmlParserUtils(unittest.TestCase):
         actual_output = espn_html_parser_utils.parse_draft_metadata_from_player_str(input_str)
         self.assertEquals(expected_output, actual_output)
 
+        input_str = "Cody Glass , C"
+        expected_output = {'Player': "Cody Glass", 'Team': "", 'Position': "C"}
+        actual_output = espn_html_parser_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEquals(expected_output, actual_output)
+
         # Test various position designations
         input_str = "Player One Ana, D"
         expected_output = {'Player': "Player One", 'Team': "Ana", 'Position': "D"}
