@@ -28,9 +28,9 @@ class EspnFantasyApiDownloader:
 
         # Older seasons used a different access point
         if season < 2018:
-            self._req = RequestsUtil(f"https://fantasy.espn.com/apis/v3/games/fhl/leagueHistory/{league_id}?seasonId={season}&")
+            self._req = RequestsUtil(f"https://lm-api-reads.fantasy.espn.com/apis/v3/games/fhl/leagueHistory/{league_id}?seasonId={season}&")
         else:
-            self._req = RequestsUtil(f"https://fantasy.espn.com/apis/v3/games/fhl/seasons/{season}/segments/0/leagues/{league_id}?")
+            self._req = RequestsUtil(f"https://lm-api-reads.fantasy.espn.com/apis/v3/games/fhl/seasons/{season}/segments/0/leagues/{league_id}?")
 
     def download_league_info(self):
         """ Downloads data containing general information about the league. """

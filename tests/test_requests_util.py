@@ -18,12 +18,12 @@ class TestRequestsUtil(unittest.TestCase):
         os.makedirs(self._test_folder_path, exist_ok=True)
 
         # Instantiate class to a known API
-        self._req = RequestsUtil("https://fantasy.espn.com/apis/v3/games/fhl/seasons/2023/segments/0/leagues/54078?")
+        self._req = RequestsUtil("https://lm-api-reads.fantasy.espn.com/apis/v3/games/fhl/seasons/2023/segments/0/leagues/54078?")
 
     def test_load_json_from_endpoint(self):
         """ Test loading a JSON from an endpoint. """
         # Directly request data from server as expected data
-        response = requests.get("https://fantasy.espn.com/apis/v3/games/fhl/seasons/2023/segments/0/leagues/54078?view=mLiveScoring&view=mMatchupScore&view=mRoster&view=mSettings&view=mStandings&view=mStatus&view=mTeam")
+        response = requests.get("https://lm-api-reads.fantasy.espn.com/apis/v3/games/fhl/seasons/2023/segments/0/leagues/54078?view=mLiveScoring&view=mMatchupScore&view=mRoster&view=mSettings&view=mStandings&view=mStatus&view=mTeam")
         expected_data = response.json()
 
         # Test typical case
@@ -37,7 +37,7 @@ class TestRequestsUtil(unittest.TestCase):
         os.makedirs(test_folder_path, exist_ok=True)
 
         # Directly request data from server as expected data
-        response = requests.get("https://fantasy.espn.com/apis/v3/games/fhl/seasons/2023/segments/0/leagues/54078?view=mLiveScoring&view=mMatchupScore&view=mRoster&view=mSettings&view=mStandings&view=mStatus&view=mTeam")
+        response = requests.get("https://lm-api-reads.fantasy.espn.com/apis/v3/games/fhl/seasons/2023/segments/0/leagues/54078?view=mLiveScoring&view=mMatchupScore&view=mRoster&view=mSettings&view=mStandings&view=mStatus&view=mTeam")
         expected_data = response.json()
 
         # Test typical case
