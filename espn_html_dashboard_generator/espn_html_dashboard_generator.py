@@ -15,7 +15,7 @@ from espn_fantasy_api.daily_points_by_position import DailyPointsByPosition
 from espn_fantasy_api.player_with_different_owners import PlayerWithDifferentOwners
 from espn_fantasy_api.man_games_lost import ManGamesLost
 
-SEASON = 20232024
+SEASON = 20242025
 ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH = os.path.join(SCRIPT_DIR, "..", "espn_statsapi_analysis", "espn_fantasy_api", "espn_fantasy_api_daily_rosters_df.csv")
 ESPN_FANTASY_API_ALL_PLAYERS_INFO_CSV_PATH = os.path.join(SCRIPT_DIR, "..", "espn_statsapi_analysis", "espn_fantasy_api", "espn_fantasy_api_all_players_info_df.csv")
 

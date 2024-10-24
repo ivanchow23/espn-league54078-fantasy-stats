@@ -11,8 +11,8 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 
 # Configurations
-start_year = 2024
-end_year = 2024
+start_year = 2025
+end_year = 2025
 league_id = 54078
 
 if __name__ == "__main__":
