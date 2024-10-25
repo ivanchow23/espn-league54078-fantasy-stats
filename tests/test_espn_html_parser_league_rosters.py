@@ -7,7 +7,7 @@ import unittest
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 import sys
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_scripts"))
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_html_parser_scripts"))
 from espn_html_parser_league_rosters import EspnHtmlParserLeagueRosters
 
 class TestEspnHtmlParserLeagueRosters(unittest.TestCase):

@@ -8,7 +8,7 @@ import unittest
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 import sys
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_scripts"))
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_fantasy_api_scripts"))
 from espn_fantasy_api_loader import EspnFantasyApiLoader
 
 class TestEspnFantasyApiLoader(unittest.TestCase):

@@ -27,7 +27,7 @@ import sys
 SCRIPT_NAME = os.path.basename(__file__)
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_scripts"))
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_html_parser_scripts"))
 sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "statsapi_scripts"))
 from espn_html_parser_loader import EspnHtmlParserLoader
 from statsapi_loader import StatsapiLoader

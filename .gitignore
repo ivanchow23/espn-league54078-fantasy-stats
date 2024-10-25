@@ -2,5 +2,5 @@
 .venv/*
 **/__pycache__/*
 **/*.log
-espn_scripts/espn_fantasy_api_downloads
+espn_fantasy_api_scripts/espn_fantasy_api_downloads
 nhlapi_scripts/nhlapi_downloads
