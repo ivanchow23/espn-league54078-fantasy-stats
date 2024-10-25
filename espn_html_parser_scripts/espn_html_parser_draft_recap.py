@@ -72,8 +72,6 @@ class EspnHtmlParserDraftRecap():
         combined_df = combined_df.reset_index()
         combined_df = combined_df.rename(columns={'index': 'Draft Number'})
 
-        # Replace special characters in the team name to stay consistent with file names
-        combined_df['Team Name'] = combined_df['Team Name'].apply(espn_html_parser_utils.sub_special_chars)
         return combined_df
 
     def _modify_player_col(self, df):

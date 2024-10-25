@@ -44,6 +44,10 @@ class EspnHtmlParserLeagueStandings():
         """ Returns dictionary of standings information. """
         return {'season_points': self._season_standings_points_df, 'season_stats': self._season_standings_stats_df}
 
+    def get_team_owners_df(self):
+        """ Returns a dataframe mapping of team and owner names. """
+        return self._team_owners_df
+
     def _parse_team_owners(self):
         """ Helper function that parses a specific table in the HTML page, all for the purpose
             of extracting team and owner name out of it. """
@@ -65,7 +69,6 @@ class EspnHtmlParserLeagueStandings():
             s = row['Team']
             d = {'Team': s[0:s.find(" (")], 'Owner': s[s.find("(") + 1: s.find(")")]}
             team_owner_dicts.append(d)
-
         return pd.DataFrame(team_owner_dicts)
 
     def _parse_season_standings_points(self):
