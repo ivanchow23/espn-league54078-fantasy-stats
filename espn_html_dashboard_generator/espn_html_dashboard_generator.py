@@ -8,7 +8,7 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 import sys
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_statsapi_analysis"))
+sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_nhlapi_analysis"))
 from espn_fantasy_api.daily_points import DailyPoints
 from espn_fantasy_api.points_by_position import PointsByPosition
 from espn_fantasy_api.daily_points_by_position import DailyPointsByPosition
@@ -16,8 +16,8 @@ from espn_fantasy_api.player_with_different_owners import PlayerWithDifferentOwn
 from espn_fantasy_api.man_games_lost import ManGamesLost
 
 SEASON = 20242025
-ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH = os.path.join(SCRIPT_DIR, "..", "espn_statsapi_analysis", "espn_fantasy_api", "espn_fantasy_api_daily_rosters_df.csv")
-ESPN_FANTASY_API_ALL_PLAYERS_INFO_CSV_PATH = os.path.join(SCRIPT_DIR, "..", "espn_statsapi_analysis", "espn_fantasy_api", "espn_fantasy_api_all_players_info_df.csv")
+ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH = os.path.join(SCRIPT_DIR, "..", "espn_nhlapi_analysis", "espn_fantasy_api", "espn_fantasy_api_daily_rosters_df.csv")
+ESPN_FANTASY_API_ALL_PLAYERS_INFO_CSV_PATH = os.path.join(SCRIPT_DIR, "..", "espn_nhlapi_analysis", "espn_fantasy_api", "espn_fantasy_api_all_players_info_df.csv")
 
 class EspnHtmlDashboardGenerator():
     def __init__(self, html_output_path=os.path.join(SCRIPT_DIR, "index.html")):

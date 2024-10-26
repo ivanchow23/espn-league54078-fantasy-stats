@@ -32,11 +32,11 @@ if __name__ == "__main__":
 
     # Generate data into analysis folder
     print("------------ Running ESPN fantasy API daily roster data generator -----------")
-    generator = EspnFantasyApiDailyRostersDataGenerator(SCRIPT_DIR.joinpath("espn_fantasy_api_downloads"), SCRIPT_DIR.parent.joinpath("espn_statsapi_analysis", "espn_fantasy_api"))
+    generator = EspnFantasyApiDailyRostersDataGenerator(SCRIPT_DIR.joinpath("espn_fantasy_api_downloads"), SCRIPT_DIR.parent.joinpath("espn_nhlapi_analysis", "espn_fantasy_api"))
     generator.generate()
     print("Done.")
 
     print("------------ Running ESPN fantasy API all player data generator -----------")
-    all_players_generator = EspnFantasyApiAllPlayersInfoDataGenerator(SCRIPT_DIR.joinpath("espn_fantasy_api_downloads"), SCRIPT_DIR.parent.joinpath("espn_statsapi_analysis", "espn_fantasy_api"))
+    all_players_generator = EspnFantasyApiAllPlayersInfoDataGenerator(SCRIPT_DIR.joinpath("espn_fantasy_api_downloads"), SCRIPT_DIR.parent.joinpath("espn_nhlapi_analysis", "espn_fantasy_api"))
     all_players_generator.generate()
     print("Done.")

@@ -1,7 +1,7 @@
 """ Utilities for ESPN and nhlapi functionality. """
 from unidecode import unidecode
 
-# ESPN to statsapi teams abbreviation mapping
+# ESPN to nhlapi teams abbreviation mapping
 # Key = ESPN abbreivation, Value = nhlapi abbreviation
 ESPN_NHLAPI_TEAM_ABBREV_MAP = { "Ana": "ANA", "Ari": "ARI", "Bos": "BOS", "Buf": "BUF", "Cgy": "CGY", "Car": "CAR",
                                 "Chi": "CHI", "Col": "COL", "Cls": "CBJ", "Dal": "DAL", "Det": "DET", "Edm": "EDM",
