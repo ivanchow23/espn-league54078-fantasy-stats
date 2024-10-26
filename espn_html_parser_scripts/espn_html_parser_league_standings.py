@@ -78,16 +78,16 @@ class EspnHtmlParserLeagueStandings():
             return combined_df
 
         # First dataframe contains rank and team information
-        # Merge owner names to it and convert to a multi-index column to match other dataframes to concatenate
         combined_df = self._html_dfs[0]
         combined_df = combined_df.merge(self._team_owners_df, on='Team', how='left')
-        combined_df.columns = pd.MultiIndex.from_product([['Team Info'], list(combined_df.columns)])
 
         # 2nd dataframe is a table of total skater/goalie points
-        combined_df = pd.concat([combined_df, self._html_dfs[1]], axis=1)
+        # Drop last level of multi-level dataframe to only keep stat headers
+        combined_df = pd.concat([combined_df, self._html_dfs[1].droplevel(0, axis=1)], axis=1)
 
         # 3rd dataframe is a table of total points
-        combined_df = pd.concat([combined_df, self._html_dfs[2]], axis=1)
+        # Drop last level of multi-level dataframe to only keep stat headers
+        combined_df = pd.concat([combined_df, self._html_dfs[2].droplevel(0, axis=1)], axis=1)
         return combined_df
 
     def _parse_season_standings_stats(self):
@@ -103,23 +103,21 @@ class EspnHtmlParserLeagueStandings():
         # The team column contains team and owner names embedded into a string
         # First, extract the string to only keep the team name in the column
         # Then, add the owner names as a separate column
-        # Finally, convert to multi-index column to match other dataframes to concatenate
         combined_df = self._html_dfs[3]
         combined_df['Team'] = combined_df['Team'].apply(lambda s: s[0:s.find(" (")])
         combined_df = combined_df.merge(self._team_owners_df, on='Team', how='left')
-        combined_df.columns = pd.MultiIndex.from_product([['Team Info'], list(combined_df.columns)])
 
         # 5th dataframe is a table of total skater/goalie raw stats
-        combined_df = pd.concat([combined_df, self._html_dfs[4]], axis=1)
+        # Drop last level of multi-level dataframe to only keep stat headers
+        combined_df = pd.concat([combined_df, self._html_dfs[4].droplevel(0, axis=1)], axis=1)
 
         # 6th dataframe is a single column of number of moves made
         # For some reason, this gets incorrectly parsed
         # First, the column name of this is actually a valid row entry
         # Then, change the column name to something more descriptive
-        # Finally, convert to multi-index column to match other dataframes to concatenate
         df = self._html_dfs[5]
         df = pd.concat([pd.DataFrame([{df.columns[0]: df.columns[0]}]), df], ignore_index=True)
-        df.columns = pd.MultiIndex.from_product([['Moves'], ['Moves']])
+        df.columns = ['Moves']
         combined_df = pd.concat([combined_df, df], axis=1)
         return combined_df
 
