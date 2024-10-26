@@ -6,9 +6,6 @@ import espn_html_parser_utils
 import os
 import pandas as pd
 
-import espn_html_parser_logger
-logger = espn_html_parser_logger.logger()
-
 class EspnHtmlParserDraftRecap():
     """ Class for ESPN draft recap file parsing. """
     def __init__(self, html_path):
@@ -18,7 +15,7 @@ class EspnHtmlParserDraftRecap():
 
         # Input check
         if not espn_html_parser_utils.check_html(html_path):
-            logger.warning(f"Invalid input: {html_path}. Skipping...")
+            print(f"Invalid input: {html_path}. Skipping...")
             self.valid = False
 
         # Private variables
@@ -43,7 +40,7 @@ class EspnHtmlParserDraftRecap():
             html_dfs = pd.read_html(self._html_path)
         # Intentional except-all
         except:
-            logger.warning("Cannot parse input HTML.")
+            print("Cannot parse input HTML.")
             self.valid = False
             return combined_df
 

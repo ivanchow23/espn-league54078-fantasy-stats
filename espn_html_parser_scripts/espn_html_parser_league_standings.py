@@ -5,9 +5,6 @@ import espn_html_parser_utils
 import os
 import pandas as pd
 
-import espn_html_parser_logger
-logger = espn_html_parser_logger.logger()
-
 NUM_EXPECTED_HTML_TABLES = 6
 class EspnHtmlParserLeagueStandings():
     """ Class for ESPN league standings file parsing. """
@@ -18,7 +15,7 @@ class EspnHtmlParserLeagueStandings():
 
         # Input check
         if not espn_html_parser_utils.check_html(html_path):
-            logger.warning(f"Invalid input: {html_path}. Skipping...")
+            print(f"Invalid input: {html_path}. Skipping...")
             self.valid = False
 
         # Private variables
@@ -136,7 +133,7 @@ class EspnHtmlParserLeagueStandings():
             dfs = pd.read_html(self._html_path)
         # Intentional catch all
         except:
-            logger.warning("Unable to read HTML.")
+            print("Unable to read HTML.")
             self.valid = False
             return dfs
 
