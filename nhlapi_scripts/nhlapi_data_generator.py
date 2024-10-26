@@ -35,11 +35,11 @@ class NhlapiDataGenerator():
                                                  'Player': f"{player['firstName']['default']} {player['lastName']['default']}",
                                                  'Team': team_abbrev,
                                                  'Position': player['positionCode'],
-                                                 'Shoots-Catches': player['shootsCatches'],
-                                                 'Birth Country': player['birthCountry'],
-                                                 'Birth Date': player['birthDate'],
-                                                 'Height (in)': player['heightInInches'],
-                                                 'Weight (lb)': player['weightInPounds']})
+                                                 'Player Shoots-Catches': player['shootsCatches'],
+                                                 'Player Birth Country': player['birthCountry'],
+                                                 'Player Birth Date': player['birthDate'],
+                                                 'Player Height (in)': player['heightInInches'],
+                                                 'Player Weight (lb)': player['weightInPounds']})
 
         return pd.DataFrame(players_list)
 

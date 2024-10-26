@@ -43,6 +43,10 @@ class DraftDataGenerator():
 
         # Merge data from sources
         combined_df = espn_html_draft_recap_df.merge(nhlapi_data_df, how='left', on='Player')
+
+        # Add more data after merge
+        combined_df['Player Age'] = combined_df.apply(lambda x: self._get_player_age(x['Player Birth Date'], str(x['Season'])), axis=1)
+
         return combined_df
 
     def _find_file_in_folder(self, folder_path, str_pattern):
@@ -67,6 +71,18 @@ class DraftDataGenerator():
                 return player
 
         return player_name
+
+    def  _get_player_age(self, birthdate_string, season_string):
+        """ Takes in birthday string and calculates the player's rough age at
+            the current time of the given season. Does this by simply taking the
+            difference between player's birth year and the start of the season.
+
+            Example: birthdate_string = 1995-07-23, season_string = 20202021
+                     Age = 2020 - 1995 = 25
+        """
+        birth_year = int(birthdate_string[0:4])
+        season = int(season_string[0:4])
+        return season - birth_year
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
