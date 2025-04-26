@@ -16,7 +16,7 @@ POSITIONS_LIST = ["D, F", "D", "F", "G"]
 DETAILED_POSITIONS_LIST = ["LW", "RW", "C", "D", "G"]
 
 # List of NHL team abbreviations found in various ESPN HTML pages
-NHL_TEAM_ABBREVIATIONS_LIST = ["Ana", "Ari", "Bos", "Buf", "Cgy", "Car", "Chi", "Col", "Cls", "Dal", "Det", "Edm",
+NHL_TEAM_ABBREVIATIONS_LIST = ["Ana", "Ari", "Bos", "Buf", "Cgy", "Car", "Chi", "Col", "Cls", "CBJ", "Dal", "Det", "Edm",
                                "Fla", "LA",  "Min", "Mon", "Nsh", "NJ",  "NYI", "NYR", "Ott", "Phi", "Pit", "Sea",
                                "SJ", "StL", "TB",  "Tor", "Utah", "Van", "Vgk", "Vgs", "Wsh", "Wpg"]
 
