@@ -80,9 +80,12 @@ class DraftDataGenerator():
             Example: birthdate_string = 1995-07-23, season_string = 20202021
                      Age = 2020 - 1995 = 25
         """
-        birth_year = int(birthdate_string[0:4])
-        season = int(season_string[0:4])
-        return season - birth_year
+        try:
+            birth_year = int(birthdate_string[0:4])
+            season = int(season_string[0:4])
+            return season - birth_year
+        except TypeError:
+            return float('nan')
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
