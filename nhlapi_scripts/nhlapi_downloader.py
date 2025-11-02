@@ -83,8 +83,8 @@ if __name__ == "__main__":
 
     # Read arguments
     arg_parse = argparse.ArgumentParser()
-    arg_parse.add_argument("--start_year", "-s", required=True, type=int, help="Starting season of data to download.")
-    arg_parse.add_argument("--end_year", "-e", required=True, type=int, help="End season of data to download.")
+    arg_parse.add_argument("--start_year", "-s", required=True, type=int, help="Starting season of data to download (Example: 2015 will download 20152016).")
+    arg_parse.add_argument("--end_year", "-e", required=True, type=int, help="End season of data to download (Example: 2025 will download 20252026).")
     args = arg_parse.parse_args()
 
     # Instantiate
