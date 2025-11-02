@@ -10,6 +10,7 @@ import timeit
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_DOWNLOADS_DIR = os.path.join(SCRIPT_DIR, "espn_fantasy_api_downloads")
+DEFAULT_LEAGUE_ID = 54078
 sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "utils"))
 from requests_util import RequestsUtil
 
@@ -130,9 +131,9 @@ if __name__ == "__main__":
 
     # Read arguments
     arg_parse = argparse.ArgumentParser()
-    arg_parse.add_argument("--league_id", "-l", required=True, type=int, help="League ID.")
-    arg_parse.add_argument("--start_year", "-s", required=True, type=int, help="Starting season of data to download.")
-    arg_parse.add_argument("--end_year", "-e", required=True, type=int, help="End season of data to download.")
+    arg_parse.add_argument("--start_year", "-s", required=True, type=int, help="Starting season of data to download (Example: 2018 will download 20172018).")
+    arg_parse.add_argument("--end_year", "-e", required=True, type=int, help="End season of data to download (Example: 2026 will download 20252026).")
+    arg_parse.add_argument("--league_id", "-l", required=False, default=DEFAULT_LEAGUE_ID, type=int, help="League ID.")
     arg_parse.add_argument("--output_path", "-o", required=False, default=DEFAULT_DOWNLOADS_DIR,
                                                   type=str, help="Output path of where downloaded data will go. Defaults to a folder within script directory.")
     arg_parse.add_argument("--espn_s2", required=False, type=str, help="espn_s2 string used for a cookie for ESPN fantasy API requests.")
