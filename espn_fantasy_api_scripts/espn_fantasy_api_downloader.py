@@ -149,7 +149,7 @@ if __name__ == "__main__":
     for season in range(start_year, end_year + 1):
         espn_api = EspnFantasyApiDownloader(season, league_id, root_output_folder=output_path, cookies={'espn_s2': espn_s2})
         espn_api.download_league_info()
-        #espn_api.download_scoring_period(144)
         espn_api.download_scoring_periods()
+        espn_api.download_all_players_info()
 
     print(f"Finished in {round(timeit.default_timer() - start_time, 1)}s.")
