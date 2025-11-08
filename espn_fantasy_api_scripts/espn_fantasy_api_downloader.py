@@ -44,6 +44,17 @@ class EspnFantasyApiDownloader:
 
         print(f"Downloaded in {round(timeit.default_timer() - start_time, 1)}s.")
 
+    def download_draft_details(self):
+        """ Downloads data containing draft details about the league. """
+        output_path = os.path.join(self._root_output_folder, f"{self._season_string}_draft_details.json")
+        print(f"Downloading to: {output_path}")
+        start_time = timeit.default_timer()
+        if not self._req.save_json_from_endpoint("view=mDraftDetail", output_path, cookies=self._cookies):
+            print(f"Download failed.")
+            return
+
+        print(f"Downloaded in {round(timeit.default_timer() - start_time, 1)}s.")
+
     def download_realtime_stats(self):
         """ Downloads realtime data. Appends a datetime timestamp to the downloaded
             file to indicate when this was taken. """
@@ -149,6 +160,7 @@ if __name__ == "__main__":
     for season in range(start_year, end_year + 1):
         espn_api = EspnFantasyApiDownloader(season, league_id, root_output_folder=output_path, cookies={'espn_s2': espn_s2})
         espn_api.download_league_info()
+        espn_api.download_draft_details()
         espn_api.download_scoring_periods()
         espn_api.download_all_players_info()
 

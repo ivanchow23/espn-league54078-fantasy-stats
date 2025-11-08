@@ -77,6 +77,10 @@ class EspnFantasyApiLoader():
         """ Returns a dictionary of the league information for the given season. """
         return self._load_json(season_string, f"{season_string}_league_info.json")
 
+    def get_draft_details_dict(self, season_string):
+        """ Returns a dictionary of the draft details for the given season. """
+        return self._load_json(season_string, f"{season_string}_draft_details.json")
+
     def get_scoring_period_dict(self, season_string, id):
         """ Returns a dictionary for the given scoring period of a season. """
         return self._load_json(season_string, "scoring_periods", f"{season_string}_scoring_period{id}.json")
