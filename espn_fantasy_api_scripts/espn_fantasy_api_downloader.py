@@ -3,6 +3,7 @@
     Downloaded data will be organized into season folders. """
 import argparse
 from datetime import datetime
+from espn_fantasy_api_downloads_parser import EspnFantasyApiDownloadsParser
 import json
 import os
 import sys
@@ -140,6 +141,30 @@ class EspnFantasyApiDownloader:
 
         print(f"Downloaded in {round(timeit.default_timer() - start_time, 1)}s.")
 
+class EspnApiDownloader():
+    def __init__(self, root_output_folder=DEFAULT_DOWNLOADS_DIR, cookies={}):
+        """ Default constructor. """
+        self._root_output_folder = root_output_folder
+        self._cookies = cookies
+        self._req = RequestsUtil("https://site.web.api.espn.com/apis/common/v3/sports/hockey/nhl/")
+        os.makedirs(root_output_folder, exist_ok=True)
+
+    def download_athletes_data(self, player_id_list):
+        """ Downloads data for all given player IDs from ESPN athletes API. """
+        output_folder_path = os.path.join(self._root_output_folder, "athletes")
+        os.makedirs(output_folder_path, exist_ok=True)
+
+        # Build links to download athlete data for each player ID
+        download_dict_list = [{'endpoint': f"athletes/{player_id}",
+                               'out_file_path': os.path.join(output_folder_path, f"{player_id}.json")}
+                                for player_id in player_id_list]
+        # Download
+        print(f"Downloading to: {output_folder_path}")
+        start_time = timeit.default_timer()
+        num_saved = self._req.save_jsons_from_endpoints_async(download_dict_list, cookies=self._cookies)
+        print(f"Downloaded {num_saved} files in {round(timeit.default_timer() - start_time, 1)}s.")
+
+
 if __name__ == "__main__":
     """ Main function. """
     start_time = timeit.default_timer()
@@ -162,10 +187,18 @@ if __name__ == "__main__":
 
     # Download various data for all given seasons
     for season in range(start_year, end_year + 1):
-        espn_api = EspnFantasyApiDownloader(season, league_id, root_output_folder=output_path, cookies={'espn_s2': espn_s2})
-        espn_api.download_league_info()
-        espn_api.download_draft_details()
-        espn_api.download_scoring_periods()
-        espn_api.download_all_players_info()
+        espn_fantasy_api = EspnFantasyApiDownloader(season, league_id, root_output_folder=output_path, cookies={'espn_s2': espn_s2})
+        espn_fantasy_api.download_league_info()
+        espn_fantasy_api.download_draft_details()
+        espn_fantasy_api.download_scoring_periods()
+        espn_fantasy_api.download_all_players_info()
+
+    # Download athlete data for draft and all players across all seasons
+    # Ensure draft and all players info data is downloaded first
+    espn_api = EspnApiDownloader(root_output_folder=output_path, cookies={'espn_s2': espn_s2})
+    all_players_info_df = EspnFantasyApiDownloadsParser(output_path).get_all_players_info_df()
+    draft_details_df = EspnFantasyApiDownloadsParser(output_path).get_draft_details_df()
+    player_id_list = set(list(all_players_info_df['id']) + list(draft_details_df['Player ID']))
+    espn_api.download_athletes_data(player_id_list)
 
     print(f"Finished in {round(timeit.default_timer() - start_time, 1)}s.")

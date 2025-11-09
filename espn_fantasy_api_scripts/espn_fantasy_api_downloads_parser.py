@@ -22,6 +22,7 @@ from espn_fantasy_api_all_players_info_parser import EspnFantasyApiAllPlayersInf
 from espn_fantasy_api_draft_details_parser import EspnFantasyApiDraftDetailsParser
 from espn_fantasy_api_loader import EspnFantasyApiLoader
 from espn_fantasy_api_scoring_period_parser import EspnFantasyApiScoringPeriodParser
+import json
 import os
 import pandas as pd
 
@@ -30,6 +31,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 class EspnFantasyApiDownloadsParser():
     def __init__(self, espn_fantasy_api_downloads_root_folder):
         """ Default constructor. """
+        self._root_folder = espn_fantasy_api_downloads_root_folder
         self._loader = EspnFantasyApiLoader(espn_fantasy_api_downloads_root_folder)
 
     def get_draft_details_df(self):
@@ -98,6 +100,28 @@ class EspnFantasyApiDownloadsParser():
 
         return combined_roster_dfs
 
+    def get_athletes_df(self):
+        """ Returns a datarame of all downloaded athletes data. """
+        athlete_dicts = []
+        folder_path = os.path.join(self._root_folder, "athletes")
+        for f in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, f)
+            if not os.path.isfile(file_path):
+                continue
+
+            athlete_dict = json.load(open(file_path, 'r')).get('athlete', {})
+            if not athlete_dict:
+                continue
+
+            athlete_dicts.append({'Player ID': float(athlete_dict.get('id')), # Cast to float in case there is "nan"
+                                  'Player Name': athlete_dict.get('fullName'),
+                                  'Player Birth Place': athlete_dict.get('displayBirthPlace'),
+                                  'Player Height': athlete_dict.get('displayHeight'),
+                                  'Player Weight': athlete_dict.get('displayWeight'),
+                                  'Player DOB': athlete_dict.get('displayDOB')})
+
+        return pd.DataFrame(athlete_dicts)
+
 if __name__ == "__main__":
     """ Main function for testing and debugging. """
     espn_fantasy_api_downloads_parser = EspnFantasyApiDownloadsParser(os.path.join(SCRIPT_DIR, "espn_fantasy_api_downloads"))
@@ -108,6 +132,10 @@ if __name__ == "__main__":
 
     print("Processing all players info...")
     espn_fantasy_api_downloads_parser.get_all_players_info_df().to_csv("all_players_info.csv", index=False)
+    print("Done.")
+
+    print("Processing athletes data...")
+    espn_fantasy_api_downloads_parser.get_athletes_df().to_csv("athletes.csv", index=False)
     print("Done.")
 
     print("Processing daily rosters...")
