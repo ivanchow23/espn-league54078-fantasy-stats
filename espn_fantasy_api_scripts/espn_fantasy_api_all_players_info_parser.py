@@ -23,7 +23,8 @@ class EspnFantasyApiAllPlayersInfoParser():
                  continue
 
             all_players_dict = {'fullName': player['player']['fullName'],
-                               'totalPoints': player_stat.get('appliedTotal')}
+                                'id': player['player']['id'],
+                                'totalPoints': player_stat.get('appliedTotal')}
 
             all_players_dict.update(self._map_stats_index_to_names(player_stat.get('stats', {})))
             all_players_dicts.append(all_players_dict)
