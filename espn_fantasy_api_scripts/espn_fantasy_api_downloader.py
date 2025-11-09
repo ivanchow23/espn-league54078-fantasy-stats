@@ -98,8 +98,12 @@ class EspnFantasyApiDownloader:
         os.makedirs(output_folder_path, exist_ok=True)
 
         # Read league information file to get scoring periods
-        league_info_path = os.path.join(self._root_output_folder, f"{self._season_string}_league_info.json")
-        league_info_json = json.load(open(league_info_path, 'r'))
+        try:
+            league_info_path = os.path.join(self._root_output_folder, f"{self._season_string}_league_info.json")
+            league_info_json = json.load(open(league_info_path, 'r'))
+        except FileNotFoundError:
+            print(f"Cannot find {self._season_string}_league_info.json. Skipping download scoring periods...")
+            return
 
         # Handle older season data formats
         if self._season < 2018:
