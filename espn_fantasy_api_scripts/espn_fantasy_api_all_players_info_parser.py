@@ -22,9 +22,9 @@ class EspnFantasyApiAllPlayersInfoParser():
             except KeyError:
                  continue
 
-            all_players_dict = {'fullName': player['player']['fullName'],
-                                'id': player['player']['id'],
-                                'totalPoints': player_stat.get('appliedTotal')}
+            all_players_dict = {'Player Name': player['player'].get('fullName'),
+                                'Player ID': float(player['player'].get('id')), # Cast to float in case there is "nan"
+                                'Fantasy Points': player_stat.get('appliedTotal')}
 
             all_players_dict.update(self._map_stats_index_to_names(player_stat.get('stats', {})))
             all_players_dicts.append(all_players_dict)
