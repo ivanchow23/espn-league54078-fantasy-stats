@@ -26,7 +26,7 @@ class PlayerWithDifferentOwners():
         # Filter for season
         season_df = self._sum_df[self._sum_df['season'] == season]
         season_bir_df = self._bir_sum_df[self._bir_sum_df['season'] == season]
-        all_players_info_df = self._all_players_info_df[self._all_players_info_df['season'] == season]
+        all_players_info_df = self._all_players_info_df[self._all_players_info_df['Season'] == season]
 
         # Data structure to store information to be used to generate table figures
         # Used later to easily translate to a dataframe table
@@ -41,7 +41,7 @@ class PlayerWithDifferentOwners():
 
         # Find each player that had multiple owners
         for player, player_df in season_df.groupby('fullName'):
-            player_totals_df = all_players_info_df.loc[self._all_players_info_df['fullName'] == player]
+            player_totals_df = all_players_info_df.loc[self._all_players_info_df['Player Name'] == player]
             num_owners = len(player_df['owner'].unique())
             # Calculations of Player points while in FA and while under ownership
             if num_owners > 1:
@@ -59,7 +59,7 @@ class PlayerWithDifferentOwners():
                     total_gp = player_totals_df['GS'].iloc[0]
                 else:
                     total_gp = player_totals_df['GP'].iloc[0]
-                total_pts = round(player_totals_df['totalPoints'].iloc[0], 2)
+                total_pts = round(player_totals_df['Fantasy Points'].iloc[0], 2)
                 total_pts_per_game = round(total_pts / total_gp, 1) if total_gp != 0 else 0
                 player_data_list.append({'Player': player, 'Owner': "Total", 'GP': total_gp, 'Points': total_pts, 'Points/GP': total_pts_per_game})
 

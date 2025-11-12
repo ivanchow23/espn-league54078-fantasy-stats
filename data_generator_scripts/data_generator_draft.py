@@ -3,6 +3,7 @@
 import argparse
 import os
 import pandas as pd
+import timeit
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -147,7 +148,9 @@ class DataGeneratorDraft():
             return float('nan')
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generates draft data from ESPN HTML and ESPN Fantasy API data sources.")
+    start_time = timeit.default_timer()
+
+    parser = argparse.ArgumentParser()
     parser.add_argument("--espn_html_root_folder", type=str, default=DEFAULT_ESPN_HTML_ROOT_FOLDER,
                         help="Root folder path containing ESPN HTML files.")
     parser.add_argument("--espn_fantasy_api_downloads_root_folder", type=str, default=DEFAULT_ESPN_FANTASY_API_DOWNLOADS_ROOT_FOLDER,
@@ -165,4 +168,4 @@ if __name__ == "__main__":
 
     draft_df = data_generator.get_df()
     draft_df.to_csv(os.path.join(args.out_dir_path, "draft_df.csv"), index=False)
-    print("Done.")
+    print(f"Finished in {round(timeit.default_timer() - start_time, 1)}s.")
