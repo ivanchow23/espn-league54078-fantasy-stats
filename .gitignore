@@ -1,5 +1,6 @@
 .vscode/launch.json
 .venv/*
+*.egg-info
 **/__pycache__/*
 **/*.log
 espn_fantasy_api_scripts/espn_fantasy_api_downloads

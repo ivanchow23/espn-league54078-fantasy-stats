@@ -3,9 +3,9 @@
     and data generator together. Meant to be a one click solution to
     generate data easily for analysis. """
 import argparse
-from espn_fantasy_api_daily_rosters_data_generator import EspnFantasyApiDailyRostersDataGenerator
-from espn_fantasy_api_all_players_info_data_generator import EspnFantasyApiAllPlayersInfoDataGenerator
-from espn_fantasy_api_downloader import EspnFantasyApiDownloader
+from espn_fantasy_api_scripts.espn_fantasy_api_daily_rosters_data_generator import EspnFantasyApiDailyRostersDataGenerator
+from espn_fantasy_api_scripts.espn_fantasy_api_all_players_info_data_generator import EspnFantasyApiAllPlayersInfoDataGenerator
+from espn_fantasy_api_scripts.espn_fantasy_api_downloader import EspnFantasyApiDownloader
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent

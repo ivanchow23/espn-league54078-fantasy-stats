@@ -19,12 +19,10 @@
 import argparse
 import json
 import os
-import sys
 import timeit
+from utils.requests_util import RequestsUtil
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "utils"))
-from requests_util import RequestsUtil
 
 class NhlapiDownloader():
     def __init__(self, root_output_folder=os.path.join(SCRIPT_DIR, "nhlapi_downloads"), overwrite=True):

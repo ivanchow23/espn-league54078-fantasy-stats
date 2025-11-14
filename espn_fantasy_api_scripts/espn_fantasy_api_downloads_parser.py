@@ -18,10 +18,10 @@
       ...
 
 """
-from espn_fantasy_api_all_players_info_parser import EspnFantasyApiAllPlayersInfoParser
-from espn_fantasy_api_draft_details_parser import EspnFantasyApiDraftDetailsParser
-from espn_fantasy_api_loader import EspnFantasyApiLoader
-from espn_fantasy_api_scoring_period_parser import EspnFantasyApiScoringPeriodParser
+from espn_fantasy_api_scripts.espn_fantasy_api_all_players_info_parser import EspnFantasyApiAllPlayersInfoParser
+from espn_fantasy_api_scripts.espn_fantasy_api_draft_details_parser import EspnFantasyApiDraftDetailsParser
+from espn_fantasy_api_scripts.espn_fantasy_api_loader import EspnFantasyApiLoader
+from espn_fantasy_api_scripts.espn_fantasy_api_scoring_period_parser import EspnFantasyApiScoringPeriodParser
 import json
 import os
 import pandas as pd

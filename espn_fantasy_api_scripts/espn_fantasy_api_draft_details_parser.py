@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """ Loads dictionary that's from the json that contains draft details. """
-from espn_fantasy_api_utils import STATS_MAP
-from espn_fantasy_api_loader import EspnFantasyApiLoader
+from espn_fantasy_api_scripts.espn_fantasy_api_utils import STATS_MAP
+from espn_fantasy_api_scripts.espn_fantasy_api_loader import EspnFantasyApiLoader
 import pandas as pd
 
 class EspnFantasyApiDraftDetailsParser():

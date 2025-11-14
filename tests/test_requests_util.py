@@ -4,12 +4,9 @@ import os
 import requests
 import shutil
 import unittest
+from utils.requests_util import RequestsUtil
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-
-import sys
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "utils"))
-from requests_util import RequestsUtil
 
 class TestRequestsUtil(unittest.TestCase):
     def setUp(self):

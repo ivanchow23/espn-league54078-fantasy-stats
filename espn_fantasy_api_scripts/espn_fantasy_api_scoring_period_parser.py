@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """ Parser to extract information for a given scoring_period.json file. """
-from espn_fantasy_api_utils import STATS_MAP
-import math
+from espn_fantasy_api_scripts.espn_fantasy_api_utils import STATS_MAP
 import pandas as pd
 
 class EspnFantasyApiScoringPeriodParser():

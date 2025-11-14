@@ -7,11 +7,8 @@ import timeit
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-import sys
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_html_parser_scripts"))
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_fantasy_api_scripts"))
-from espn_html_parser import EspnHtmlParser
-from espn_fantasy_api_downloads_parser import EspnFantasyApiDownloadsParser
+from espn_html_parser_scripts.espn_html_parser import EspnHtmlParser
+from espn_fantasy_api_scripts.espn_fantasy_api_downloads_parser import EspnFantasyApiDownloadsParser
 
 DEFAULT_ESPN_HTML_ROOT_FOLDER = os.path.join(SCRIPT_DIR, "..", "espn_html_files")
 DEFAULT_ESPN_FANTASY_API_DOWNLOADS_ROOT_FOLDER = os.path.join(SCRIPT_DIR, "..", "espn_fantasy_api_scripts", "espn_fantasy_api_downloads")

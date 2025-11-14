@@ -6,14 +6,12 @@ from datetime import datetime
 from espn_fantasy_api_downloads_parser import EspnFantasyApiDownloadsParser
 import json
 import os
-import sys
 import timeit
+from utils.requests_util import RequestsUtil
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_DOWNLOADS_DIR = os.path.join(SCRIPT_DIR, "espn_fantasy_api_downloads")
 DEFAULT_LEAGUE_ID = 54078
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "utils"))
-from requests_util import RequestsUtil
 
 class EspnFantasyApiDownloader:
     def __init__(self, season, league_id, root_output_folder=DEFAULT_DOWNLOADS_DIR, cookies={}):

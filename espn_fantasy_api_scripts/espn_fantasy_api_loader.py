@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from espn_fantasy_api_utils import STATS_MAP
+from espn_fantasy_api_scripts.espn_fantasy_api_utils import STATS_MAP
 import json
 import os
 import re

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """ Parser for ESPN league standings files. """
 import argparse
-import espn_html_parser_utils
+import espn_html_parser_scripts.espn_html_parser_utils as espn_html_parser_utils
 import os
 import pandas as pd
 

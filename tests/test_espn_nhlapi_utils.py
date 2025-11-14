@@ -1,12 +1,9 @@
 #!/usr/bin/env python
+import espn_nhlapi_scripts.espn_nhlapi_utils as enu
 import os
 import unittest
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-
-import sys
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_nhlapi_scripts"))
-import espn_nhlapi_utils as enu
 
 class TestEspnUtils(unittest.TestCase):
     def test_player_name_is_close_match_identical(self):

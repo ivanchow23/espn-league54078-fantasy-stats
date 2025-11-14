@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 """ Parser for ESPN draft recap files. """
 import argparse
-from bs4 import BeautifulSoup
-import espn_html_parser_utils
+import espn_html_parser_scripts.espn_html_parser_utils as espn_html_parser_utils
 import os
 import pandas as pd
 

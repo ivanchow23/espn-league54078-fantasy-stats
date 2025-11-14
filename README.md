@@ -12,21 +12,22 @@ Some tools/functionality include methods to:
 See high_level_design_diagram.drawio for a design overview.
 
 ## Set-Up Instructions
-1. Install Python 3.8.10: https://www.python.org/downloads/release/python-3810/
-2. Run install_packages.bat
+Run setup_environment.bat.
 
-This will create a virtual environment in the repository and download relevant packages to it. All scripts will be run out of this virtual environment.
+This will download uv, install Python, create a virtual environment, and download packages in the repository.
 
 ## Basic Usage
 Various commonly used .bat scripts for downloading and data generation are placed in the root of the repository for convenience. For example, ESPN fantasy API data downloading and generation are wrapped together in one .bat file. These .bat scripts can be ran by double clicking on them, or dragging and dropping input files onto them depending on the .bat script.
 
 There is also an analysis folder where generated data will be put into. These folders contain various notebooks used to analyze data, generate stats and plots, etc.
 
+Use "uv run" before running any script on command line.
+
 ## Development
 ### Running Unit Tests
-On command line, navigate into the tests folder and run:
+Run on command line in the root project folder:
 ```
-python -m unittest -v -b
+uv run -m unittest discover -s tests -v -b
 ```
 ### Project Management
 Tasks and TODOs are backlogged in JIRA (access required): https://ivanchow-jira.atlassian.net/jira/software/projects/EFHS/boards/1/backlog

@@ -1,17 +1,12 @@
 #!/usr/bin/env python
 """ Generates data from ESPN HTML and NHLAPI data sources. """
 import argparse
-from espn_nhlapi_utils import ESPN_NHLAPI_TEAM_ABBREV_MAP, espn_to_nhlapi_team_abbrev, player_name_is_close_match
+from espn_html_parser_scripts.espn_html_parser import EspnHtmlParser
+from espn_nhlapi_scripts.espn_nhlapi_utils import player_name_is_close_match
+from nhlapi_scripts.nhlapi_data_generator import NhlapiDataGenerator
 import os
-import pandas as pd
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-import sys
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_html_parser_scripts"))
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "nhlapi_scripts"))
-from espn_html_parser import EspnHtmlParser
-from nhlapi_data_generator import NhlapiDataGenerator
 
 class DraftDataGenerator():
     def __init__(self, espn_html_root_folder, nhlapi_downloads_root_folder, out_dir_path):

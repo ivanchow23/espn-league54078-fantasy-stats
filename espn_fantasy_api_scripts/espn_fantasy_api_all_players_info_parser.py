@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """ Loads dictionary that's from the json that contains all players data. """
-from espn_fantasy_api_utils import STATS_MAP
+from espn_fantasy_api_scripts.espn_fantasy_api_utils import STATS_MAP
 import pandas as pd
 
 class EspnFantasyApiAllPlayersInfoParser():

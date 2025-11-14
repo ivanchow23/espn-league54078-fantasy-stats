@@ -3,13 +3,9 @@
 import argparse
 import os
 import timeit
+from espn_html_parser_scripts.espn_html_parser import EspnHtmlParser
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-import sys
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_html_parser_scripts"))
-from espn_html_parser import EspnHtmlParser
-
 DEFAULT_ESPN_HTML_ROOT_FOLDER = os.path.join(SCRIPT_DIR, "..", "espn_html_files")
 DEFAULT_OUTPUT_DIR = SCRIPT_DIR
 

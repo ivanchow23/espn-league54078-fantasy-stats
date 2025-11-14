@@ -1,13 +1,10 @@
 #!/usr/bin/env python
+import espn_html_parser_scripts.espn_html_parser_utils as espn_html_parser_utils
 import os
 import shutil
 import unittest
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-
-import sys
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_html_parser_scripts"))
-import espn_html_parser_utils
 
 class TestEspnHtmlParserUtils(unittest.TestCase):
     def setUp(self):

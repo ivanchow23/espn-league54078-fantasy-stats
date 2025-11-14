@@ -3,17 +3,14 @@ from datetime import datetime
 import dominate
 from dominate.tags import *
 from dominate.util import raw
+from espn_nhlapi_analysis.espn_fantasy_api.daily_points import DailyPoints
+from espn_nhlapi_analysis.espn_fantasy_api.points_by_position import PointsByPosition
+from espn_nhlapi_analysis.espn_fantasy_api.daily_points_by_position import DailyPointsByPosition
+from espn_nhlapi_analysis.espn_fantasy_api.player_with_different_owners import PlayerWithDifferentOwners
+from espn_nhlapi_analysis.espn_fantasy_api.man_games_lost import ManGamesLost
 import os
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-
-import sys
-sys.path.insert(1, os.path.join(SCRIPT_DIR, "..", "espn_nhlapi_analysis"))
-from espn_fantasy_api.daily_points import DailyPoints
-from espn_fantasy_api.points_by_position import PointsByPosition
-from espn_fantasy_api.daily_points_by_position import DailyPointsByPosition
-from espn_fantasy_api.player_with_different_owners import PlayerWithDifferentOwners
-from espn_fantasy_api.man_games_lost import ManGamesLost
 
 SEASON = 20252026
 ESPN_FANTASY_API_DAILY_ROSTERS_CSV_PATH = os.path.join(SCRIPT_DIR, "..", "espn_nhlapi_analysis", "espn_fantasy_api", "espn_fantasy_api_daily_rosters_df.csv")

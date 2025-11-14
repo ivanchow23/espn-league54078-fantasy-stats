@@ -21,8 +21,8 @@
       ...
 """
 import argparse
-from espn_html_parser_league_standings import EspnHtmlParserLeagueStandings
-from espn_html_parser_draft_recap import EspnHtmlParserDraftRecap
+from espn_html_parser_scripts.espn_html_parser_league_standings import EspnHtmlParserLeagueStandings
+from espn_html_parser_scripts.espn_html_parser_draft_recap import EspnHtmlParserDraftRecap
 import os
 import pandas as pd
 import re

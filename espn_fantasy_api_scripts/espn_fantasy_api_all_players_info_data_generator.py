@@ -2,8 +2,8 @@
 """ ESPN fantasy API all players data generator script.
     Generates current players data for analysis purposes. """
 import argparse
-from espn_fantasy_api_loader import EspnFantasyApiLoader
-from espn_fantasy_api_all_players_info_parser import EspnFantasyApiAllPlayersInfoParser
+from espn_fantasy_api_scripts.espn_fantasy_api_loader import EspnFantasyApiLoader
+from espn_fantasy_api_scripts.espn_fantasy_api_all_players_info_parser import EspnFantasyApiAllPlayersInfoParser
 import os
 import pandas as pd
 

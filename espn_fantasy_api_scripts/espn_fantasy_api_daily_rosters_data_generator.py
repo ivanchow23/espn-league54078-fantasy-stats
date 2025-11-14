@@ -2,8 +2,8 @@
 """ ESPN fantasy API daily rosters data generator script.
     Generates daily roster data for analysis purposes. """
 import argparse
-from espn_fantasy_api_loader import EspnFantasyApiLoader
-from espn_fantasy_api_scoring_period_parser import EspnFantasyApiScoringPeriodParser
+from espn_fantasy_api_scripts.espn_fantasy_api_loader import EspnFantasyApiLoader
+from espn_fantasy_api_scripts.espn_fantasy_api_scoring_period_parser import EspnFantasyApiScoringPeriodParser
 import os
 import pandas as pd
 
