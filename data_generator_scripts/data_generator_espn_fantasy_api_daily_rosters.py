@@ -15,32 +15,38 @@ class ProgressHandler():
     """ Helper class to handle progress updates processing daily rosters data. """
     def __init__(self):
         """ Default constructor. """
-        self._current_season = 0
         self._pbar = None
-        self._pbar_active = False
-        self._num_seasons = 0
 
     def update_progress_bar(self, season, current_count, total_count):
-        """ Function handler to show progress bar. """
-        # Create new progress bar for processing a new season
-        if season != self._current_season:
-            self._num_seasons += 1
-            if self._pbar_active:
-                self._pbar.close()
-
-            self._current_season = season
+        """ Function handler to update and show progress bar. """
+        if self._pbar is None:
             self._pbar = tqdm(total=total_count, desc=f"Processing {season}",
                               bar_format="{desc}: |{bar:20}| {percentage:3.0f}% [{n_fmt}/{total_fmt}] [{elapsed}]")
-            self._pbar_active = True
 
         self._pbar.update(1)
 
-    def close(self):
-        """ Close the active progress bar cleanly. """
-        if self._pbar_active and self._pbar is not None:
+        if current_count == total_count:
             self._pbar.close()
-            self._pbar_active = False
             self._pbar = None
+
+class ProgressHandlerMultiprocess():
+    """ Helper class to handle progress updates processing daily rosters data
+        when using multiprocessing. Simply prints basic information for now.
+        There is a known issue with tqdm and positioning multiple progress
+        bars at once: https://github.com/tqdm/tqdm/issues/1000. """
+    def __init__(self):
+        """ Default constructor. """
+        self._start_time = 0
+
+    def update_progress_bar(self, season, current_count, total_count):
+        """ Print to console. Uses same name as ProgressHandler.update_progress_bar
+            to tempoarily simplify integration with main code. """
+        if current_count == 1:
+            print(f"Processing {season}...")
+            self._start_time = timeit.default_timer()
+
+        if current_count == total_count:
+            print(f"Processing {season} [{current_count}/{total_count}] finished in {round(timeit.default_timer() - self._start_time, 1)}s.")
 
 if __name__ == "__main__":
     start_time = timeit.default_timer()
@@ -53,8 +59,23 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("Generating ESPN fantasy API daily rosters data...")
-    progress_handler = ProgressHandler()
-    df = EspnFantasyApiDownloadsParser(args.espn_fantasy_api_downloads_root_folder).get_daily_rosters_df(progress_func_handler=progress_handler.update_progress_bar)
+    parser = EspnFantasyApiDownloadsParser(args.espn_fantasy_api_downloads_root_folder)
+    multiprocess = True
+
+    # Set-up progress bar handling
+    progress_handlers = []
+    progress_handlers_funcs = {}
+    for i, season_string in enumerate(parser.get_seasons()):
+        if multiprocess:
+            p = ProgressHandlerMultiprocess()
+        else:
+            p = ProgressHandler()
+        progress_handlers.append(p)
+        progress_handlers_funcs[season_string] = p.update_progress_bar
+
+    # Parse daily rosters data
+    df = parser.get_daily_rosters_df(progress_func_handlers=progress_handlers_funcs, multiprocess=multiprocess)
     df.to_csv(os.path.join(args.out_dir_path, "espn_fantasy_api_daily_rosters_df.csv"), index=False)
-    progress_handler.close()
+
+    # Finish
     print(f"Finished in {round(timeit.default_timer() - start_time, 1)}s.")
