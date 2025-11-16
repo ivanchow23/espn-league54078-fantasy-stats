@@ -60,8 +60,10 @@ class EspnFantasyApiDownloadsParser():
 
         return combined_df
 
-    def get_daily_rosters_df(self):
-        """ Returns a dataframe of all daily rosters for all seasons. """
+    def get_daily_rosters_df(self, progress_func_handler=None):
+        """ Returns a dataframe of all daily rosters for all seasons.
+            Provides a function handler for caller to check progress
+            since this function could take some time to run. """
         combined_roster_dfs = pd.DataFrame()
 
         # Loop through each available season's worth of data
@@ -80,7 +82,6 @@ class EspnFantasyApiDownloadsParser():
 
             # Store roster data for each scoring period and owner
             for scoring_period in range(scoring_period_start, scoring_period_end + 1):
-                print(f"Processing {season_string} Scoring Period ID {scoring_period}/{scoring_period_end}")
                 for owner_id in owner_id_map:
                     # Parse roster dataframe from scoring period data
                     scoring_period_dict = self._loader.get_scoring_period_dict(season_string, scoring_period)
@@ -97,6 +98,10 @@ class EspnFantasyApiDownloadsParser():
 
                     # Combine to overall dataframe
                     combined_roster_dfs = pd.concat([combined_roster_dfs, roster_df])
+
+                # Provide information for progress processing
+                if progress_func_handler is not None:
+                    progress_func_handler(season_string, scoring_period, scoring_period_end)
 
         return combined_roster_dfs
 
