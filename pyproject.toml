@@ -3,7 +3,7 @@ name = "espn-league54078-fantasy-stats"
 version = "0.1.0"
 description = "ESPN League 54078 Fantasy Stats"
 readme = "README.md"
-requires-python = "==3.8.10"
+requires-python = "==3.8.20"
 dependencies = ["aiohttp==3.8.1",
                 "beautifulsoup4==4.10.0",
                 "dominate==2.9.0",
