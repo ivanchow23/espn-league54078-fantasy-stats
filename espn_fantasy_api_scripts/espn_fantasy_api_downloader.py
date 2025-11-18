@@ -196,6 +196,10 @@ if __name__ == "__main__":
     espn_api = EspnApiDownloader(root_output_folder=output_path, cookies={'espn_s2': espn_s2})
     all_players_info_df = EspnFantasyApiDownloadsParser(output_path).get_all_players_info_df()
     draft_details_df = EspnFantasyApiDownloadsParser(output_path).get_draft_details_df()
+
+    # Convert IDs to ints because this column can be floats
+    all_players_info_df['Player ID'] = all_players_info_df['Player ID'].astype(int)
+    draft_details_df['Player ID'] = draft_details_df['Player ID'].astype(int) 
     player_id_list = set(list(all_players_info_df['Player ID']) + list(draft_details_df['Player ID']))
     espn_api.download_athletes_data(player_id_list)
 
