@@ -3,7 +3,7 @@
     Downloaded data will be organized into season folders. """
 import argparse
 from datetime import datetime
-from espn_fantasy_api_downloads_parser import EspnFantasyApiDownloadsParser
+from espn_fantasy_api_scripts.espn_fantasy_api_downloads_parser import EspnFantasyApiDownloadsParser
 import json
 import os
 import timeit
@@ -199,7 +199,7 @@ if __name__ == "__main__":
 
     # Convert IDs to ints because this column can be floats
     all_players_info_df['Player ID'] = all_players_info_df['Player ID'].astype(int)
-    draft_details_df['Player ID'] = draft_details_df['Player ID'].astype(int) 
+    draft_details_df['Player ID'] = draft_details_df['Player ID'].astype(int)
     player_id_list = set(list(all_players_info_df['Player ID']) + list(draft_details_df['Player ID']))
     espn_api.download_athletes_data(player_id_list)
 
