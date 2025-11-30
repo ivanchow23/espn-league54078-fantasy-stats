@@ -26,7 +26,7 @@ class TestEspnFantasyApiAllPlayerInfoParser(unittest.TestCase):
         actual_result = parser.get_all_players_info_as_dicts()
         expected_result = [{'Player Name': "Player 1", 'Player ID': 12345, 'Fantasy Points': 566.0, 'G': 2, 'A': 1, 'PPP': 1, 'SHP': 1, 'GP': 23}]
 
-        self.assertEquals(expected_result, actual_result)
+        self.assertEqual(expected_result, actual_result)
 
     def tearDown(self):
         """ Remove any items. """

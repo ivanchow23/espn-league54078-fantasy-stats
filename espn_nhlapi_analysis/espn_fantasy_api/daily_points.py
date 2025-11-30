@@ -35,7 +35,9 @@ class DailyPoints():
         season_df = self._cumsum_df[self._cumsum_df['season'] == season]
 
         # Normalize
-        season_df[f'{key} (norm. by avg)'] = season_df.groupby('scoringPeriodId')[key].apply(lambda x: round(x / x.mean(), 3))
+        normalized_df = season_df.groupby('scoringPeriodId')[key].apply(lambda x: round(x / x.mean(), 3))
+        normalized_df.index = normalized_df.index.droplevel('scoringPeriodId')
+        season_df[f'{key} (norm. by avg)'] = normalized_df
 
         # Plot
         fig = go.Figure()
@@ -52,7 +54,9 @@ class DailyPoints():
         season_df = self._cumsum_df[self._cumsum_df['season'] == season]
 
         # Normalize
-        season_df[f'{key} (norm. by first)'] = season_df.groupby('scoringPeriodId')[key].apply(lambda x: round(x / x.max(), 3))
+        normalized_df = season_df.groupby('scoringPeriodId')[key].apply(lambda x: round(x / x.max(), 3))
+        normalized_df.index = normalized_df.index.droplevel('scoringPeriodId')
+        season_df[f'{key} (norm. by first)'] = normalized_df
 
         # Plot
         fig = go.Figure()

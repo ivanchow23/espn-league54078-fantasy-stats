@@ -23,7 +23,7 @@ class TestEspnFantasyApiDraftDetailsParser(unittest.TestCase):
                            {'Draft Number': 2, 'Round Pick Number': 2, 'Round Number': 1, 'Owner ID': "efgh", 'Player ID': 99999,},
                            {'Draft Number': 3, 'Round Pick Number': 3, 'Round Number': 1, 'Owner ID': "wxyz", 'Player ID': 54321,}]
 
-        self.assertEquals(expected_result, actual_result)
+        self.assertEqual(expected_result, actual_result)
 
     def tearDown(self):
         """ Remove any items. """

@@ -20,8 +20,8 @@ for i, owner in enumerate(owners_list):
 
     # Stats
     mean = round(owner_df['Player Age'].mean(), 1)
-    min = int(owner_df['Player Age'].min())
-    max = int(owner_df['Player Age'].max())
+    min = float(owner_df['Player Age'].min())
+    max = float(owner_df['Player Age'].max())
 
     fig.add_trace(go.Histogram(x=owner_df['Player Age'], histnorm='percent', name=f"{owner} (min={min} avg={mean} max={max})"), 1, i + 1)
 fig.update_layout(title="Distribution of Owner's Draft Picks (Overall)", xaxis_title="Age", yaxis_title="% of Picks", width=1400, height=500)
@@ -36,8 +36,8 @@ for season, season_df in draft_df.groupby('Season'):
 
         # Stats
         mean = round(owner_df['Player Age'].mean(), 1)
-        min = int(owner_df['Player Age'].min())
-        max = int(owner_df['Player Age'].max())
+        min = float(owner_df['Player Age'].min())
+        max = float(owner_df['Player Age'].max())
 
         fig.add_trace(go.Histogram(x=owner_df['Player Age'], histnorm='percent', name=f"{owner} (min={min} avg={mean} max={max})"), 1, i + 1)
     fig.update_layout(title=f"Distribution of Owner's Draft Picks ({season})", xaxis_title="Age", yaxis_title="% of Picks", width=1400, height=500)

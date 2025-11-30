@@ -20,6 +20,7 @@ class PointsByPosition():
         # Normalize values by average of the league for that season
         normalized_df = self._totals_df.groupby(['season', 'position'])[self._cols_of_interest].apply(lambda x: round(x / x.mean(), 3))
         normalized_df = normalized_df.rename(columns={col: f"{col} (norm. by avg)" for col in self._cols_of_interest})
+        normalized_df.index = normalized_df.index.droplevel(['season', 'position'])
         self._totals_df = pd.concat([self._totals_df, normalized_df], axis=1)
 
     def get_seasons(self):

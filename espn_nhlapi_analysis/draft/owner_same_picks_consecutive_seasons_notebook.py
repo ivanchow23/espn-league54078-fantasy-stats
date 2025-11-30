@@ -59,4 +59,3 @@ for current_season in season_ints:
     multi_season_df = pd.concat([multi_season_df, multi_df])
 
 multi_season_df.to_csv("owner_same_picks_consecutive_seasons.csv")
-multi_season_df.style

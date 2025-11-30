@@ -26,7 +26,7 @@ class TestEspnFantasyApiScoringPeriodParser(unittest.TestCase):
                            {'fullName': "Player 2", 'lineupSlotId': 4, 'G': 0, 'A': 3, 'PPP': 0, 'SHP': 0, 'appliedTotal': 3, 'GP': 1},
                            {'fullName': "Player 3", 'lineupSlotId': 5, 'W': 1, 'SO': 1, 'appliedTotal': 2, 'GP': 1}]
 
-        self.assertEquals(expected_result, actual_result)
+        self.assertEqual(expected_result, actual_result)
 
     def test_get_owner_roster_applied_stats_as_dicts_no_game(self):
         """ Test when player(s) did not play a game for given scoring period.
@@ -46,7 +46,7 @@ class TestEspnFantasyApiScoringPeriodParser(unittest.TestCase):
                            {'fullName': "Player 2", 'lineupSlotId': 4},
                            {'fullName': "Player 3", 'lineupSlotId': 5}]
 
-        self.assertEquals(expected_result, actual_result)
+        self.assertEqual(expected_result, actual_result)
 
     def test_get_owner_roster_applied_stats_as_dicts_empty_applied_stats_and_stats_for_scoring_period(self):
         """ Test when player(s) did not play a game (even though there was a game)
@@ -67,7 +67,7 @@ class TestEspnFantasyApiScoringPeriodParser(unittest.TestCase):
                            {'fullName': "Player 2", 'lineupSlotId': 4, 'appliedTotal': 0},
                            {'fullName': "Player 3", 'lineupSlotId': 5, 'appliedTotal': 0, 'SV': 0}]
 
-        self.assertEquals(expected_result, actual_result)
+        self.assertEqual(expected_result, actual_result)
 
     def tearDown(self):
         """ Remove any items. """

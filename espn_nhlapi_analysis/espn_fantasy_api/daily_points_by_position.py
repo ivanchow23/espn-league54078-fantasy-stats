@@ -33,9 +33,11 @@ class DailyPointsByPosition():
                             y_title="Normalized Points")
 
         # Plot cumulative points normalized by average
-        for i, (pos_index, pos_df) in enumerate(season_cumsum_df.groupby('position')):
+        for i, (_, pos_df) in enumerate(season_cumsum_df.groupby('position')):
             # Normalize
-            pos_df['appliedTotal (norm. by avg)'] = pos_df.groupby('scoringPeriodId')['appliedTotal'].apply(lambda x: round(x / x.mean(), 2))
+            normalized_df = pos_df.groupby('scoringPeriodId')['appliedTotal'].apply(lambda x: round(x / x.mean(), 2))
+            normalized_df.index = normalized_df.index.droplevel('scoringPeriodId')
+            pos_df['appliedTotal (norm. by avg)'] = normalized_df
 
             # Configurations to show proper shared legends
             # Do not show the legend for a subplot (unless it is the first subplot being made)
