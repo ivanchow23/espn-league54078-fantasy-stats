@@ -79,6 +79,8 @@ class RequestsUtil():
         # Send request to URL
         response = requests.get(url, headers=headers, cookies=cookies)
         if response.status_code != 200:
+            print(f"_load_json ret={response.status_code}")
+            print(f"url={url}")            
             return None
 
         return response.json()
@@ -104,5 +106,7 @@ class RequestsUtil():
             asyncio event loop. """
         async with session.get(url, headers=headers, cookies=cookies) as resp:
             if resp.status != 200:
+                print(f"_load_json_from_session ret={resp.status}")
+                print(f"url={url}")
                 return {}
             return await resp.json()
