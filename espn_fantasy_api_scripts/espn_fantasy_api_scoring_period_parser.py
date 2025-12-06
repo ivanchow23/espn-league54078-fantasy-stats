@@ -20,6 +20,7 @@ class EspnFantasyApiScoringPeriodParser():
             # Append various information to list of dictionaries
             for roster_entry in team_roster['roster']['entries']:
                 roster_dict = {'fullName': roster_entry['playerPoolEntry']['player']['fullName'],
+                               'id': roster_entry['playerPoolEntry']['player']['id'],
                                'lineupSlotId': roster_entry['lineupSlotId']}
 
                 # First, get dictionary from list of stats that correspond to this scoring period ID
