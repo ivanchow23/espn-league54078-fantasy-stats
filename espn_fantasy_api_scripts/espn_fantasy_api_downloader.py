@@ -162,6 +162,26 @@ class EspnApiDownloader():
         num_saved = self._req.save_jsons_from_endpoints_async(download_dict_list, cookies=self._cookies)
         print(f"Downloaded {num_saved} files in {round(timeit.default_timer() - start_time, 1)}s.")
 
+def _filter_all_players_info_df(all_players_info_df, start_year, end_year):
+    """ Helper function to filter all players info data. """
+    # Filter for seasons of interest
+    start_season_int = int(str(f"{start_year - 1}{start_year}"))
+    end_season_int = int(str(f"{end_year - 1}{end_year}"))
+    df = all_players_info_df[(all_players_info_df['Season'] >= start_season_int) & (all_players_info_df['Season'] <= end_season_int)]
+
+    # Filter for players that have an actual GP
+    df = df[df['GP'].notna()]
+
+    return df
+
+def _filter_draft_details_df(draft_details_df, start_year, end_year):
+    """ Helper function to filter draft details data. """
+    # Filter for seasons of interest
+    start_season_int = int(str(f"{start_year - 1}{start_year}"))
+    end_season_int = int(str(f"{end_year - 1}{end_year}"))
+    df = draft_details_df[(draft_details_df['Season'] >= start_season_int) & (draft_details_df['Season'] <= end_season_int)]
+
+    return df
 
 if __name__ == "__main__":
     """ Main function. """
@@ -196,6 +216,10 @@ if __name__ == "__main__":
     espn_api = EspnApiDownloader(root_output_folder=output_path, cookies={'espn_s2': espn_s2})
     all_players_info_df = EspnFantasyApiDownloadsParser(output_path).get_all_players_info_df()
     draft_details_df = EspnFantasyApiDownloadsParser(output_path).get_draft_details_df()
+
+    # Filter to reduce amount of player data to download
+    all_players_info_df = _filter_all_players_info_df(all_players_info_df, start_year, end_year)
+    draft_details_df = _filter_draft_details_df(draft_details_df, start_year, end_year)
 
     # Convert IDs to ints because this column can be floats
     all_players_info_df['Player ID'] = all_players_info_df['Player ID'].astype(int)
