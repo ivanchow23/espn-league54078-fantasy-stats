@@ -1,29 +1,44 @@
-# ESPN Fantasy Hockey Stats
+# ESPN League 54078 Fantasy Stats
 
 ## Introduction
-This repository contains various tools to download, parse, and analyze ESPN fantasy hockey data for league: https://fantasy.espn.com/hockey/league?leagueId=54078
-
-Some tools/functionality include methods to:
-* Download raw ESPN fantasy hockey data
-* Parse historically saved ESPN fantasy hockey HTML pages
-* Generate "raw data" files for data analysis
-* Analyze data and generate stats, plots, tables, etc.
-
-See high_level_design_diagram.drawio for a design overview.
+This repository contains tools to download, parse, and generate data for: https://fantasy.espn.com/hockey/league?leagueId=54078
 
 ## Set-Up Instructions
-Run setup_environment.bat.
-
-This will download uv, install Python, create a virtual environment, and download packages in the repository.
+Run setup_environment.bat or setup_environment.sh.
 
 ## Basic Usage
-Various commonly used .bat scripts for downloading and data generation are placed in the root of the repository for convenience. For example, ESPN fantasy API data downloading and generation are wrapped together in one .bat file. These .bat scripts can be ran by double clicking on them, or dragging and dropping input files onto them depending on the .bat script.
+See the following for basic overview and usage of commonly used scripts.
 
-There is also an analysis folder where generated data will be put into. These folders contain various notebooks used to analyze data, generate stats and plots, etc.
+### espn_fantasy_api_downloader.py
+* Purpose: Downloads raw JSON files from various ESPN endpoints
+* Reason: Downloaded data is stored on the machine for faster development
+* Example: Downloads day to day roster data, player information, etc.
+```
+Example: Downloads data from 20152016 to 20252026 season
+uv run espn_fantasy_api_downloader.py -s 2016 -e 2026
+```
 
-Use "uv run" before running any script on command line.
+### data_generator_*.py
+* Purpose: Parses through downloaded data from espn_fantasy_api_downloader.py and generates new data files for easier consumption
+* Reason: This is so downstream tools don't need to handle processing raw JSON files themselves
+* Example: Generated data can be in CSV format so downstream tools can consume them for easier analysis
+```
+Example: Generates draft data
+uv run data_generator_draft.py
+```
+
+### espn_html_parser.py
+* Purpose: Parses manually archived HTML files (which are usually checked into the repository)
+* Reason: We took snapshots of historical league data because not everything was easily accessible or available through the APIs. We use data from the archived HTML files with fantasy API data to generate new data.
+* Example: League standings data was archived because we currently cannot get fantasy API access to daily rosters data for older seasons (which could be used to derive league standings)
+* Note: Script is mainly used for debugging and is not usually ran standalone
+```
+Example:
+uv run espn_html_parser.py -i "..\espn_html_files"
+```
 
 ## Development
+
 ### Running Unit Tests
 Run on command line in the root project folder:
 ```
@@ -32,7 +47,12 @@ uv run -m unittest discover -s tests -v -b
 ### Project Management
 Tasks and TODOs are backlogged in JIRA (access required): https://ivanchow-jira.atlassian.net/jira/software/projects/EFHS/boards/1/backlog
 
+Note: This could change in the future since the repository has migrated to GitHub.
+
 ### Pull Requests
-* Create a branch with the same name as the JIRA ticket
+* Create a branch with the same name as the ticket or issue
 * Push to the branch for code review
-* Approved changes will be merged directly onto master (using squash as a single commit) and the branch will be deleted.
+* Approved changes will be merged directly using squash as a single commit and the branch will be deleted
+
+## System Architecture
+See high_level_design_diagram.drawio for a design overview.
