@@ -30,6 +30,16 @@ class TestEspnHtmlParserUtils(unittest.TestCase):
         actual_output = espn_html_parser_utils.parse_draft_metadata_from_player_str(input_str)
         self.assertEqual(expected_output, actual_output)
 
+        input_str = "James van Riemsdyk Tor, LW"
+        expected_output = {'Player': "James van Riemsdyk", 'Team': "Tor", 'Position': "LW"}
+        actual_output = espn_html_parser_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEqual(expected_output, actual_output)
+
+        input_str = "Martin St. Louis NYR, RW"
+        expected_output = {'Player': "Martin St. Louis", 'Team': "NYR", 'Position': "RW"}
+        actual_output = espn_html_parser_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEqual(expected_output, actual_output)
+
         input_str = "Cody Glass , C"
         expected_output = {'Player': "Cody Glass", 'Team': "", 'Position': "C"}
         actual_output = espn_html_parser_utils.parse_draft_metadata_from_player_str(input_str)
@@ -46,20 +56,26 @@ class TestEspnHtmlParserUtils(unittest.TestCase):
         actual_output = espn_html_parser_utils.parse_draft_metadata_from_player_str(input_str)
         self.assertEqual(expected_output, actual_output)
 
-        # Test invalid position designations
+        # Test invalid position designations which could still be parsed
         input_str = "Invalid Player Ana, E"
-        expected_output = {'Player': "Invalid Player Ana, E", 'Team': "", 'Position': ""}
+        expected_output = {'Player': "Invalid Player", 'Team': "Ana", 'Position': "E"}
         actual_output = espn_html_parser_utils.parse_draft_metadata_from_player_str(input_str)
         self.assertEqual(expected_output, actual_output)
 
         input_str = "Invalid Player Ana, 123"
-        expected_output = {'Player': "Invalid Player Ana, 123", 'Team': "", 'Position': ""}
+        expected_output = {'Player': "Invalid Player", 'Team': "Ana", 'Position': "123"}
         actual_output = espn_html_parser_utils.parse_draft_metadata_from_player_str(input_str)
         self.assertEqual(expected_output, actual_output)
 
-        # Test unknown team abbreviation
+        # Test unknown team abbreviations which could still be parsed
         input_str = "Some Player AAA, C"
-        expected_output = {'Player': "Some Player AAA", 'Team': "", 'Position': "C"}
+        expected_output = {'Player': "Some Player", 'Team': "AAA", 'Position': "C"}
+        actual_output = espn_html_parser_utils.parse_draft_metadata_from_player_str(input_str)
+        self.assertEqual(expected_output, actual_output)
+
+        # Test weird team abbreviations which could still be parsed
+        input_str = "Some Player uTaH, C"
+        expected_output = {'Player': "Some Player", 'Team': "uTaH", 'Position': "C"}
         actual_output = espn_html_parser_utils.parse_draft_metadata_from_player_str(input_str)
         self.assertEqual(expected_output, actual_output)
 

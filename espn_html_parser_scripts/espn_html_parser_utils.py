@@ -42,27 +42,19 @@ def parse_draft_metadata_from_player_str(player_str):
     if not re.match(re_pattern, player_str):
         return player_dict
 
-    # Parse for position
-    for pos in DETAILED_POSITIONS_LIST:
-        if player_str.endswith(", " + pos):
-            player_dict['Position'] = pos
-            player_str = player_str[:len(player_str) - len(", ") - len(pos)]
-            break
+    # Split string based on comma first
+    # Example: "Sidney Crosby Pit, C" becomes "Sidney Crosby Pit" and " C"
+    string_parts = player_str.split(",")
 
-    # Parse for team abbreviation
-    # The " " empty string is for players not on a valid team
-    if player_str.endswith(" "):
-        player_dict['Team'] = ""
-        player_str = player_str[:len(player_str) - len(" ")]
-    else:
-        for team in NHL_TEAM_ABBREVIATIONS_LIST:
-            if player_str.endswith(team):
-                player_dict['Team'] = team
-                player_str = player_str[:len(player_str) - len(" ") - len(team)]
-                break
+    # Parse player name and team part
+    # Assumes last part is the team abbreviation and the parts in front is the name
+    player_name_team_parts = string_parts[0].split(" ")
+    player_dict['Player'] = " ".join(player_name_team_parts[i] for i in range(len(player_name_team_parts) -1))
+    player_dict['Team'] = player_name_team_parts[len(player_name_team_parts) -1]
 
-    # We should just be left with player name here
-    player_dict['Player'] = player_str
+    # Player position is just the part after the comma without spaces
+    player_dict['Position'] = string_parts[1].strip()
+
     return player_dict
 
 def parse_metadata_from_player_str(player_str):
