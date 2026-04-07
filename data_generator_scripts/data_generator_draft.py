@@ -26,6 +26,22 @@ CAN_PROVINCE_CODES = [
     'AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'
 ]
 
+# NHL Eastern Conference (Atlantic + Metropolitan Divisions)
+EASTERN_CONFERENCE_TEAM_ABBREVS = [
+    # Atlantic Division
+    'BOS', 'BUF', 'DET', 'FLA', 'MON', 'OTT', 'TB', 'TOR',
+    # Metropolitan Division
+    'CAR', 'CBJ', 'NJ', 'NYI', 'NYR', 'PHI', 'PIT', 'WSH'
+]
+
+# NHL Western Conference (Central + Pacific Divisions)
+WESTERN_CONFERENCE_TEAM_ABBREVS = [
+    # Central Division
+    'CHI', 'COL', 'DAL', 'MIN', 'NSH', 'STL', 'WPG',
+    # Pacific Division
+    'ANA', 'ARI', 'CGY', 'CLS', 'EDM', 'LA', 'SEA', 'SJ', 'UTA', 'UTAH', 'VAN', 'VGK', 'VGS'
+]
+
 class DataGeneratorDraft():
     def __init__(self, espn_html_root_folder=DEFAULT_ESPN_HTML_ROOT_FOLDER,
                        espn_fantasy_api_downloads_root_folder=DEFAULT_ESPN_FANTASY_API_DOWNLOADS_ROOT_FOLDER,
@@ -63,6 +79,10 @@ class DataGeneratorDraft():
         merged_df = merged_df.merge(espn_fantasy_all_players_info_df, how='left', on=['Player ID', 'Season'])
 
         # ------------------------------------------- Data cleaning and transformations -------------------------------------------
+        # Add column of conference from the team drafted
+        merged_df.insert(merged_df.columns.get_loc('Team') + 1, 'Conference',
+                         merged_df['Team'].apply(self._espn_team_abbrev_to_conference))
+
         # Add column that converts birth place to birth country code
         merged_df['Player Birth Place'] = merged_df['Player Birth Place'].fillna("")
         merged_df.insert(merged_df.columns.get_loc('Player Birth Place') + 1, 'Player Birth Country',
@@ -83,6 +103,18 @@ class DataGeneratorDraft():
         merged_df = merged_df.rename(columns={'Player Weight': 'Player Weight (lbs)'})
 
         return merged_df
+
+    def _espn_team_abbrev_to_conference(self, abbrev):
+        """ Helper function to convert an ESPN team abbreviation to a conference string. """
+        for team in EASTERN_CONFERENCE_TEAM_ABBREVS:
+            if abbrev.upper() == team:
+                return "Eastern"
+
+        for team in WESTERN_CONFERENCE_TEAM_ABBREVS:
+            if abbrev.upper() == team:
+                return "Western"
+
+        return ""
 
     def _player_birth_place_to_birth_country_code(self, birth_place):
         """ ESPN data shows birth "place" which can be a mix of provinces, states,
