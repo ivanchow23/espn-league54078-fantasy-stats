@@ -1,2 +1,3 @@
 The original draft recap HTML file from ESPN has the draft in incorrect orders because the actual draft was done offline.
 The draft recap HTML file has been manually fixed to match the offline records.
+Also manually added a draft_metadata.csv file to append to draft data as needed.

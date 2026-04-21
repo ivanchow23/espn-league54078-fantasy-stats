@@ -102,6 +102,23 @@ class DataGeneratorDraft():
         merged_df['Player Weight'] = pd.to_numeric(merged_df['Player Weight'].str.replace(' lbs', '', regex=False), errors='coerce')
         merged_df = merged_df.rename(columns={'Player Weight': 'Player Weight (lbs)'})
 
+        # Workaround: Handle very specific case for the 2014-2015 season
+        # The data from this season had to be manually modified/entered
+        # Manually add the additional metadata into the final merged dataframe
+        # Assumes column names in manual metadata file to be identical to merged_df
+        md_file_path = os.path.join(self._espn_html_root_folder, "20142015", "20142015_draft_metadata.csv")
+        if os.path.exists(md_file_path):
+            md_df = pd.read_csv(md_file_path)
+            merged_df = merged_df.merge(md_df, how='left', on=['Player', 'Season'], suffixes=('', '_meta'))
+
+            # Fill nan from metadata columns excluding the columns we used as keys
+            for col in list(set(md_df.columns) - set(['Player', 'Season'])):
+                if f'{col}_meta' in merged_df.columns:
+                    # Empty strings need to be replaced with nan for combined_first()
+                    merged_df[col] = merged_df[col].replace("", float('nan'))
+                    merged_df[col] = merged_df[col].combine_first(merged_df[f'{col}_meta'])
+                    merged_df = merged_df.drop(columns=[f'{col}_meta'])
+
         return merged_df
 
     def _espn_team_abbrev_to_conference(self, abbrev):
