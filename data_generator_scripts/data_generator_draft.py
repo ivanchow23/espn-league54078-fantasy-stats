@@ -79,6 +79,12 @@ class DataGeneratorDraft():
         merged_df = merged_df.merge(espn_fantasy_all_players_info_df, how='left', on=['Player ID', 'Season'])
 
         # ------------------------------------------- Data cleaning and transformations -------------------------------------------
+        # Change all team abbreviations to upper-case (because ESPN seems to have a mix of lower/upper)
+        merged_df['Team'] = merged_df['Team'].str.upper()
+
+        # Consolidate team abbreviations (e.g., "UTAH" -> "UTA", "VGS" -> "VGK")
+        merged_df['Team'] = merged_df['Team'].replace({'UTAH': 'UTA', 'VGS': 'VGK'})
+
         # Add column of conference from the team drafted
         merged_df.insert(merged_df.columns.get_loc('Team') + 1, 'Conference',
                          merged_df['Team'].apply(self._espn_team_abbrev_to_conference))
