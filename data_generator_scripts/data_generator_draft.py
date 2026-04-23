@@ -125,6 +125,9 @@ class DataGeneratorDraft():
                     merged_df[col] = merged_df[col].combine_first(merged_df[f'{col}_meta'])
                     merged_df = merged_df.drop(columns=[f'{col}_meta'])
 
+        # Sort
+        merged_df = merged_df.sort_values(by=['Season', 'Draft Number']).reset_index(drop=True)
+
         return merged_df
 
     def _espn_team_abbrev_to_conference(self, abbrev):

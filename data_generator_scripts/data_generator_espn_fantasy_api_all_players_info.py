@@ -21,5 +21,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("Generating ESPN fantasy API all players info data...")
-    EspnFantasyApiDownloadsParser(args.espn_fantasy_api_downloads_root_folder).get_all_players_info_df().to_csv(os.path.join(args.out_dir_path, "espn_fantasy_api_all_players_info_df.csv"), index=False)
+    df = EspnFantasyApiDownloadsParser(args.espn_fantasy_api_downloads_root_folder).get_all_players_info_df()
+    df = df.sort_values(by='Season').reset_index(drop=True)
+    df.to_csv(os.path.join(args.out_dir_path, "espn_fantasy_api_all_players_info_df.csv"), index=False)
     print(f"Finished in {round(timeit.default_timer() - start_time, 1)}s.")

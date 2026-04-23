@@ -75,6 +75,11 @@ if __name__ == "__main__":
 
     # Parse daily rosters data
     df = parser.get_daily_rosters_df(progress_func_handlers=progress_handlers_funcs, multiprocess=multiprocess)
+
+    # Sort
+    df = df.sort_values(by=['season', 'scoringPeriodId']).reset_index(drop=True)
+
+    # Output    
     df.to_csv(os.path.join(args.out_dir_path, "espn_fantasy_api_daily_rosters_df.csv"), index=False)
 
     # Finish

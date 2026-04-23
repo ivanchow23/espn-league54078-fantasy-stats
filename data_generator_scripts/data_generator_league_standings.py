@@ -20,6 +20,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("Generating league standings data...")
-    EspnHtmlParser(args.espn_html_root_folder).get_league_standings_stats_df().to_csv(os.path.join(args.out_dir_path, "standings_stats_df.csv"), index=False)
-    EspnHtmlParser(args.espn_html_root_folder).get_league_standings_points_df().to_csv(os.path.join(args.out_dir_path, "standings_points_df.csv"), index=False)
+    standing_stats_df = EspnHtmlParser(args.espn_html_root_folder).get_league_standings_stats_df()
+    standing_stats_df = standing_stats_df.sort_values(by=['Season', 'RK']).reset_index(drop=True)
+    standing_stats_df.to_csv(os.path.join(args.out_dir_path, "standings_stats_df.csv"), index=False)
+
+    standing_pts_df = EspnHtmlParser(args.espn_html_root_folder).get_league_standings_points_df()
+    standing_pts_df = standing_pts_df.sort_values(by=['Season', 'RK']).reset_index(drop=True)
+    standing_pts_df.to_csv(os.path.join(args.out_dir_path, "standings_points_df.csv"), index=False)
     print(f"Finished in {round(timeit.default_timer() - start_time, 1)}s.")
